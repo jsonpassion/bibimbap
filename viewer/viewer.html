@@ -145,7 +145,7 @@ body:not(.simple) #board,body:not(.simple) .simple-only{display:none!important}
 </header>
 <div id="board"></div>
 <main>
-  <section id="sA" class="axis"><h1><span class="n">A</span>얼마나 정확한가<em>정확도 40점 · 베이스라인(단순 프롬프트, 에이전트 없음) vs 최신 스쿼드 · 가시 연습셋 · jxc-selfeval</em></h1>
+  <section id="sA" class="axis"><h1><span class="n">A</span>얼마나 정확한가<em>정확도 40점 · 베이스라인(단순 프롬프트, 에이전트 없음) vs 최신 스쿼드 · 같은 n의 전수 측정 · jxc-selfeval</em></h1>
     <div class="verdict" id="vA"></div><table id="accT" class="bench"></table><div class="note" id="accNote"></div></section>
   <section id="sB" class="axis"><h1><span class="n">B</span>얼마나 토큰 효율적인가<em>토큰 효율 30점 · 문항당 출력 토큰(트랙별) + 같은 문항 trace 비교</em></h1>
     <div class="verdict" id="vB"></div>
@@ -166,7 +166,7 @@ body:not(.simple) #board,body:not(.simple) .simple-only{display:none!important}
   <section id="s04"><h2>C.4 판단<em>규칙으로만 도출, 손으로 쓴 문장 없음</em></h2><div id="flags" data-rubric="explainability"></div><table id="cmpt" data-rubric="insightfulness" title="클릭: ×배 → 절대차 → % 전환"></table><div id="sentence" data-rubric="insightfulness"></div></section>
   <section id="s05"><h2>C.5 각주<em>이 로그에 있는 것과 없는 것 · 재료</em></h2>
     <div id="honest" data-rubric="traceability">
-      <div><ul><li class="yes">토큰 누적치 (execution-token-usage → 호출별 Δ 복원)</li><li class="yes">상태 전이 (agent-state-changed · task-status-changed)</li><li class="yes">타임스탬프 · 계획 태스크 수 · 거절된 계획 수</li><li class="yes">단독 베이스라인 (baseline 필드, 외부 채점 러너) · 트랙별 정확도·토큰 (jxc-selfeval)</li></ul>
+      <div><ul><li class="yes">토큰 누적치 (execution-token-usage → 호출별 Δ 복원)</li><li class="yes">상태 전이 (agent-state-changed · task-status-changed)</li><li class="yes">타임스탬프 · 계획 태스크 수 · 거절된 계획 수</li><li class="yes">단독 베이스라인 (baseline 필드, 외부 채점 러너) · 트랙별 정확도·토큰 (jxc-selfeval, 같은 n의 전수)</li><li class="yes" id="sampleNote"></li></ul>
         <label id="rngdl"><input type="checkbox" id="rngdTog"> RNGD 환산 추정 보기 (측정 아님)</label></div>
       <div><ul><li class="no">솔버의 답 텍스트 — AI:GO가 저장하지 않음 (로그 형식 고정, 운영진 확인)</li><li class="no">추론 내용 · 프롬프트 본문</li><li class="no">스쿼드 답의 정답 여부 — 로그에 없음. 이 뷰어는 맞았는지 말하지 않는다; 정답은 외부 채점(baseline.correct) + selfeval 로만 표시</li><li class="no" id="sessNote">token-usage-update 의 세션 누적치는 이 실행의 합계가 아님 → 차트에 쓰지 않음</li></ul></div>
       <div class="calbox" data-rubric="insightfulness"><div style="color:var(--dim);font-size:12px;margin-bottom:4px">Generic-Solver 확신도 캘리브레이션 (채점 러너)</div><svg id="cal" viewBox="0 0 520 220"></svg><div id="calcap"></div></div>
@@ -195,20 +195,26 @@ const baseOf=T=>{const b=T.baseline;return b&&(b.prompt!=null||b.completion!=nul
 const sessOf=e=>{const d=e.detail||{};if(d.cumPrompt!=null||d.cumCompletion!=null)return(d.cumPrompt||0)+(d.cumCompletion||0);const m=/([\d,]+)\s*$/.exec(e.summary||'');return m?+m[1].replace(/,/g,''):0;};
 
 // ---- BENCH: measured on visible practice sets with jxc-selfeval; output tokens per item; all gpt-oss-120b (owner numbers, verbatim) ----
-const BENCH={tracks:[
-  {id:'generic',name:'generic (MMLU-Pro/GPQA)',base:{acc:60.0,n:20,tok:572},latest:{acc:80.9,n:136,ci:[75,87],tok:450}},
-  {id:'math',name:'math (algebra-level practice)',base:{acc:100,n:15,tok:740},latest:{acc:100,n:14,ci:[100,100],tok:385}},
+const BENCH={tracks:[   // full-set measurements: same endpoint, gpt-oss-120b, jxc-selfeval, same n for baseline vs latest; output tokens per item
+  {id:'generic',name:'generic (MMLU-Pro/GPQA, 140)',total:140,base:{acc:79.1,n:139,tok:533,correct:110},latest:{acc:80.9,n:136,ci:[75,87],tok:450,correct:110}},
+  {id:'math',name:'math (MATH-500 L5 134 + AIME-2024 30 = 164)',total:164,base:{acc:79.8,n:163,tok:1909},latest:{acc:82.6,n:161,ci:[78,88],tok:1501}},
   {id:'aime',name:'math AIME-2024 (hard, segment test)',ref:'난이도 참고 · 베이스라인 미측정',base:null,latest:{acc:72.4,n:29,ci:[59,86],tok:3021}},
-  {id:'coding',name:'coding LCB',base:{acc:85.0,n:20,tok:2036},latest:{acc:90.0,n:20,ci:[80,100],tok:1489}}],
+  {id:'coding',name:'coding LCB (20)',total:20,base:{acc:75.0,n:20,tok:1838},latest:{acc:88.9,n:18,ci:[78,100],tok:1558}}],
+ method:'같은 엔드포인트 · gpt-oss-120b · jxc-selfeval · 베이스라인/최신 같은 n의 전수 측정 · 문항당 출력 토큰',
+ history:{sampleN:20,sampleAcc:60},   // the early 20-item baseline sample — kept only for the honesty note
  excluded:'Qwen3-32B generic 66.9% (n=140) · AIME 43.3% (n=30, 6,911 tok); EXAONE AIME 38.9% (n=18, 6,947 tok)',
  planner:{qwen:{model:'Qwen3-32B /no_think',tok:61,sec:1.4},gptoss:{model:'gpt-oss-120b',tok:193,dup:'4회 중 3회 태스크 중복'}},
- baseLabel:'단독 gpt-oss-120b · 단순 프롬프트 · 에이전트 없음',latestLabel:'BIBIMBAP v3.7b'};
+ baseLabel:'단독 gpt-oss-120b · 단순 프롬프트 · 에이전트 없음',latestLabel:'BIBIMBAP v3.7b · v3.6 페르소나'};
 // verdict templates (slots filled from BENCH only — no hand-written per-number text)
-function benchVerdicts(){const tr=BENCH.tracks.filter(t=>t.base);
-  const accParts=tr.map(t=>{const d=t.latest.acc-t.base.acc;return`${t.id} ${d>0?'+'+Math.round(d)+'%p':d<0?Math.round(d)+'%p':'유지 '+t.latest.acc+'%'}`;});
-  const allUp=tr.every(t=>t.latest.acc>=t.base.acc),allDown=tr.every(t=>t.latest.tok<t.base.tok);
-  return{A:`${accParts.join(' · ')} — ${allUp?'전 트랙 베이스라인 이상':'일부 트랙 하락'}`,
-    B:`솔버 출력 토큰은 ${allDown?'전 트랙 감소':'일부 트랙 증가'}(${tr.map(t=>`${t.id} ${fmt(t.base.tok)}→${fmt(t.latest.tok)}`).join(', ')}), 오케스트레이션 고정비 ≈ 플래너 ${BENCH.planner.qwen.tok} tok + 컨텍스트 재전송`};}
+function benchVerdicts(){const tr=BENCH.tracks.filter(t=>t.base),d=t=>t.latest.acc-t.base.acc,pct=t=>Math.round((t.latest.tok/t.base.tok-1)*100),g=BENCH.tracks.find(t=>t.id==='generic');
+  const accParts=tr.map(t=>`${t.id} ${d(t)>=0?'+':''}${d(t).toFixed(1)}%p`),same=tr.filter(t=>t.base.correct!=null&&t.base.correct===t.latest.correct);
+  const allUp=tr.every(t=>d(t)>=0),allDown=tr.every(t=>t.latest.tok<t.base.tok),ps=tr.map(t=>Math.abs(pct(t))),lo=Math.min(...ps),hi=Math.max(...ps);
+  return{A:`${accParts.join(' · ')} — ${allUp?'전 트랙 베이스라인 이상':'일부 트랙 하락'}${same.length?` (${same.map(t=>`${t.id}은 정답 수 동일 ${t.base.correct}`).join(', ')})`:''}`,
+    subA:'베이스라인도 이미 강한 모델 — 페르소나의 몫은 정확도 유지 + 토큰 절감',
+    B:`솔버 출력 토큰 ${allDown?'전 트랙 감소':'일부 트랙 증가'}: ${tr.map(t=>`${t.id} ${fmt(t.base.tok)}→${fmt(t.latest.tok)} (${pct(t)>0?'+':'−'}${Math.abs(pct(t))}%)`).join(' · ')} · 오케스트레이션 고정비 ≈ 플래너 ${BENCH.planner.qwen.tok} tok + 컨텍스트 재전송`,
+    chip:`정확도 전 트랙 ${allUp?'≥':'vs'} 베이스라인 (A) · 출력 ${allDown?`−${lo}~−${hi}%`:'혼재'} (B)`,
+    oneA:`정확도는 지키고(전 트랙 ${allUp?'≥':'vs'} 베이스라인), 토큰을 줄였다`,
+    sample:g&&BENCH.history?`베이스라인 ${BENCH.history.sampleN}문항 표본(${BENCH.history.sampleAcc}%)은 운이 나빴던 표본이었다 — 전수(${g.total})에서는 ${g.base.acc}%. 그래서 숫자는 전부 같은 n의 전수 측정으로 교체했다`:''};}
 
 // ---- §2.3 derive(T) → D. Per-event derived data lives in parallel arrays (D.flag[i], D.task[i], D.k[i], D.cum[i]); events[] are never mutated. ----
 function derive(T){
@@ -369,15 +375,15 @@ function snapT(t){const ms=[D.plan&&D.plan.t,D.agg&&D.agg.t,D.fin&&D.fin.t,D.bas
 // ---- §6.5 SPLIT chips: Before = v1 (history on) or 단독 baseline lane; After = cur ----
 function renderSplits(){const box=$('#splits');box.style.display=cmp?'flex':'none';if(!cmp)return;const{bk,ak}=pairKeys(),A=Dof(ak),B=bk?Dof(bk):BL();if(!B){box.innerHTML='';return;}const sp=splitsOf(B,A),bn=bk?label(bk):'단독';
   const rows=[['계획 완료',sp.plan,B.checkpoints.plan,A.checkpoints.plan,'s'],['첫 호출',sp.first,B.checkpoints.firstCall,A.checkpoints.firstCall,'s'],['완주',sp.finish,B.checkpoints.finish,A.checkpoints.finish,'s'],['토큰',sp.tokens,B.checkpoints.finish,A.checkpoints.finish,'tok']];
-  const acc=BENCH.tracks.filter(t=>t.base&&t.latest.acc>t.base.acc).map(t=>`${t.id} +${Math.round(t.latest.acc-t.base.acc)}%p`).join(' · ');   // vs 단독: the fixed-cost chips are balanced by the accuracy gain (A)
-  box.innerHTML=`<span class="t">SPLIT ${esc(bn)} → ${esc(label(ak))}</span>`+(bk||!acc?'':`<span class="sp on good" title="A 정확도 — 가시 연습셋, jxc-selfeval"><small>정확도</small>${esc(acc)} (A)</span>`)+rows.map(([nm,d,tb,ta,u])=>{if(d==null)return bk?`<span class="sp"><small>${nm}</small>—</span>`:'';const on=tNow>=Math.max(tb??0,ta??0)-1e-9,pc=`${sp.pct>0?'+':'−'}${Math.abs(sp.pct).toFixed(0)}%`;
+  const acc=benchVerdicts().chip;   // vs 단독: the fixed-cost chips are balanced by the A/B result chip
+  box.innerHTML=`<span class="t">SPLIT ${esc(bn)} → ${esc(label(ak))}</span>`+(bk||!acc?'':`<span class="sp on good" title="${esc(BENCH.method)}"><small>A·B</small>${esc(acc)}</span>`)+rows.map(([nm,d,tb,ta,u])=>{if(d==null)return bk?`<span class="sp"><small>${nm}</small>—</span>`:'';const on=tNow>=Math.max(tb??0,ta??0)-1e-9,pc=`${sp.pct>0?'+':'−'}${Math.abs(sp.pct).toFixed(0)}%`;
     const v=u==='s'?(d>0?'+':'−')+f1(Math.abs(d))+'s':[`${sgn(d)} (${pc})`,d<0?`÷${sp.div}`:`×${f1(A.total/B.total)}`,pc][tokMode],cls=!on?'':bk?(d<=0?' good':' bad'):' fixed';   // red/green only when History (v1) is the Before; vs 단독 = amber 고정비
     return`<span class="sp${on?' on':''}${cls}${u==='tok'?' tok':''}" title="${u==='tok'?'클릭: 형식 전환':bk?'':'오케스트레이션 고정비 (플래너 1홉 + 취합) — 채점 지표 아님'}"><small>${bk?'':'고정비 · '}${nm}</small>${v}</span>`;}).join('');
   const tk=box.querySelector('.sp.tok');if(tk)tk.onclick=()=>{tokMode=(tokMode+1)%3;renderSplits();};}
 
 // ---- A · B: BENCH tables (owner numbers, verbatim) ----
 function renderBench(){const v=benchVerdicts(),bar=(val,max,cls)=>`<div class="bb ${cls}"><i style="width:${Math.max(1,val/max*100)}%"></i>${cls==='l'?fmt(val):''}</div>`;
-  $('#vA').innerHTML=`${esc(v.A)}<small>출처: 가시 연습셋, jxc-selfeval · n과 CI90은 표 참조 · 정답 여부는 채점 러너 기준</small>`;
+  $('#vA').innerHTML=`${esc(v.A)}<small>${esc(v.subA)} · ${esc(BENCH.method)} · n과 CI90은 표 참조</small>`;
   $('#accT').innerHTML=`<tr><th>트랙</th><th>베이스라인 정확도 (n)</th><th>최신 ${esc(BENCH.latestLabel)} (n · CI90)</th><th>Δ</th><th class="bars">0 → 100%</th></tr>`+BENCH.tracks.map(t=>{const b=t.base,l=t.latest,d=b?l.acc-b.acc:null;
     return`<tr class="${t.ref?'ref':''}"><td>${esc(t.name)}${t.ref?` <span class="na">${esc(t.ref)}</span>`:''}</td><td>${b?`${b.acc}% (n=${b.n})`:'—'}</td><td>${l.acc}% (n=${l.n} · ${l.ci[0]}–${l.ci[1]}%)</td><td>${d==null?'—':`<span class="chip ${d<0?'worse':''}">${d>0?'+':''}${d.toFixed(1)}%p</span>`}</td><td class="bars">${b?bar(b.acc,100,''):''}${bar(l.acc,100,'l')}</td></tr>`;}).join('');
   $('#accNote').textContent=`막대: 회색 = 베이스라인(단순 프롬프트), 초록 = 최신 스쿼드 · 모두 gpt-oss-120b 솔버 · ${BENCH.tracks.find(t=>t.ref)?'AIME 행은 난이도 참고(베이스라인 미측정)':''}`;
@@ -523,8 +529,8 @@ function renderHonest(){$('#vC').innerHTML=`이벤트 <b>${T.events.length}</b>�
     pts.forEach(p=>{s+=`<circle cx="${p.x}" cy="${p.y}" r="${3+Math.sqrt(p.n)*1.6}" fill="var(--ag)" opacity=".5"/><text x="${p.x}" y="${py+ph+16}" text-anchor="middle">${p.conf}</text>${p.n>=5?`<text x="${p.x}" y="${p.y-12}" text-anchor="middle" class="lbl">${p.correct}/${p.n}</text>`:''}`;});
     s+=`<text x="${px+pw/2}" y="${Hc-4}" text-anchor="middle">self-reported confidence (0–10)</text>`;svg.innerHTML=s;const top=cal[cal.length-1],n=cal.reduce((a,c)=>a+c.n,0);$('#calcap').textContent=`확신도 ${top.conf} → ${top.correct}/${top.n} 정답 (${n}문항, 채점 러너) · 확신도가 낮은 문항만 재검토하면 된다 = 원칙 0의 근거`;}
   else{svg.innerHTML=`<text x="10" y="30">캘리브레이션 데이터 없음</text>`;$('#calcap').textContent='';}
-  const b=D.base,sess=T.events.filter(e=>e.type==='token-usage-update').map(sessOf);$('#sessNote').textContent=`token-usage-update 의 세션 누적치${sess.length?` (${sess.map(fmt).join(' / ')})`:''}는 이 실행의 합계가 아님 → 차트에 쓰지 않음`;
-  $('#methods').textContent=`methods · ${fmt(D.total)} = Σ execution-token-usage.prompt+completion (호출 ${D.calls.length}회, ${cur}, ${T.meta.source||'trace.json'}) · 입력 ${fmt(D.prompt)} / 출력 ${fmt(D.completion)}${b?` · ${fmt(b.tok)} = baseline.prompt+completion (${b.model}, ${b.s}s, correct=${b.correct}) · 배율 ${fmt(D.total)}/${fmt(b.tok)} = ${f2(D.total/b.tok)}`:' · 기준 없음'} · 중복 = 같은 제목+같은 에이전트 태스크 −1 · 호출별 Δ = cumPrompt[i]−cumPrompt[i−1] · 태스크 구간 = task-status-changed(in_progress) → task-completed${D.traceTotal!=null?` · trace 합계 = ${fmt(D.traceTotal)} ${D.traceTotal===D.total?'✓ 일치':'✗'}`:''} · 트랙 정확도·토큰 = jxc-selfeval (가시 연습셋) · ${(T.meta.startedAt||'').slice(0,10)}`;
+  const b=D.base,sess=T.events.filter(e=>e.type==='token-usage-update').map(sessOf);$('#sampleNote').textContent=benchVerdicts().sample;$('#sessNote').textContent=`token-usage-update 의 세션 누적치${sess.length?` (${sess.map(fmt).join(' / ')})`:''}는 이 실행의 합계가 아님 → 차트에 쓰지 않음`;
+  $('#methods').textContent=`methods · ${fmt(D.total)} = Σ execution-token-usage.prompt+completion (호출 ${D.calls.length}회, ${cur}, ${T.meta.source||'trace.json'}) · 입력 ${fmt(D.prompt)} / 출력 ${fmt(D.completion)}${b?` · ${fmt(b.tok)} = baseline.prompt+completion (${b.model}, ${b.s}s, correct=${b.correct}) · 배율 ${fmt(D.total)}/${fmt(b.tok)} = ${f2(D.total/b.tok)}`:' · 기준 없음'} · 중복 = 같은 제목+같은 에이전트 태스크 −1 · 호출별 Δ = cumPrompt[i]−cumPrompt[i−1] · 태스크 구간 = task-status-changed(in_progress) → task-completed${D.traceTotal!=null?` · trace 합계 = ${fmt(D.traceTotal)} ${D.traceTotal===D.total?'✓ 일치':'✗'}`:''} · 트랙 정확도·토큰 = jxc-selfeval (${BENCH.method}) · ${(T.meta.startedAt||'').slice(0,10)}`;
   $('#rngd').textContent=`${fmt(D.total)} tok ≈ RNGD 1장 기준 ~${f1(D.total/3000)}s · ~${fmt(D.total/3000*180)}J (공개 수치 3,000 tok/s · 180 W 가정 — 측정 아님)`;}
 
 // ---- §4.2 playhead / replay ----
@@ -598,10 +604,10 @@ const LD=()=>RUNS[LATEST]?Dof(LATEST):D,V1=()=>RUNS['run-001']?Dof('run-001'):nu
 const lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}},lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(e){}};
 function countUp(el,to,fm,ms=1100){const t0=performance.now();const step=ts=>{const p=Math.min(1,(ts-t0)/ms),k=1-Math.pow(1-p,3);el.textContent=fm(p<1?to*k:to);if(p<1)requestAnimationFrame(step);};requestAnimationFrame(step);}   // ends on the exact value
 // ---- scoreboard ----
-function renderBoard(){const d=LD(),b=d.base,v1=V1(),g=BENCH.tracks.find(t=>t.id==='generic'),tr=BENCH.tracks.filter(t=>t.base),sv=d.solver?d.solver.name:'전문가',acc=(t,cls)=>`<div class="bar ${cls}"><i style="width:${t.acc*0.62}%"></i>${round(t.acc)}%</div>`;
+function renderBoard(){const d=LD(),b=d.base,v1=V1(),g=BENCH.tracks.find(t=>t.id==='generic'),tr=BENCH.tracks.filter(t=>t.base),bv=benchVerdicts(),sv=d.solver?d.solver.name:'전문가',acc=(t,cls)=>`<div class="bar ${cls}"><i style="width:${t.acc*0.62}%"></i>${round(t.acc)}%</div>`;
   $('#board').innerHTML=`<div id="bhead"><h1>문제 하나를 풀었습니다 — 혼자 푼 모델 vs BIBIMBAP 스쿼드</h1><p>같은 문항 ${esc(b?b.item:'?')} · 두 쪽 다 정답 · 숫자는 전부 실측</p></div><div class="cards">
-<div class="card" id="card1"><h3>얼마나 정확한가</h3><div class="one">연습 세트에서 맞힌 비율 (정확도 = 공개 표본으로 채점한 정답률)</div><div class="hero"><span data-cu="${g.base.acc}" data-fm="pct">0%</span><span class="arr">→</span><span class="to" data-cu="${g.latest.acc}" data-fm="pct">0%</span><span class="bchip">generic · n=${g.latest.n}</span></div>
-<div class="mini">${tr.map(t=>`<div class="mrow"><span class="lab">${t.id}</span><div class="bars">${acc(t.base,'')}${acc(t.latest,'l')}</div></div>`).join('')}</div><div class="cap">정확도 = 연습 세트(공개 표본)에서 맞힌 비율 · 회색 = 혼자 푼 모델, 초록 = 스쿼드 · 출처 jxc-selfeval</div></div>
+<div class="card" id="card1"><h3>얼마나 정확한가</h3><div class="one">${esc(bv.oneA)} (정확도 = 전수 측정에서 맞힌 비율)</div><div class="hero"><span data-cu="${g.base.acc}" data-fm="pct">0%</span><span class="arr">→</span><span class="to" data-cu="${g.latest.acc}" data-fm="pct">0%</span><span class="bchip">generic · n=${g.latest.n}</span></div>
+<div class="mini">${tr.map(t=>`<div class="mrow"><span class="lab">${t.id}</span><div class="bars">${acc(t.base,'')}${acc(t.latest,'l')}</div></div>`).join('')}</div><div class="cap">정확도 = 같은 n의 전수 측정에서 맞힌 비율 (${tr.map(t=>`${t.id} ${t.total}`).join(' · ')}) · 회색 = 혼자 푼 모델, 초록 = 스쿼드 · jxc-selfeval</div></div>
 <div class="card" id="card2"><h3>토큰을 얼마나 썼나</h3><div class="one">같은 문제 한 건에 모델이 읽고 쓴 양 (토큰 = 글자 단위 · 적을수록 싸다)</div><div class="hero"><span data-cu="${b?b.tok:0}" data-fm="int">0</span><span class="arr">→</span><span class="to" style="color:var(--ex)" data-cu="${d.total}" data-fm="int">0</span>${d.ratio?`<span class="bchip">${f1(d.ratio)}×</span>`:''}</div>
 <div class="mini" id="tokbars"><div class="bar" data-v="${b?b.tok:0}"><i></i>혼자 ${fmt(b?b.tok:0)}</div><div class="bar s" data-v="${d.total}"><i></i>스쿼드 ${fmt(d.total)}</div>${v1?`<div class="bar v1" data-v="${v1.total}"><i></i>첫 시도 ${fmt(v1.total)} (÷${f1(v1.total/d.total)})</div>`:''}</div>
 <div class="cap">토큰 = 모델이 읽고 쓴 글자 단위 · 오케스트레이션 고정비 = 플래너 1홉 + 취합 · 카드에 마우스를 올리면 첫 시도가 보입니다</div></div>
@@ -641,7 +647,7 @@ function setMode(on){simple=!!on;document.body.classList.toggle('simple',simple)
 // ---- 안내 투어 ----
 const TOUR=()=>{const d=LD(),b=d.base,v1=V1(),g=BENCH.tracks.find(t=>t.id==='generic');return[
  {t:'#bhead',h:'문제 하나, 세 가지만 보세요: 정확도 · 토큰 · 과정',p:`한 문항(${b?b.item:'?'})을 혼자 푼 모델과 BIBIMBAP 스쿼드가 각각 풀었습니다. 아래 세 카드가 전부입니다.`,en:'One problem, three things to look at: accuracy, tokens, process.'},
- {t:'#card1',h:`혼자 ${round(g.base.acc)}% → 스쿼드 ${round(g.latest.acc)}% (n=${g.latest.n})`,p:`연습 세트에서 맞힌 비율입니다. ${BENCH.tracks.filter(t=>t.base).map(t=>t.id).join(' · ')} 세 트랙 모두 베이스라인 이상.`,en:`Accuracy on practice sets: ${round(g.base.acc)}% alone → ${round(g.latest.acc)}% as a squad.`},
+ {t:'#card1',h:`혼자 ${round(g.base.acc)}% → 스쿼드 ${round(g.latest.acc)}% (generic, n=${g.latest.n})`,p:`${BENCH.tracks.filter(t=>t.base&&t.id!=='generic').map(t=>`${t.id} ${round(t.base.acc)}→${round(t.latest.acc)}`).join(', ')} — ${BENCH.tracks.filter(t=>t.base).every(t=>t.latest.acc>=t.base.acc)?'전 트랙 베이스라인 이상, 정확도는 지켰습니다':'일부 트랙 하락'}`,en:'Accuracy held or improved on every track.'},
  {t:'#card2',h:`같은 문제 ${fmt(b?b.tok:0)} vs ${fmt(d.total)} — 오케스트레이션 고정비${v1?`. 첫 시도는 ${fmt(v1.total)}, 관측으로 ÷${round(v1.total/d.total)}`:''}`,p:'플래너 1홉 + 취합이 고정비입니다. 첫 시도를 로그로 해부해 낭비를 걷어냈습니다.',en:'Same problem: the squad pays a fixed orchestration cost; the first attempt was cut by observing the log.',on:()=>{$('#card2').classList.add('reveal');tokScale(true);}},
  {t:'#card3',h:`플래너가 계획 ${d.spans.length}개 → 전문가가 ${d.calls.length}번 호출로 풀이 → 취합. ${round(d.dur)}초`,p:`점이 실제 이벤트 시각을 따라 움직입니다. 플래너가 생각하는 동안(${d.plan?f1(d.plan.t):'?'}s) 로그에는 아무 이벤트도 없습니다.`,en:'The dot follows the real event times: plan → solve → aggregate.',on:()=>{if(!FL.playing){FL.stage=0;FL.hops=[];FL.hop=null;flowSet(0);flowPlay();}}},
  {t:'#bnote',h:'답 텍스트는 로그에 없습니다 — 아는 것과 모르는 것을 구분합니다',p:'정답 여부는 외부 채점으로만 표시하고, 화면의 모든 숫자는 토큰 카운터·상태 전이·타임스탬프에서만 나옵니다.',en:'The answer text is not in the log; correctness comes only from the external grader.',cta:'원장 모드로 6축 보기'}];};
