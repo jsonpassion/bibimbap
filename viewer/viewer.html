@@ -124,7 +124,7 @@ function normalizeRaw(text, squad) {
   const planIdx = Math.max(...raw.slice(0, execIdx).map((e, i) => e.eventType === "squad:planning-started" ? i : -1));
   const evs = raw.slice(Math.max(planIdx, 0)); const t0 = ts(evs[0].timestamp);
   const rejected = raw.slice(0, Math.max(planIdx, 0)).filter(e => e.eventType === "squad:plan-ready").length;
-  const tasks = {}; // 로그만으로 복원: wave의 taskIds + task-completed title
+  const tasks = {}; // 로그만으로 복원: 이 실행의 wave taskIds + task-completed (index.json 비의존)
   let phase = "planning", cur = null, prev = [0, 0]; const events = [], calls = [];
   const name = id => agents[id]?.name || (id ? "agent-" + String(id).slice(-6) : "?");
   const ensureAgent = id => { if (id && !agents[id]) agents[id] = {id, name: name(id), role: "?", model: "?", planner: id === plannerId}; };

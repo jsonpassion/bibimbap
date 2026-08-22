@@ -41,8 +41,15 @@ def main():
     rejected_plans = sum(1 for e in raw[:plan_idx] if e["eventType"] == "squad:plan-ready")
 
     tasks_idx = {t["id"]: t for t in json.load(open(os.path.join(ws, "tasks", "index.json")))}
+    # 이 실행에 속한 태스크만 (wave/task-completed 이벤트에 등장한 id)
+    run_ids = set()
+    for e in evs:
+        p = e.get("payload") or {}
+        run_ids.update(p.get("taskIds") or []); 
+        if p.get("taskId"): run_ids.add(p["taskId"])
     tasks = []
     for tid, t in tasks_idx.items():
+        if run_ids and tid not in run_ids: continue
         ag = agents.get(t.get("assignedTo"), {})
         tasks.append({"id": tid, "title": t["title"], "agentId": t.get("assignedTo"),
                       "agentName": ag.get("name", "?"), "status": t["status"],
