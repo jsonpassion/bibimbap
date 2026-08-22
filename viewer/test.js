@@ -16,7 +16,7 @@ const row=(k,T,D)=>{const b=D.base;
 const DD={};for(const k of files){const T=load(k);DD[k]=C.derive(T);row(k,T,DD[k]);}
 // checks against the spec's acceptance table + owner's run-004 / run-008 numbers
 const assert=(c,m)=>{if(!c){console.error('ASSERT FAILED:',m);process.exitCode=1;}};
-assert(C.LATEST==='run-008'&&C.RUN_IDS[0]===C.LATEST&&C.ALL_RUNS.includes('run-009')&&!C.RUN_IDS.includes('run-009x')&&['run-008','run-004','run-001'].every(k=>inlined.includes(k)),'LATEST / inline blocks');
+assert(C.LATEST==='run-009'&&C.RUN_IDS[0]===C.LATEST&&['run-009','run-008','run-004','run-001'].every(k=>inlined.includes(k)),'LATEST / inline blocks');
 assert(C.stageOf('run-008',load('run-008'))==='앙상블'&&C.stageOf('run-004',load('run-004'))==='절감'&&C.stageOf('run-001',load('run-001'))==='첫 시도'&&C.stageOf('run-009',{meta:{version:'v6.0 DIRECT (최종 제출)'}})==='최종','stageOf (run-009 = 최종 from meta.version)');
 const a1=DD['run-001'];assert(a1.total===26808&&a1.calls.length===28&&a1.spans.length===3&&a1.dupCount===2&&+a1.dur.toFixed(1)===60.2&&a1.waves.length===1&&a1.directive===1,'run-001 totals');
 assert(JSON.stringify(a1.spans.map(s=>s.prompt+s.completion))==='[10629,4330,11849]','run-001 subtotals');assert(JSON.stringify(a1.spans.map(s=>[s.first,s.last]))==='[[487,1277],[487,758],[522,1196]]','run-001 first/last');
