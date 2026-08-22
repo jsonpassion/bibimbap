@@ -22,6 +22,7 @@ def main():
     ap.add_argument("--baseline", help="selfeval results.jsonl (단독 모델 비교용)")
     ap.add_argument("--item", help="baseline에서 비교할 item_id")
     ap.add_argument("--calibration", help="confgate results.jsonl (확신도 캘리브레이션)")
+    ap.add_argument("--execution", help="특정 executionId(접두사)로 실행 구간 선택 (기본: 마지막 실행)")
     a = ap.parse_args()
     ws = a.workspace
 
@@ -34,7 +35,16 @@ def main():
 
     raw = [json.loads(l) for l in open(os.path.join(ws, "logs", "events.jsonl"))]
     # 마지막 승인된 실행 구간만: execution-started 직전의 마지막 planning-started 부터 끝까지
-    exec_idx = max(i for i, e in enumerate(raw) if e["eventType"] == "squad:execution-started")
+    exec_starts = [i for i, e in enumerate(raw) if e["eventType"] == "squad:execution-started"]
+    exec_idx = max(exec_starts)
+    if a.execution:
+        cands = [i for i in exec_starts if str((raw[i].get("payload") or {}).get("executionId", "")).startswith(a.execution)]
+        if not cands:
+            raise SystemExit(f"executionId {a.execution}* 를 가진 execution-started 이벤트 없음")
+        exec_idx = cands[0]
+        # 다음 실행 시작 전까지로 자르기
+        later = [i for i in exec_starts if i > exec_idx]
+        raw = raw[:later[0]] if later else raw
     plan_idx = max(i for i, e in enumerate(raw[:exec_idx]) if e["eventType"] == "squad:planning-started")
     evs = raw[plan_idx:]
     t0 = ts(evs[0]["timestamp"])

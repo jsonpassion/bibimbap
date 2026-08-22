@@ -1,0 +1,336 @@
+{
+ "meta": {
+  "squad": "BIBIMBAP",
+  "request": "[PLANNING DIRECTIVE] ONE atomic benchmark problem: create EXACTLY ONE task — title \"SOLVE\", assignee Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" No other tasks, no other agents.\n\nSolve this problem:\nWhat is the smallest real number $x$ in the domain of the function $$g(x) = \\sqrt{(x-3)^2-(x-8)^2}~?$$\n\nREQUIRED OUTPUT: Put the final answer in \\boxed{...} on the last line, nothing after it.",
+  "startedAt": "2026-08-22T13:48:51.578340Z",
+  "completedAt": "2026-08-22T13:49:40.873214Z",
+  "durationSec": 49.3,
+  "rejectedPlansBefore": 32,
+  "version": "v4.0 · math (math-visible-0001)"
+ },
+ "agents": [
+  {
+   "id": "agent-1787368242465-fezk8r8",
+   "name": "Conductor",
+   "role": "planner",
+   "model": "Qwen3-32B-FP8",
+   "planner": true
+  },
+  {
+   "id": "agent-1787371848955-vy48dd2",
+   "name": "Generic-Solver",
+   "role": "Generic-Solver",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371889852-bjmjlyo",
+   "name": "Math-Solver",
+   "role": "Math-Solver",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371952162-avfl1wb",
+   "name": "LCB-Coder",
+   "role": "LCB-Coder",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371974406-lotikpk",
+   "name": "SWE-Patcher",
+   "role": "SWE-Patcher",
+   "model": "gpt-oss-120b",
+   "planner": false
+  }
+ ],
+ "tasks": [
+  {
+   "id": "be3825df-7d4e-4dfb-a4a3-bed570bc328e",
+   "title": "SOLVE",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "agentName": "Math-Solver",
+   "status": "done",
+   "createdAt": "2026-08-22T13:49:09.905494Z",
+   "completedAt": "2026-08-22T13:49:11.553571Z",
+   "durationSec": 1.6
+  }
+ ],
+ "events": [
+  {
+   "t": 0.0,
+   "ts": "2026-08-22T13:48:51.578340Z",
+   "type": "planning-started",
+   "phase": "planning",
+   "summary": "플래너가 요청을 분석해 계획을 수립합니다",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "request": "[PLANNING DIRECTIVE] ONE atomic benchmark problem: create EXACTLY ONE task — title \"SOLVE\", assignee Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" No other tasks, no other agents.\n\nSolve this problem:\nWhat is the smallest real number $x$ in the domain of the function $$g(x) = \\sqrt{(x-3)^2-(x-8)^2}~?$$\n\nREQUIRED OUTPUT: Put the final answer in \\boxed{...} on the last line, nothing after it."
+   },
+   "agentName": "Conductor"
+  },
+  {
+   "t": 18.31,
+   "ts": "2026-08-22T13:49:09.893196Z",
+   "type": "plan-ready",
+   "phase": "planning",
+   "summary": "계획 완성 — 태스크 1개, 웨이브 1개",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "taskCount": 1,
+    "waves": [
+     [
+      "be3825df-7d4e-4dfb-a4a3-bed570bc328e"
+     ]
+    ],
+    "autoApprove": true
+   },
+   "agentName": "Conductor"
+  },
+  {
+   "t": 18.32,
+   "ts": "2026-08-22T13:49:09.893843Z",
+   "type": "execution-started",
+   "phase": "execution",
+   "summary": "실행 시작 — 태스크 1개 / 웨이브 1개"
+  },
+  {
+   "t": 18.33,
+   "ts": "2026-08-22T13:49:09.906949Z",
+   "type": "task-wave-started",
+   "phase": "execution",
+   "summary": "웨이브 1 시작 (태스크 1개 병렬)",
+   "detail": {
+    "taskIds": [
+     "be3825df-7d4e-4dfb-a4a3-bed570bc328e"
+    ]
+   }
+  },
+  {
+   "t": 18.33,
+   "ts": "2026-08-22T13:49:09.909788Z",
+   "type": "task-status-changed",
+   "phase": "execution",
+   "taskId": "be3825df-7d4e-4dfb-a4a3-bed570bc328e",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "태스크 'SOLVE' pending → in_progress",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 18.63,
+   "ts": "2026-08-22T13:49:10.211999Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "Math-Solver 상태 → running",
+   "detail": {
+    "state": "running"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 19.51,
+   "ts": "2026-08-22T13:49:11.092226Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "tokens": {
+    "prompt": 808,
+    "completion": 75,
+    "cumPrompt": 808,
+    "cumCompletion": 75
+   },
+   "summary": "모델 호출 — 입력 808 / 출력 75 토큰 (누적 883)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 19.97,
+   "ts": "2026-08-22T13:49:11.552818Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "tokens": {
+    "prompt": 709,
+    "completion": 44,
+    "cumPrompt": 1517,
+    "cumCompletion": 119
+   },
+   "summary": "모델 호출 — 입력 709 / 출력 44 토큰 (누적 1,636)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 19.97,
+   "ts": "2026-08-22T13:49:11.553280Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "Math-Solver 상태 → idle",
+   "detail": {
+    "state": "idle"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 19.98,
+   "ts": "2026-08-22T13:49:11.553450Z",
+   "type": "token-usage-update",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "Math-Solver 누적 토큰 13,943",
+   "detail": {
+    "cumPrompt": 12882,
+    "cumCompletion": 1061
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 19.98,
+   "ts": "2026-08-22T13:49:11.555847Z",
+   "type": "task-completed",
+   "phase": "execution",
+   "taskId": "be3825df-7d4e-4dfb-a4a3-bed570bc328e",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "태스크 'SOLVE' 완료 (성공)",
+   "detail": {
+    "success": true,
+    "error": null,
+    "taskCounts": {
+     "cancelled": 0,
+     "completed": 1,
+     "failed": 0,
+     "pending": 0,
+     "running": 0,
+     "skipped": 0,
+     "total": 1
+    }
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 20.28,
+   "ts": "2026-08-22T13:49:11.858031Z",
+   "type": "aggregation-started",
+   "phase": "aggregation",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "summary": "취합 시작 — 태스크 1개 결과 합성",
+   "agentName": "Conductor"
+  },
+  {
+   "t": 20.79,
+   "ts": "2026-08-22T13:49:12.364819Z",
+   "type": "execution-completed",
+   "phase": "aggregation",
+   "summary": "실행 완료",
+   "detail": {
+    "result": "**Execution complete** — 1 task(s) processed in 1 wave(s).\n\n1. ✅ **SOLVE**  \n   Agent: `Math-Solver`",
+    "tokenUsage": {
+     "completionTokens": 119,
+     "promptTokens": 1517
+    }
+   }
+  },
+  {
+   "t": 34.56,
+   "ts": "2026-08-22T13:49:26.140455Z",
+   "type": "planning-started",
+   "phase": "aggregation",
+   "summary": "플래너가 요청을 분석해 계획을 수립합니다",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "request": "[PLANNING DIRECTIVE] ONE atomic benchmark problem: create EXACTLY ONE task — title \"SOLVE\", assignee LCB-Coder for an algorithmic problem with examples/tests or SWE-Patcher for a repository issue/patch, description \"Solve the problem completely and output only the final answer in the required format.\" No other tasks, no other agents.\n\nSolve this problem:\n9x9 Sum\n\nAmong the 81 integers that appear in the 9-by-9 multiplication table, find the sum of those that are not X.\n\nThere is a grid of size 9 by 9.\nEach cell of the grid contains an integer: the cell at the i-th row from the top and the j-th"
+   },
+   "agentName": "Conductor"
+  },
+  {
+   "t": 49.29,
+   "ts": "2026-08-22T13:49:40.873214Z",
+   "type": "plan-ready",
+   "phase": "aggregation",
+   "summary": "계획 완성 — 태스크 1개, 웨이브 1개",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "taskCount": 1,
+    "waves": [
+     [
+      "8fc23192-dd92-4073-ba79-5291be91ac4b"
+     ]
+    ],
+    "autoApprove": true
+   },
+   "agentName": "Conductor"
+  }
+ ],
+ "tokens": {
+  "prompt": 1517,
+  "completion": 119,
+  "total": 1636,
+  "calls": 2,
+  "byAgent": {
+   "agent-1787371889852-bjmjlyo": {
+    "name": "Math-Solver",
+    "prompt": 1517,
+    "completion": 119,
+    "calls": 2
+   }
+  },
+  "byPhase": {
+   "execution": {
+    "prompt": 1517,
+    "completion": 119,
+    "calls": 2
+   }
+  }
+ },
+ "insights": {
+  "taskCount": 1,
+  "duplicateTasks": 0,
+  "plannerShare": 0.0,
+  "callsPerTask": 2.0
+ },
+ "baseline": {
+  "item": "math-visible-0001",
+  "model": "furiosa-ai/gpt-oss-120b",
+  "correct": true,
+  "prompt": 131,
+  "completion": 486,
+  "seconds": 5.09
+ },
+ "calibration": [
+  {
+   "conf": 0,
+   "correct": 0,
+   "n": 2
+  },
+  {
+   "conf": 3,
+   "correct": 1,
+   "n": 2
+  },
+  {
+   "conf": 5,
+   "correct": 0,
+   "n": 3
+  },
+  {
+   "conf": 7,
+   "correct": 7,
+   "n": 11
+  },
+  {
+   "conf": 8,
+   "correct": 20,
+   "n": 29
+  },
+  {
+   "conf": 9,
+   "correct": 46,
+   "n": 57
+  },
+  {
+   "conf": 10,
+   "correct": 36,
+   "n": 36
+  }
+ ]
+}

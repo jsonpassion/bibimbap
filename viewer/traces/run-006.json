@@ -1,0 +1,246 @@
+{
+ "meta": {
+  "squad": "BIBIMBAP",
+  "request": "[PLANNING DIRECTIVE] ONE atomic benchmark problem: create EXACTLY ONE task — title \"SOLVE\", assignee LCB-Coder for an algorithmic problem with examples/tests or SWE-Patcher for a repository issue/patch, description \"Solve the problem completely and output only the final answer in the required format.\" No other tasks, no other agents.\n\nSolve this problem:\n9x9 Sum\n\nAmong the 81 integers that appear in the 9-by-9 multiplication table, find the sum of those that are not X.\n\nThere is a grid of size 9 by 9.\nEach cell of the grid contains an integer: the cell at the i-th row from the top and the j-th",
+  "startedAt": "2026-08-22T13:49:26.140455Z",
+  "completedAt": "2026-08-22T13:49:44.196610Z",
+  "durationSec": 18.1,
+  "rejectedPlansBefore": 33,
+  "version": "v4.0 · coding (LCB abc387_b)"
+ },
+ "agents": [
+  {
+   "id": "agent-1787368242465-fezk8r8",
+   "name": "Conductor",
+   "role": "planner",
+   "model": "Qwen3-32B-FP8",
+   "planner": true
+  },
+  {
+   "id": "agent-1787371848955-vy48dd2",
+   "name": "Generic-Solver",
+   "role": "Generic-Solver",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371889852-bjmjlyo",
+   "name": "Math-Solver",
+   "role": "Math-Solver",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371952162-avfl1wb",
+   "name": "LCB-Coder",
+   "role": "LCB-Coder",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371974406-lotikpk",
+   "name": "SWE-Patcher",
+   "role": "SWE-Patcher",
+   "model": "gpt-oss-120b",
+   "planner": false
+  }
+ ],
+ "tasks": [
+  {
+   "id": "8fc23192-dd92-4073-ba79-5291be91ac4b",
+   "title": "SOLVE",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "agentName": "LCB-Coder",
+   "status": "done",
+   "createdAt": "2026-08-22T13:49:40.883609Z",
+   "completedAt": "2026-08-22T13:49:43.387533Z",
+   "durationSec": 2.5
+  }
+ ],
+ "events": [
+  {
+   "t": 0.0,
+   "ts": "2026-08-22T13:49:26.140455Z",
+   "type": "planning-started",
+   "phase": "planning",
+   "summary": "플래너가 요청을 분석해 계획을 수립합니다",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "request": "[PLANNING DIRECTIVE] ONE atomic benchmark problem: create EXACTLY ONE task — title \"SOLVE\", assignee LCB-Coder for an algorithmic problem with examples/tests or SWE-Patcher for a repository issue/patch, description \"Solve the problem completely and output only the final answer in the required format.\" No other tasks, no other agents.\n\nSolve this problem:\n9x9 Sum\n\nAmong the 81 integers that appear in the 9-by-9 multiplication table, find the sum of those that are not X.\n\nThere is a grid of size 9 by 9.\nEach cell of the grid contains an integer: the cell at the i-th row from the top and the j-th"
+   },
+   "agentName": "Conductor"
+  },
+  {
+   "t": 14.73,
+   "ts": "2026-08-22T13:49:40.873214Z",
+   "type": "plan-ready",
+   "phase": "planning",
+   "summary": "계획 완성 — 태스크 1개, 웨이브 1개",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "taskCount": 1,
+    "waves": [
+     [
+      "8fc23192-dd92-4073-ba79-5291be91ac4b"
+     ]
+    ],
+    "autoApprove": true
+   },
+   "agentName": "Conductor"
+  },
+  {
+   "t": 14.73,
+   "ts": "2026-08-22T13:49:40.873800Z",
+   "type": "execution-started",
+   "phase": "execution",
+   "summary": "실행 시작 — 태스크 1개 / 웨이브 1개"
+  },
+  {
+   "t": 14.74,
+   "ts": "2026-08-22T13:49:40.885169Z",
+   "type": "task-wave-started",
+   "phase": "execution",
+   "summary": "웨이브 1 시작 (태스크 1개 병렬)",
+   "detail": {
+    "taskIds": [
+     "8fc23192-dd92-4073-ba79-5291be91ac4b"
+    ]
+   }
+  },
+  {
+   "t": 14.75,
+   "ts": "2026-08-22T13:49:40.887736Z",
+   "type": "task-status-changed",
+   "phase": "execution",
+   "taskId": "8fc23192-dd92-4073-ba79-5291be91ac4b",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "태스크 'SOLVE' pending → in_progress",
+   "agentName": "LCB-Coder"
+  },
+  {
+   "t": 15.05,
+   "ts": "2026-08-22T13:49:41.189803Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "LCB-Coder 상태 → running",
+   "detail": {
+    "state": "running"
+   },
+   "agentName": "LCB-Coder"
+  },
+  {
+   "t": 17.25,
+   "ts": "2026-08-22T13:49:43.386320Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1227,
+    "completion": 481,
+    "cumPrompt": 1227,
+    "cumCompletion": 481
+   },
+   "summary": "모델 호출 — 입력 1,227 / 출력 481 토큰 (누적 1,708)",
+   "agentName": "LCB-Coder"
+  },
+  {
+   "t": 17.25,
+   "ts": "2026-08-22T13:49:43.387114Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "LCB-Coder 상태 → idle",
+   "detail": {
+    "state": "idle"
+   },
+   "agentName": "LCB-Coder"
+  },
+  {
+   "t": 17.25,
+   "ts": "2026-08-22T13:49:43.387426Z",
+   "type": "token-usage-update",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "LCB-Coder 누적 토큰 10,597",
+   "detail": {
+    "cumPrompt": 8227,
+    "cumCompletion": 2370
+   },
+   "agentName": "LCB-Coder"
+  },
+  {
+   "t": 17.25,
+   "ts": "2026-08-22T13:49:43.389700Z",
+   "type": "task-completed",
+   "phase": "execution",
+   "taskId": "8fc23192-dd92-4073-ba79-5291be91ac4b",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "태스크 'SOLVE' 완료 (성공)",
+   "detail": {
+    "success": true,
+    "error": null,
+    "taskCounts": {
+     "cancelled": 0,
+     "completed": 1,
+     "failed": 0,
+     "pending": 0,
+     "running": 0,
+     "skipped": 0,
+     "total": 1
+    }
+   },
+   "agentName": "LCB-Coder"
+  },
+  {
+   "t": 17.55,
+   "ts": "2026-08-22T13:49:43.691782Z",
+   "type": "aggregation-started",
+   "phase": "aggregation",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "summary": "취합 시작 — 태스크 1개 결과 합성",
+   "agentName": "Conductor"
+  },
+  {
+   "t": 18.06,
+   "ts": "2026-08-22T13:49:44.196610Z",
+   "type": "execution-completed",
+   "phase": "aggregation",
+   "summary": "실행 완료",
+   "detail": {
+    "result": "**Execution complete** — 1 task(s) processed in 1 wave(s).\n\n1. ✅ **SOLVE**  \n   Agent: `LCB-Coder`",
+    "tokenUsage": {
+     "completionTokens": 481,
+     "promptTokens": 1227
+    }
+   }
+  }
+ ],
+ "tokens": {
+  "prompt": 1227,
+  "completion": 481,
+  "total": 1708,
+  "calls": 1,
+  "byAgent": {
+   "agent-1787371952162-avfl1wb": {
+    "name": "LCB-Coder",
+    "prompt": 1227,
+    "completion": 481,
+    "calls": 1
+   }
+  },
+  "byPhase": {
+   "execution": {
+    "prompt": 1227,
+    "completion": 481,
+    "calls": 1
+   }
+  }
+ },
+ "insights": {
+  "taskCount": 1,
+  "duplicateTasks": 0,
+  "plannerShare": 0.0,
+  "callsPerTask": 1.0
+ }
+}

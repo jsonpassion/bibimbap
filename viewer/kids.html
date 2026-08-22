@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BIBIMBAP 친구들 — 다섯 친구가 시험 문제 한 개를 푸는 이야기</title>
+<style>
+:root{--bg:#FFFDF5;--card:#FFFFFF;--surface:#F5F0E8;--yellow:#FFD43B;--pink:#FF6B9D;--blue:#4DABF7;--coral:#FF6B35;--mint:#63E6BE;--lav:#B197FC;--lime:#A9E34B;--orange:#FF922B;--ink:#1A1A1A;--body:#374151;--bw:3px;--sh:6px 6px 0 var(--ink);--sh-sm:4px 4px 0 var(--ink);--r:22px}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:-apple-system,system-ui,"Apple SD Gothic Neo",Pretendard,"Segoe UI","Noto Sans KR",sans-serif;font-size:20px;line-height:1.45;overflow-x:hidden}
+button{font:inherit;color:inherit}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:14px 24px;background:var(--yellow);border-bottom:var(--bw) solid var(--ink)}
+.logo{background:var(--ink);color:var(--yellow);font-weight:900;font-size:18px;letter-spacing:.1em;padding:6px 12px;border-radius:10px;border:var(--bw) solid var(--ink);transform:rotate(-3deg)}
+h1{margin:0;font-size:34px;font-weight:900;line-height:1.1}
+.sub{margin:0;font-size:18px;font-weight:700;color:var(--body);flex:1 1 260px}
+.hdr-r{display:flex;gap:10px;flex-wrap:wrap}
+main{max-width:1240px;margin:0 auto;padding:20px 20px 40px}
+.btn{min-height:52px;font-size:22px;font-weight:900;border:var(--bw) solid var(--ink);border-radius:16px;background:var(--card);box-shadow:var(--sh);padding:8px 22px;cursor:pointer;transition:transform .08s,box-shadow .08s}
+.btn:hover{background:var(--surface)}
+.btn:active,.btn[aria-pressed="true"]{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--ink)}
+.btn[aria-pressed="true"]{background:var(--lime)}
+.btn.big{background:var(--pink);color:#fff;min-width:150px}
+.btn.play{background:var(--blue);color:#fff}
+.btn:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
+.scene{background:var(--card);border:var(--bw) solid var(--ink);border-radius:var(--r);box-shadow:var(--sh);padding:20px 24px;min-height:520px;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+.scene h2{font-size:38px;margin:0;line-height:1.15;font-weight:900}
+.scene h2 .tag{display:inline-block;background:var(--ink);color:var(--yellow);font-size:18px;padding:2px 12px;border-radius:10px;vertical-align:middle;margin-right:10px;transform:rotate(-2deg)}
+.row{display:grid;grid-template-columns:1fr 370px;gap:20px;align-items:stretch;flex:1}.row>*{min-width:0}
+.stage{position:relative;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:18px;padding:48px 8px 10px;display:flex;gap:10px;justify-content:center;align-items:flex-end;flex-wrap:wrap;min-height:320px}
+.panel{background:var(--card);border:var(--bw) solid var(--ink);border-radius:18px;padding:16px;box-shadow:var(--sh-sm);display:flex;flex-direction:column;gap:10px;justify-content:center}
+.cap{font-size:22px;font-weight:800;background:var(--yellow);border:var(--bw) solid var(--ink);border-radius:14px;padding:10px 18px;box-shadow:var(--sh-sm)}
+.cap.mint{background:var(--mint)}.cap.lav{background:var(--lav)}.cap.lime{background:var(--lime)}.cap.coral{background:var(--coral);color:#fff}
+.kid{font-size:20px;line-height:1.5;margin:0}
+.kid.small{font-size:17px;color:var(--body)}
+.kid b{background:linear-gradient(transparent 60%,var(--yellow) 60%)}
+/* ── characters ── */
+.ch{width:132px;position:relative;text-align:center;transition:opacity .5s,filter .5s,width .4s;flex:0 0 auto}
+.ch svg{width:100%;height:auto;display:block;overflow:visible}
+.ch .nm{font-weight:900;font-size:17px;background:var(--card);border:var(--bw) solid var(--ink);border-radius:12px;padding:2px 8px;display:inline-block;box-shadow:3px 3px 0 var(--ink);margin-top:4px;line-height:1.2;white-space:nowrap}
+.ch .nm .short{display:none}.ch.small .nm .full,.ch.ghost .nm .full{display:none}.ch.small .nm .short,.ch.ghost .nm .short{display:inline}
+.ch .sub2{font-size:13px;color:var(--body);font-weight:700;margin-top:4px}
+.ch.small{width:100px}.ch.small .nm{font-size:14px;padding:1px 8px}
+.ch.big{width:230px}.ch.big .nm{font-size:22px}
+.ch.tiny{width:82px}.ch.tiny .nm{font-size:13px;padding:1px 6px}.ch.tiny .nm .full{display:none}.ch.tiny .nm .short{display:inline}.ch.tiny .sub2{font-size:11px}.stage.tight{gap:6px}
+.ch.dim{opacity:.35;filter:grayscale(.8)}
+.ch.ghost{opacity:.6}
+.ch .say{position:absolute;left:50%;top:-40px;transform:translate(-50%,8px);background:#fff;border:var(--bw) solid var(--ink);border-radius:14px;padding:4px 12px;font-size:17px;font-weight:800;white-space:nowrap;opacity:0;transition:.3s;pointer-events:none;z-index:3;box-shadow:3px 3px 0 var(--ink)}
+.ch .say.on{opacity:1;transform:translate(-50%,0)}
+.ch .body{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 3.2s ease-in-out infinite}
+.ch .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+.ch:nth-child(2n) .eyes{animation-delay:1.3s}.ch:nth-child(3n) .body{animation-delay:.8s}
+.ch .bubble,.ch .check,.ch .abox{opacity:0;transition:opacity .3s}
+.ch.working .bubble{opacity:1}
+.ch.working .dots circle{transform-box:fill-box;transform-origin:center;animation:dot .9s ease-in-out infinite}
+.ch.working .dots circle:nth-child(2){animation-delay:.15s}.ch.working .dots circle:nth-child(3){animation-delay:.3s}
+.ch .baton,.ch .wand,.ch .hammer,.ch .sheet,.ch .laptop{transform-box:fill-box;transform-origin:0% 100%;transition:transform .6s}
+.ch.working .baton,.ch.working .wand,.ch.working .sheet{animation:wave 1s ease-in-out infinite}
+.ch.working .hammer{animation:hit .45s ease-in-out infinite}
+.ch.working .laptop{animation:type .22s steps(2) infinite}
+.ch.working .lamp{animation:lamp .6s steps(2) infinite}
+.ch.point .baton{transform:rotate(40deg)}
+.ch.done .check{opacity:1;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.ch.done svg{animation:hop .55s ease-out 3}
+.ch.answer .abox{opacity:1}.ch.answer .wand{opacity:0}
+.ch.bump svg{animation:bump var(--d,1.3s) ease-in-out infinite alternate}
+@keyframes breathe{50%{transform:scaleY(1.035) scaleX(.99)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@keyframes dot{50%{transform:translateY(-7px)}}
+@keyframes wave{50%{transform:rotate(-22deg)}}
+@keyframes hit{50%{transform:rotate(-35deg)}}
+@keyframes type{50%{transform:translateY(3px)}}
+@keyframes lamp{50%{fill:#FFD43B}}
+@keyframes hop{40%{transform:translateY(-24px)}}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.25)}}
+@keyframes bump{0%{transform:translate(0,0) rotate(-5deg)}100%{transform:translate(var(--x,18px),-10px) rotate(6deg)}}
+/* ── props ── */
+.note{position:absolute;z-index:5;background:#fff;border:var(--bw) solid var(--ink);border-radius:12px;padding:6px 12px;font-size:16px;font-weight:800;line-height:1.25;box-shadow:var(--sh-sm);transform:translate(-50%,-50%) rotate(-6deg);transition:left 1.2s cubic-bezier(.4,0,.2,1),top 1.2s cubic-bezier(.4,0,.2,1),opacity .3s;opacity:0;white-space:nowrap}
+.note.on{opacity:1}
+.bowl{width:100%;max-width:250px;margin:0 auto;display:block;overflow:visible}
+.pcard{transform:translateY(-130px);opacity:0;transition:transform 1s cubic-bezier(.2,1.4,.4,1),opacity .4s}
+.pcard.in{transform:none;opacity:1}
+.bowlcheck{opacity:0;transform-box:fill-box;transform-origin:center}
+.bowlcheck.on{opacity:1;animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.tl li{display:flex;gap:10px;align-items:flex-start;font-size:18px;opacity:.35;transition:opacity .4s}
+.tl li.on{opacity:1}
+.tl .t{flex:0 0 auto;background:var(--ink);color:#fff;font-weight:900;border-radius:10px;padding:1px 10px;font-variant-numeric:tabular-nums}
+.energy .elbl,.cmp .elbl{font-weight:900;font-size:18px}
+.track{display:flex;height:44px;border:var(--bw) solid var(--ink);border-radius:12px;overflow:hidden;background:var(--surface)}
+.fill{height:100%;width:0;transition:width 1.8s cubic-bezier(.3,0,.2,1)}
+.fill.in{background:var(--blue)}.fill.out{background:var(--coral)}
+.legend{font-size:17px;font-weight:700;line-height:1.6}
+.sw{display:inline-block;width:16px;height:16px;border:2px solid var(--ink);border-radius:4px;vertical-align:-2px;margin:0 2px 0 4px}
+.sw.in{background:var(--blue)}.sw.out{background:var(--coral)}
+.clockrow{display:flex;gap:14px;align-items:center;font-size:18px;font-weight:700}
+.clock{width:84px;flex:0 0 auto}
+#hand{transform-origin:50px 50px;transition:transform 1.8s cubic-bezier(.3,0,.2,1)}
+.calls{display:flex;flex-direction:column;gap:6px;font-size:16px;font-weight:700}
+.calls div{border:2px solid var(--ink);border-radius:10px;padding:4px 10px;background:var(--surface);opacity:0;transform:translateX(14px);transition:.4s}
+.calls div.on{opacity:1;transform:none}
+.cmp{display:flex;flex-direction:column;gap:10px}
+.cmprow{display:grid;grid-template-columns:112px 1fr;gap:8px;align-items:center;font-size:15px;line-height:1.2;font-weight:800}
+.cmprow small{font-size:13px;color:var(--body)}
+.blocks{display:flex;flex-wrap:wrap;gap:5px 3px;min-height:30px;min-width:0;align-items:center;position:relative;padding-right:10px}
+.blk{width:22px;height:30px;border:var(--bw) solid var(--ink);border-radius:6px;flex:0 0 auto;transform:scale(0);transition:transform .25s cubic-bezier(.2,1.6,.4,1)}
+.blk.on{transform:none}
+.blk.spill{transform:scale(0) rotate(0)}.blk.spill.on{transform:rotate(var(--rot,8deg)) translateY(var(--dy,0))}
+.cmprow .num{display:block;font-size:21px;line-height:1.1;font-variant-numeric:tabular-nums}
+.burst{position:absolute;right:-6px;top:-30px;z-index:2;background:var(--coral);color:#fff;border:var(--bw) solid var(--ink);border-radius:10px;padding:2px 10px;font-size:16px;transform:rotate(6deg) scale(0);transition:transform .4s cubic-bezier(.2,1.6,.4,1)}
+.burst.on{transform:rotate(6deg) scale(1)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0;padding:0;list-style:none}
+.stats li{border:var(--bw) solid var(--ink);border-radius:12px;padding:4px 10px;font-size:15px;font-weight:800;background:var(--surface)}
+.stats li b{display:block;font-size:24px;line-height:1.15}.stats li b small{font-size:13px;color:var(--body)}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;flex:1;align-content:center}
+.card3{border:var(--bw) solid var(--ink);border-radius:var(--r);padding:22px;box-shadow:var(--sh);transform:scale(.85);opacity:0;transition:.5s cubic-bezier(.2,1.4,.4,1);display:flex;flex-direction:column;gap:10px}
+.card3.on{transform:none;opacity:1}
+.card3 h3{margin:0;font-size:34px;line-height:1.1}
+.card3 .ico{width:90px;height:90px}
+.card3 p{margin:0;font-size:19px;font-weight:700}
+.card3 .n{font-size:28px;font-weight:900}
+/* ── nav ── */
+.nav{display:flex;gap:14px;justify-content:center;align-items:center;margin:18px 0 6px;flex-wrap:wrap}
+.dots{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.dots button{width:48px;height:48px;border-radius:50%;border:var(--bw) solid var(--ink);background:var(--card);font-weight:900;font-size:18px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.dots button[aria-current="true"]{background:var(--ink);color:var(--yellow);transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.hint{text-align:center;color:var(--body);font-size:17px;font-weight:700;margin:0}
+/* ── intro dialog ── */
+dialog{border:var(--bw) solid var(--ink);border-radius:var(--r);box-shadow:10px 10px 0 var(--ink);padding:0;width:min(960px,94vw);max-height:92vh;background:var(--bg);color:var(--ink)}
+dialog::backdrop{background:rgba(26,26,26,.55)}
+.dhead{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--lav);border-bottom:var(--bw) solid var(--ink)}
+.dhead h2{margin:0;font-size:28px;flex:1}
+.tabs{display:flex;gap:8px;padding:14px 20px 0;flex-wrap:wrap}
+.tabs button{min-height:48px;border:var(--bw) solid var(--ink);border-radius:14px;background:var(--card);font-weight:900;font-size:17px;padding:6px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--yellow);transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.dbody{padding:16px 20px 22px;overflow:auto;max-height:calc(92vh - 150px)}
+.ibox{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start}
+.ibox .ch{width:220px;margin:20px auto 0}
+.itext h3{margin:0;font-size:32px}
+.itext .role{margin:4px 0 10px;font-size:17px;color:var(--body);font-weight:700}
+.quote{background:var(--card);border:var(--bw) solid var(--ink);border-radius:14px;padding:10px 16px;font-size:21px;font-weight:800;box-shadow:var(--sh-sm);margin:0 0 14px}
+.itext h4{margin:8px 0 4px;font-size:20px}
+.rules{margin:0;padding-left:26px;font-size:19px;font-weight:700;display:flex;flex-direction:column;gap:8px}
+.rules small{display:block;font-size:13px;color:var(--body);font-weight:500;font-family:ui-monospace,Menlo,monospace;line-height:1.3}
+.shared{margin-top:18px;background:var(--mint);border:var(--bw) solid var(--ink);border-radius:14px;padding:12px 16px}
+.shared h4{margin:0 0 6px;font-size:20px}
+@media(max-width:900px){.row{grid-template-columns:1fr}.three{grid-template-columns:1fr}.scene{padding:16px;min-height:0}.scene h2{font-size:28px}.ibox{grid-template-columns:1fr}.ibox .ch{margin:0 auto}}
+@media(max-width:640px){body{font-size:18px}h1{font-size:26px}header{padding:12px 14px}main{padding:12px 12px 30px}.ch{width:96px}.ch .nm{font-size:13px;padding:1px 6px}.ch:not(.big) .nm .full{display:none}.ch:not(.big) .nm .short{display:inline}.ch.big{width:170px}.ch.big .nm{font-size:16px}.ch.small{width:70px}.ch.small .nm{font-size:11px}.ch .say{font-size:13px;top:-30px}.stage{padding:36px 6px 8px;gap:6px;min-height:240px}.cap{font-size:18px;padding:8px 12px}.btn{font-size:19px;padding:8px 14px}.btn.big{min-width:0;flex:1}.cmprow{grid-template-columns:96px 1fr}.stats li b{font-size:22px}.card3 h3{font-size:28px}}
+html.fast *,html.fast *::before,html.fast *::after{transition:none!important;animation:none!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.15s!important}}
+</style>
+</head>
+<body>
+<header>
+ <div class="logo">BIBIMBAP</div>
+ <h1>BIBIMBAP 친구들</h1>
+ <p class="sub">다섯 친구가 시험 문제 한 개를 푸는 이야기</p>
+ <div class="hdr-r"><button id="auto" class="btn" aria-pressed="false">자동 재생: 꺼짐</button><button id="introBtn" class="btn">친구들 소개</button></div>
+</header>
+<main>
+ <section id="scene" class="scene" aria-live="polite"></section>
+ <nav class="nav" aria-label="장면 이동">
+  <button id="prev" class="btn big">◀ 이전</button>
+  <div class="dots" id="dots"></div>
+  <button id="play" class="btn play">▶ 다시 보기</button>
+  <button id="next" class="btn big">다음 ▶</button>
+ </nav>
+ <p class="hint">키보드: ← → 장면 넘기기 · 스페이스 = 다시 보기</p>
+</main>
+<dialog id="intro">
+ <div class="dhead"><h2>친구들 소개 — 각자 지키는 규칙</h2><button class="btn" id="closeIntro">닫기 ✕</button></div>
+ <div class="tabs" id="tabs" role="tablist"></div>
+ <div class="dbody" id="dbody"></div>
+</dialog>
+<script type="application/json" id="run004">{"meta":{"squad":"BIBIMBAP","request":"[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. The plan must contain EXACTLY ONE task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Do not create extraction, parsing, analysis, review, or duplicate tasks. Exactly one agent may work on this request — no reviewer, verifier, formatter, or helper agent. A plan with more than one task is invalid.\n\n[FINAL RESPONSE RULE] The squad's final response must be exactly the specialist's answer in the REQUIRED OUTPUT format — never a status summ","startedAt":"2026-08-22T10:42:55.829838Z","completedAt":"2026-08-22T10:43:13.177898Z","durationSec":17.3,"rejectedPlansBefore":23,"version":"v3.7b (5 agents · Qwen3 /no_think planner · 답만 출력)"},"agents":[{"id":"agent-1787368242465-fezk8r8","name":"Conductor","role":"planner","model":"Qwen3-32B-FP8","planner":true},{"id":"agent-1787371848955-vy48dd2","name":"Generic-Solver","role":"Generic-Solver","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371889852-bjmjlyo","name":"Math-Solver","role":"Math-Solver","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371952162-avfl1wb","name":"LCB-Coder","role":"LCB-Coder","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371974406-lotikpk","name":"SWE-Patcher","role":"SWE-Patcher","model":"gpt-oss-120b","planner":false}],"tasks":[{"id":"19391f46-4592-41d2-a4b8-ff02c786dea3","title":"SOLVE","agentId":"agent-1787371889852-bjmjlyo","agentName":"Math-Solver","status":"done","createdAt":"2026-08-22T10:43:10.279415Z","completedAt":"2026-08-22T10:43:12.363289Z","durationSec":2.1}],"events":[{"t":0,"ts":"2026-08-22T10:42:55.829838Z","type":"planning-started","phase":"planning","summary":"플래너가 요청을 분석해 계획을 수립합니다","agentId":"agent-1787368242465-fezk8r8","detail":{"request":"[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. The plan must contain EXACTLY ONE task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Do not create extraction, parsing, analysis, review, or duplicate tasks. Exactly one agent may work on this request — no reviewer, verifier, formatter, or helper agent. A plan with more than one task is invalid.\n\n[FINAL RESPONSE RULE] The squad's final response must be exactly the specialist's answer in the REQUIRED OUTPUT format — never a status summ"},"agentName":"Conductor"},{"t":14.44,"ts":"2026-08-22T10:43:10.272667Z","type":"plan-ready","phase":"planning","summary":"계획 완성 — 태스크 1개, 웨이브 1개","agentId":"agent-1787368242465-fezk8r8","detail":{"taskCount":1,"waves":[["19391f46-4592-41d2-a4b8-ff02c786dea3"]],"autoApprove":true},"agentName":"Conductor"},{"t":14.44,"ts":"2026-08-22T10:43:10.273073Z","type":"execution-started","phase":"execution","summary":"실행 시작 — 태스크 1개 / 웨이브 1개"},{"t":14.45,"ts":"2026-08-22T10:43:10.280964Z","type":"task-wave-started","phase":"execution","summary":"웨이브 1 시작 (태스크 1개 병렬)","detail":{"taskIds":["19391f46-4592-41d2-a4b8-ff02c786dea3"]}},{"t":14.45,"ts":"2026-08-22T10:43:10.283515Z","type":"task-status-changed","phase":"execution","taskId":"19391f46-4592-41d2-a4b8-ff02c786dea3","agentId":"agent-1787371889852-bjmjlyo","summary":"태스크 'SOLVE' pending → in_progress","agentName":"Math-Solver"},{"t":14.76,"ts":"2026-08-22T10:43:10.585524Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","summary":"Math-Solver 상태 → running","detail":{"state":"running"},"agentName":"Math-Solver"},{"t":15.89,"ts":"2026-08-22T10:43:11.722795Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","tokens":{"prompt":809,"completion":62,"cumPrompt":809,"cumCompletion":62},"summary":"모델 호출 — 입력 809 / 출력 62 토큰 (누적 871)","agentName":"Math-Solver"},{"t":16.53,"ts":"2026-08-22T10:43:12.362334Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","tokens":{"prompt":692,"completion":48,"cumPrompt":1501,"cumCompletion":110},"summary":"모델 호출 — 입력 692 / 출력 48 토큰 (누적 1,611)","agentName":"Math-Solver"},{"t":16.53,"ts":"2026-08-22T10:43:12.362798Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","summary":"Math-Solver 상태 → idle","detail":{"state":"idle"},"agentName":"Math-Solver"},{"t":16.53,"ts":"2026-08-22T10:43:12.363064Z","type":"token-usage-update","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","summary":"Math-Solver 누적 토큰 5,819","detail":{"cumPrompt":5328,"cumCompletion":491},"agentName":"Math-Solver"},{"t":16.54,"ts":"2026-08-22T10:43:12.366315Z","type":"task-completed","phase":"execution","taskId":"19391f46-4592-41d2-a4b8-ff02c786dea3","agentId":"agent-1787371889852-bjmjlyo","summary":"태스크 'SOLVE' 완료 (성공)","detail":{"success":true,"error":null,"taskCounts":{"cancelled":0,"completed":1,"failed":0,"pending":0,"running":0,"skipped":0,"total":1}},"agentName":"Math-Solver"},{"t":16.84,"ts":"2026-08-22T10:43:12.671207Z","type":"aggregation-started","phase":"aggregation","agentId":"agent-1787368242465-fezk8r8","summary":"취합 시작 — 태스크 1개 결과 합성","agentName":"Conductor"},{"t":17.35,"ts":"2026-08-22T10:43:13.177898Z","type":"execution-completed","phase":"aggregation","summary":"실행 완료","detail":{"result":"**Execution complete** — 1 task(s) processed in 1 wave(s).\n\n1. ✅ **SOLVE**  \n   Agent: `Math-Solver`","tokenUsage":{"completionTokens":110,"promptTokens":1501}}}],"tokens":{"prompt":1501,"completion":110,"total":1611,"calls":2,"byAgent":{"agent-1787371889852-bjmjlyo":{"name":"Math-Solver","prompt":1501,"completion":110,"calls":2}},"byPhase":{"execution":{"prompt":1501,"completion":110,"calls":2}}},"insights":{"taskCount":1,"duplicateTasks":0,"plannerShare":0,"callsPerTask":2},"baseline":{"item":"math-visible-0001","model":"furiosa-ai/gpt-oss-120b","correct":true,"prompt":131,"completion":486,"seconds":5.09},"calibration":[{"conf":0,"correct":0,"n":2},{"conf":3,"correct":1,"n":2},{"conf":5,"correct":0,"n":3},{"conf":7,"correct":7,"n":11},{"conf":8,"correct":20,"n":29},{"conf":9,"correct":46,"n":57},{"conf":10,"correct":36,"n":36}]}</script>
+<script type="application/json" id="run001">{"meta":{"squad":"BIBIMBAP","request":"[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. Produce the minimal plan: ONE wave containing a SINGLE task — the task count must be exactly 1. Outputting 2 or more tasks is invalid. Two tasks with the same or similar description are duplicates and strictly forbidden. The single task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Nothing else belongs in the plan.\n\nYou are an elite competition-math squad. Solve the problem below with compact, reliable reasoning. The final answer must","startedAt":"2026-08-22T04:52:54.665414Z","completedAt":"2026-08-22T04:53:54.892647Z","durationSec":60.2,"rejectedPlansBefore":6,"version":"v1 (8 agents · 프롬프트 v2)"},"agents":[{"id":"agent-1787368242465-fezk8r8","name":"Conductor","role":"planner","model":"gpt-oss-120b","planner":true},{"id":"agent-1787371848955-vy48dd2","name":"Context-Handler","role":"Context-Handler","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371889852-bjmjlyo","name":"Generic-Solver","role":"Generic-Solver","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371952162-avfl1wb","name":"Math-Solver","role":"Math-Solver","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371974406-lotikpk","name":"Math-Verifier","role":"reviewer","model":"gpt-oss-120b","planner":false},{"id":"agent-1787372031428-i9gs9g2","name":"LCB-Coder","role":"LCB-Coder","model":"gpt-oss-120b","planner":false},{"id":"agent-1787372065165-rdukj0a","name":"SWE-Patcher","role":"SWE-Patcher","model":"gpt-oss-120b","planner":false},{"id":"agent-1787372136283-ms9m8b5","name":"Format-Warden","role":"Format-Warden","model":"gpt-oss-120b","planner":false}],"tasks":[{"id":"b1cf52a5-f321-43c5-b8ec-4f91a9f46288","title":"SOLVE","agentId":"agent-1787371952162-avfl1wb","agentName":"Math-Solver","status":"done","createdAt":"2026-08-22T04:53:14.871178Z","completedAt":"2026-08-22T04:53:54.080046Z","durationSec":39.2},{"id":"3c9a7996-0463-4143-954f-e5b5fcf7c3ab","title":"SOLVE","agentId":"agent-1787371952162-avfl1wb","agentName":"Math-Solver","status":"done","createdAt":"2026-08-22T04:53:14.873909Z","completedAt":"2026-08-22T04:53:28.515344Z","durationSec":13.6},{"id":"6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","title":"SOLVE","agentId":"agent-1787371952162-avfl1wb","agentName":"Math-Solver","status":"done","createdAt":"2026-08-22T04:53:14.874739Z","completedAt":"2026-08-22T04:53:35.676806Z","durationSec":20.8}],"events":[{"t":0,"ts":"2026-08-22T04:52:54.665414Z","type":"planning-started","phase":"planning","summary":"플래너가 요청을 분석해 계획을 수립합니다","agentId":"agent-1787368242465-fezk8r8","detail":{"request":"[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. Produce the minimal plan: ONE wave containing a SINGLE task — the task count must be exactly 1. Outputting 2 or more tasks is invalid. Two tasks with the same or similar description are duplicates and strictly forbidden. The single task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Nothing else belongs in the plan.\n\nYou are an elite competition-math squad. Solve the problem below with compact, reliable reasoning. The final answer must"},"agentName":"Conductor"},{"t":20.2,"ts":"2026-08-22T04:53:14.867771Z","type":"plan-ready","phase":"planning","summary":"계획 완성 — 태스크 3개, 웨이브 1개","agentId":"agent-1787368242465-fezk8r8","detail":{"taskCount":3,"waves":[["3c9a7996-0463-4143-954f-e5b5fcf7c3ab","6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","b1cf52a5-f321-43c5-b8ec-4f91a9f46288"]],"autoApprove":true},"agentName":"Conductor"},{"t":20.2,"ts":"2026-08-22T04:53:14.867928Z","type":"execution-started","phase":"execution","summary":"실행 시작 — 태스크 3개 / 웨이브 1개"},{"t":20.21,"ts":"2026-08-22T04:53:14.875785Z","type":"task-wave-started","phase":"execution","summary":"웨이브 1 시작 (태스크 3개 병렬)","detail":{"taskIds":["3c9a7996-0463-4143-954f-e5b5fcf7c3ab","6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","b1cf52a5-f321-43c5-b8ec-4f91a9f46288"]}},{"t":20.21,"ts":"2026-08-22T04:53:14.877826Z","type":"task-status-changed","phase":"execution","taskId":"3c9a7996-0463-4143-954f-e5b5fcf7c3ab","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' pending → in_progress","agentName":"Math-Solver"},{"t":20.51,"ts":"2026-08-22T04:53:15.180381Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → running","detail":{"state":"running"},"agentName":"Math-Solver"},{"t":21.47,"ts":"2026-08-22T04:53:16.138233Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":487,"completion":56,"cumPrompt":487,"cumCompletion":56},"summary":"모델 호출 — 입력 487 / 출력 56 토큰 (누적 543)","agentName":"Math-Solver"},{"t":22.35,"ts":"2026-08-22T04:53:17.014480Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":503,"completion":46,"cumPrompt":990,"cumCompletion":102},"summary":"모델 호출 — 입력 503 / 출력 46 토큰 (누적 1,092)","agentName":"Math-Solver"},{"t":23.11,"ts":"2026-08-22T04:53:17.778539Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":686,"completion":44,"cumPrompt":1676,"cumCompletion":146},"summary":"모델 호출 — 입력 686 / 출력 44 토큰 (누적 1,822)","agentName":"Math-Solver"},{"t":24.33,"ts":"2026-08-22T04:53:18.998835Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":869,"completion":65,"cumPrompt":2545,"cumCompletion":211},"summary":"모델 호출 — 입력 869 / 출력 65 토큰 (누적 2,756)","agentName":"Math-Solver"},{"t":25.7,"ts":"2026-08-22T04:53:20.364981Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":893,"completion":77,"cumPrompt":3438,"cumCompletion":288},"summary":"모델 호출 — 입력 893 / 출력 77 토큰 (누적 3,726)","agentName":"Math-Solver"},{"t":26.75,"ts":"2026-08-22T04:53:21.418342Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":917,"completion":69,"cumPrompt":4355,"cumCompletion":357},"summary":"모델 호출 — 입력 917 / 출력 69 토큰 (누적 4,712)","agentName":"Math-Solver"},{"t":28.15,"ts":"2026-08-22T04:53:22.813478Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":941,"completion":78,"cumPrompt":5296,"cumCompletion":435},"summary":"모델 호출 — 입력 941 / 출력 78 토큰 (누적 5,731)","agentName":"Math-Solver"},{"t":30.17,"ts":"2026-08-22T04:53:24.832806Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":965,"completion":152,"cumPrompt":6261,"cumCompletion":587},"summary":"모델 호출 — 입력 965 / 출력 152 토큰 (누적 6,848)","agentName":"Math-Solver"},{"t":31.34,"ts":"2026-08-22T04:53:26.002473Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1088,"completion":64,"cumPrompt":7349,"cumCompletion":651},"summary":"모델 호출 — 입력 1,088 / 출력 64 토큰 (누적 8,000)","agentName":"Math-Solver"},{"t":32.42,"ts":"2026-08-22T04:53:27.088967Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1211,"completion":74,"cumPrompt":8560,"cumCompletion":725},"summary":"모델 호출 — 입력 1,211 / 출력 74 토큰 (누적 9,285)","agentName":"Math-Solver"},{"t":33.85,"ts":"2026-08-22T04:53:28.514988Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1277,"completion":67,"cumPrompt":9837,"cumCompletion":792},"summary":"모델 호출 — 입력 1,277 / 출력 67 토큰 (누적 10,629)","agentName":"Math-Solver"},{"t":33.85,"ts":"2026-08-22T04:53:28.515200Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → idle","detail":{"state":"idle"},"agentName":"Math-Solver"},{"t":33.85,"ts":"2026-08-22T04:53:28.515286Z","type":"token-usage-update","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 누적 토큰 10,629","detail":{"cumPrompt":9837,"cumCompletion":792},"agentName":"Math-Solver"},{"t":33.85,"ts":"2026-08-22T04:53:28.516816Z","type":"task-completed","phase":"execution","taskId":"3c9a7996-0463-4143-954f-e5b5fcf7c3ab","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' 완료 (성공)","detail":{"success":true,"error":null,"taskCounts":{"cancelled":0,"completed":1,"failed":0,"pending":2,"running":0,"skipped":0,"total":3}},"agentName":"Math-Solver"},{"t":34.16,"ts":"2026-08-22T04:53:28.823005Z","type":"task-status-changed","phase":"execution","taskId":"6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' pending → in_progress","agentName":"Math-Solver"},{"t":34.46,"ts":"2026-08-22T04:53:29.124157Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → running","detail":{"state":"running"},"agentName":"Math-Solver"},{"t":35.14,"ts":"2026-08-22T04:53:29.804674Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":487,"completion":48,"cumPrompt":10324,"cumCompletion":840},"summary":"모델 호출 — 입력 487 / 출력 48 토큰 (누적 11,164)","agentName":"Math-Solver"},{"t":35.83,"ts":"2026-08-22T04:53:30.497704Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":503,"completion":36,"cumPrompt":10827,"cumCompletion":876},"summary":"모델 호출 — 입력 503 / 출력 36 토큰 (누적 11,703)","agentName":"Math-Solver"},{"t":36.74,"ts":"2026-08-22T04:53:31.400992Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":686,"completion":64,"cumPrompt":11513,"cumCompletion":940},"summary":"모델 호출 — 입력 686 / 출력 64 토큰 (누적 12,453)","agentName":"Math-Solver"},{"t":37.67,"ts":"2026-08-22T04:53:32.334302Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":710,"completion":67,"cumPrompt":12223,"cumCompletion":1007},"summary":"모델 호출 — 입력 710 / 출력 67 토큰 (누적 13,230)","agentName":"Math-Solver"},{"t":38.93,"ts":"2026-08-22T04:53:33.594758Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":734,"completion":72,"cumPrompt":12957,"cumCompletion":1079},"summary":"모델 호출 — 입력 734 / 출력 72 토큰 (누적 14,036)","agentName":"Math-Solver"},{"t":41.01,"ts":"2026-08-22T04:53:35.675880Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":758,"completion":165,"cumPrompt":13715,"cumCompletion":1244},"summary":"모델 호출 — 입력 758 / 출력 165 토큰 (누적 14,959)","agentName":"Math-Solver"},{"t":41.01,"ts":"2026-08-22T04:53:35.676375Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → idle","detail":{"state":"idle"},"agentName":"Math-Solver"},{"t":41.01,"ts":"2026-08-22T04:53:35.676541Z","type":"token-usage-update","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 누적 토큰 14,959","detail":{"cumPrompt":13715,"cumCompletion":1244},"agentName":"Math-Solver"},{"t":41.01,"ts":"2026-08-22T04:53:35.678692Z","type":"task-completed","phase":"execution","taskId":"6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' 완료 (성공)","detail":{"success":true,"error":null,"taskCounts":{"cancelled":0,"completed":2,"failed":0,"pending":1,"running":0,"skipped":0,"total":3}},"agentName":"Math-Solver"},{"t":41.32,"ts":"2026-08-22T04:53:35.983998Z","type":"task-status-changed","phase":"execution","taskId":"b1cf52a5-f321-43c5-b8ec-4f91a9f46288","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' pending → in_progress","agentName":"Math-Solver"},{"t":41.62,"ts":"2026-08-22T04:53:36.286119Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → running","detail":{"state":"running"},"agentName":"Math-Solver"},{"t":42.37,"ts":"2026-08-22T04:53:37.039429Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":522,"completion":39,"cumPrompt":14237,"cumCompletion":1283},"summary":"모델 호출 — 입력 522 / 출력 39 토큰 (누적 15,520)","agentName":"Math-Solver"},{"t":42.9,"ts":"2026-08-22T04:53:37.563534Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":538,"completion":35,"cumPrompt":14775,"cumCompletion":1318},"summary":"모델 호출 — 입력 538 / 출력 35 토큰 (누적 16,093)","agentName":"Math-Solver"},{"t":43.6,"ts":"2026-08-22T04:53:38.262506Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":721,"completion":36,"cumPrompt":15496,"cumCompletion":1354},"summary":"모델 호출 — 입력 721 / 출력 36 토큰 (누적 16,850)","agentName":"Math-Solver"},{"t":44.29,"ts":"2026-08-22T04:53:38.955521Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":904,"completion":36,"cumPrompt":16400,"cumCompletion":1390},"summary":"모델 호출 — 입력 904 / 출력 36 토큰 (누적 17,790)","agentName":"Math-Solver"},{"t":45.44,"ts":"2026-08-22T04:53:40.102911Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1087,"completion":72,"cumPrompt":17487,"cumCompletion":1462},"summary":"모델 호출 — 입력 1,087 / 출력 72 토큰 (누적 18,949)","agentName":"Math-Solver"},{"t":48.29,"ts":"2026-08-22T04:53:42.953269Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1111,"completion":167,"cumPrompt":18598,"cumCompletion":1629},"summary":"모델 호출 — 입력 1,111 / 출력 167 토큰 (누적 20,227)","agentName":"Math-Solver"},{"t":50.23,"ts":"2026-08-22T04:53:44.898637Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1127,"completion":149,"cumPrompt":19725,"cumCompletion":1778},"summary":"모델 호출 — 입력 1,127 / 출력 149 토큰 (누적 21,503)","agentName":"Math-Solver"},{"t":51.43,"ts":"2026-08-22T04:53:46.092069Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1151,"completion":96,"cumPrompt":20876,"cumCompletion":1874},"summary":"모델 호출 — 입력 1,151 / 출력 96 토큰 (누적 22,750)","agentName":"Math-Solver"},{"t":56.5,"ts":"2026-08-22T04:53:51.170404Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1175,"completion":315,"cumPrompt":22051,"cumCompletion":2189},"summary":"모델 호출 — 입력 1,175 / 출력 315 토큰 (누적 24,240)","agentName":"Math-Solver"},{"t":58.02,"ts":"2026-08-22T04:53:52.683161Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1199,"completion":101,"cumPrompt":23250,"cumCompletion":2290},"summary":"모델 호출 — 입력 1,199 / 출력 101 토큰 (누적 25,540)","agentName":"Math-Solver"},{"t":59.41,"ts":"2026-08-22T04:53:54.079521Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1196,"completion":72,"cumPrompt":24446,"cumCompletion":2362},"summary":"모델 호출 — 입력 1,196 / 출력 72 토큰 (누적 26,808)","agentName":"Math-Solver"},{"t":59.41,"ts":"2026-08-22T04:53:54.079805Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → idle","detail":{"state":"idle"},"agentName":"Math-Solver"},{"t":59.41,"ts":"2026-08-22T04:53:54.079937Z","type":"token-usage-update","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 누적 토큰 26,808","detail":{"cumPrompt":24446,"cumCompletion":2362},"agentName":"Math-Solver"},{"t":59.42,"ts":"2026-08-22T04:53:54.081676Z","type":"task-completed","phase":"execution","taskId":"b1cf52a5-f321-43c5-b8ec-4f91a9f46288","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' 완료 (성공)","detail":{"success":true,"error":null,"taskCounts":{"cancelled":0,"completed":3,"failed":0,"pending":0,"running":0,"skipped":0,"total":3}},"agentName":"Math-Solver"},{"t":59.72,"ts":"2026-08-22T04:53:54.386219Z","type":"aggregation-started","phase":"aggregation","agentId":"agent-1787368242465-fezk8r8","summary":"취합 시작 — 태스크 3개 결과 합성","agentName":"Conductor"},{"t":60.23,"ts":"2026-08-22T04:53:54.892647Z","type":"execution-completed","phase":"aggregation","summary":"실행 완료","detail":{"result":"**Execution complete** — 3 task(s) processed in 1 wave(s).\n\n1. ✅ **SOLVE**  \n   Agent: `Math-Solver`\n2. ✅ **SOLVE**  \n   Agent: `Math-Solver`\n3. ✅ **SOLVE**  \n   Agent: `Math-Solver`","tokenUsage":{"completionTokens":2362,"promptTokens":24446}}}],"tokens":{"prompt":24446,"completion":2362,"total":26808,"calls":28,"byAgent":{"agent-1787371952162-avfl1wb":{"name":"Math-Solver","prompt":24446,"completion":2362,"calls":28}},"byPhase":{"execution":{"prompt":24446,"completion":2362,"calls":28}}},"insights":{"taskCount":3,"duplicateTasks":2,"plannerShare":0,"callsPerTask":9.3},"baseline":{"item":"math-visible-0001","model":"furiosa-ai/gpt-oss-120b","correct":true,"prompt":131,"completion":486,"seconds":5.09},"calibration":[{"conf":0,"correct":0,"n":2},{"conf":3,"correct":1,"n":2},{"conf":5,"correct":0,"n":3},{"conf":7,"correct":7,"n":11},{"conf":8,"correct":20,"n":29},{"conf":9,"correct":46,"n":57},{"conf":10,"correct":36,"n":36}]}</script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s),fmt=n=>n.toLocaleString('ko-KR'),r1=n=>Math.round(n*10)/10,f1=n=>r1(n).toFixed(1);
+const R4=JSON.parse($('#run004').textContent),R1=JSON.parse($('#run001').textContent);
+/* Every number on screen is derived from the inlined traces here (nothing hard-coded). */
+function stat(r){
+ const calls=r.events.filter(e=>e.type==='execution-token-usage');
+ const prompt=calls.reduce((a,e)=>a+e.tokens.prompt,0),completion=calls.reduce((a,e)=>a+e.tokens.completion,0);
+ const plan=r.events.find(e=>e.type==='plan-ready'),start=r.events.find(e=>e.type==='planning-started');
+ const keys=r.tasks.map(t=>t.title+'|'+t.agentName),byAgent={};
+ calls.forEach(e=>{byAgent[e.agentName]=(byAgent[e.agentName]||0)+1;});
+ const b=r.baseline||{};
+ return{calls,prompt,completion,total:prompt+completion,end:r1(r.events[r.events.length-1].t),startT:start?r1(start.t):0,planT:plan?r1(plan.t):null,
+  tasks:r.tasks.length,dup:keys.length-new Set(keys).size,byAgent,agents:r.agents,solver:r.tasks[0]?r.tasks[0].agentName:null,
+  base:{tok:(b.prompt||0)+(b.completion||0),sec:b.seconds||0,correct:b.correct},ver:r.meta.version};
+}
+const S4=stat(R4),S1=stat(R1),RATIO=S1.total/S4.total;
+/* ── characters (personalities derived from the five system prompts) ── */
+const CH={
+ conductor:{name:'지휘자 컨덕터',agent:'Conductor',job:'계획 세우는 친구',hi:'누가 풀까?',say:'딱 한 명에게 넘겨요. 내가 풀진 않아요!',rules:[
+  ['문제 1개 = 심부름 쪽지 1장. 딱 한 장만 써요.','Create exactly one task with one create_task call'],
+  ['두 장 만들면 안 돼요. 검토·정리 심부름도 안 돼요.','never more than one (no extraction, analysis, review, or duplicate tasks)'],
+  ['아무도 안 정하면 모두가 뛰어가요(낭비!). 다 되면 "PLAN READY"라고만 말해요.','Never create zero tasks (that broadcasts the request to every agent) … reply with exactly: PLAN READY']]},
+ generic:{name:'퀴즈왕 제너릭',agent:'Generic-Solver',job:'객관식 문제 친구',hi:'객관식이면 나!',say:'틀린 보기는 지우고, 글자 하나로만 답해요!',rules:[
+  ['먼저 "이 문제가 진짜 뭘 묻지?"를 한 줄로 생각해요.','state to yourself, in one clause, what the question is actually testing'],
+  ['틀린 보기부터 지워요. 멋있어 보인다고 고르지 않아요.','eliminate options that contradict established facts … never choose an option because it sounds sophisticated'],
+  ['답은 글자 하나! "Answer: (글자)" 한 줄만 써요.','Output exactly one line and nothing else: Answer: <LETTER>']]},
+ math:{name:'수학 마법사 매스',agent:'Math-Solver',job:'수학 문제 친구',hi:'수학이면 나!',say:'오래 생각하고, 다시 확인하고, 상자에 답을 써요!',rules:[
+  ['튼튼한 기본 방법으로 차근차근 계산해요. 얄팍한 꼼수는 안 써요.','choose the most mechanical standard technique … avoid clever but fragile shortcuts'],
+  ['다 풀면 "말이 되나?" 확인해요. (0~999 사이인지, 특별한 경우도 되는지)','sanity-check the result: AIME-style answers are integers from 0 to 999 … special cases must not break the formula'],
+  ['답은 상자 \\boxed{ } 안에 딱 하나만. 생각은 길게, 말은 짧게!','Reasoning: high · Give the final answer exactly in the REQUIRED OUTPUT form (typically \\boxed{...})']]},
+ coder:{name:'코딩 로봇 코더',agent:'LCB-Coder',job:'코딩 문제 친구',hi:'코딩이면 나!',say:'예제를 전부 돌려 본 다음, 파이썬 코드 한 덩어리만!',rules:[
+  ['문제 크기를 보고 충분히 빠른 방법을 골라요.','read the constraints and derive the required complexity'],
+  ['이상한 경우(빈 입력, n=1, 아주 큰 수)를 먼저 챙기고, 예제를 전부 머릿속으로 돌려 봐요.','cover edge cases before writing … mentally trace every provided example against your code'],
+  ['파이썬 코드 한 덩어리만 내요. 설명도 주석도 없이.','Output ONLY one Python code block … No explanation, no debug prints']]},
+ patcher:{name:'고치기 달인 패처',agent:'SWE-Patcher',job:'버그 고치는 친구',hi:'고장이면 나!',say:'가장 작게 고쳐요. 시험지(테스트)는 절대 안 건드려요!',rules:[
+  ['진짜 원인을 찾아서 거기를 고쳐요. 겉만 고치지 않아요.','locate the root cause … fix the cause, not the symptom'],
+  ['꼭 필요한 줄만 아주 조금 바꿔요.','make the minimal change: touch only the lines required'],
+  ['시험지(테스트)는 절대 고치거나 지우거나 더하지 않아요.','never modify, delete, or add tests']]}};
+const SHARED=[['이 문제는 나 혼자 풀어요. 다른 친구를 부르지 않아요.','You are the only agent on this problem. Never delegate'],['내 대답이 곧 답안지예요. 답 말고는 아무것도 안 써요.','Your reply is the graded output. It must contain nothing except the required answer'],['계산기·검색 같은 도구는 없어요. 바로 답을 써요.','No tools are available to you'],['내 전공이 아닌 문제가 와도 그냥 풀어요.','If this task is outside your specialty … solve it anyway']];
+const KEYS=Object.keys(CH),KIND={generic:'객관식',math:'수학',coder:'코딩',patcher:'버그 고치기'};
+const keyOf=name=>KEYS.find(k=>CH[k].agent===name)||null,SOLVER=keyOf(S4.solver)||'math';
+/* ── hand-made SVG art ── */
+const INK='#1A1A1A',SW='stroke="#1A1A1A" stroke-width="3"';
+const arm=(x1,y1,x2,y2,c)=>`<path d="M${x1} ${y1} L${x2} ${y2}" stroke="${INK}" stroke-width="9" stroke-linecap="round"/><path d="M${x1} ${y1} L${x2} ${y2}" stroke="${c}" stroke-width="4" stroke-linecap="round"/>`;
+const pear=(c,t=48)=>`<path d="M80 ${t} C52 ${t} 36 ${t+26} 36 ${t+54} C36 ${t+78} 52 ${t+92} 80 ${t+92} C108 ${t+92} 124 ${t+78} 124 ${t+54} C124 ${t+26} 108 ${t} 80 ${t}Z" fill="${c}" ${SW}/>`;
+const eyes=(l,r,y)=>`<g class="eyes"><circle cx="${l}" cy="${y}" r="5.5" fill="${INK}"/><circle cx="${r}" cy="${y}" r="5.5" fill="${INK}"/><circle cx="${l+2}" cy="${y-2}" r="1.8" fill="#fff"/><circle cx="${r+2}" cy="${y-2}" r="1.8" fill="#fff"/></g>`;
+const face=y=>eyes(66,94,y)+`<circle cx="55" cy="${y+13}" r="5.5" fill="#FF6B9D" opacity=".5"/><circle cx="105" cy="${y+13}" r="5.5" fill="#FF6B9D" opacity=".5"/><path d="M71 ${y+17} q9 9 18 0" fill="none" ${SW} stroke-linecap="round"/>`;
+const feet=`<ellipse cx="62" cy="139" rx="14" ry="6" fill="${INK}"/><ellipse cx="98" cy="139" rx="14" ry="6" fill="${INK}"/>`;
+const bubble=`<g class="bubble"><circle cx="114" cy="40" r="3.5" fill="#fff" ${SW}/><circle cx="122" cy="28" r="5.5" fill="#fff" ${SW}/><rect x="106" y="-30" width="64" height="40" rx="16" fill="#fff" ${SW}/><g class="dots"><circle cx="124" cy="-10" r="5" fill="${INK}"/><circle cx="138" cy="-10" r="5" fill="${INK}"/><circle cx="152" cy="-10" r="5" fill="${INK}"/></g></g>`;
+const check=`<g class="check"><circle cx="136" cy="-8" r="20" fill="#51CF66" ${SW}/><path d="M125 -8 l8 8 l15 -17" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+const ART={
+ conductor:`${feet}<g class="body">${pear('#B197FC')}${arm(38,108,22,124,'#B197FC')}<rect x="42" y="40" width="76" height="10" rx="5" fill="${INK}"/><rect x="56" y="6" width="48" height="38" rx="6" fill="${INK}"/><rect x="56" y="28" width="48" height="7" fill="#FFD43B"/>${face(82)}<path d="M64 118 l14 6 l-14 6z M96 118 l-14 6 l14 6z" fill="#E03131" ${SW} stroke-width="2.5"/><circle cx="80" cy="124" r="3.5" fill="${INK}"/><g class="baton">${arm(118,104,146,68,'#B197FC')}<path d="M146 68 L162 48" ${SW} stroke-width="4" stroke-linecap="round"/><circle cx="162" cy="48" r="4" fill="#FFD43B" ${SW} stroke-width="2"/></g></g>`,
+ generic:`${feet}<g class="body">${pear('#4DABF7')}${arm(38,108,22,124,'#4DABF7')}<path d="M62 52 l5 -18 l8 14 M79 48 l4 -18 l8 16 M94 50 l9 -13 l3 15" fill="none" ${SW} stroke-linecap="round" stroke-linejoin="round"/>${face(82)}<g fill="#fff" fill-opacity=".35" ${SW}><circle cx="66" cy="82" r="12"/><circle cx="94" cy="82" r="12"/></g><path d="M78 82 h4 M54 80 l-14 -6 M106 80 l14 -6" ${SW} stroke-linecap="round"/><g class="sheet">${arm(118,106,134,120,'#4DABF7')}<g transform="translate(112 96) rotate(10)"><rect width="40" height="50" rx="5" fill="#fff" ${SW}/><g font-size="11" font-weight="900" fill="${INK}"><text x="6" y="14">A</text><text x="6" y="26">B</text><text x="6" y="38">C</text><text x="6" y="49">D</text></g><path d="M4 11 h30 M4 35 h30 M4 46 h30" stroke="#E03131" stroke-width="2.5"/><circle cx="9" cy="22" r="7" fill="none" stroke="#2F9E44" stroke-width="2.5"/></g></g></g>`,
+ math:`${feet}<g class="body">${pear('#FF6B9D')}${arm(38,108,22,124,'#FF6B9D')}<path d="M80 -10 L46 54 L114 54Z" fill="#5F3DC4" ${SW} stroke-linejoin="round"/><ellipse cx="80" cy="54" rx="42" ry="8" fill="#5F3DC4" ${SW}/><polygon points="80,16 84,26 95,27 87,34 89,45 80,39 71,45 73,34 65,27 76,26" fill="#FFD43B" ${SW} stroke-width="2"/>${face(84)}<g class="wand">${arm(118,108,142,80,'#FF6B9D')}<path d="M142 80 L156 62" ${SW} stroke-width="4" stroke-linecap="round"/><polygon points="156,48 159,56 168,57 161,63 163,72 156,67 149,72 151,63 144,57 153,56" fill="#FFD43B" ${SW} stroke-width="2"/></g><g class="abox">${arm(118,108,136,92,'#FF6B9D')}<g transform="translate(112 62) rotate(-8)"><rect width="48" height="40" rx="6" fill="#fff" ${SW}/><rect x="6" y="6" width="36" height="28" rx="3" fill="none" ${SW} stroke-width="2.5" stroke-dasharray="5 3"/><text x="24" y="27" text-anchor="middle" font-size="17" font-weight="900" fill="${INK}">답</text></g></g></g>`,
+ coder:`<rect x="52" y="132" width="20" height="12" rx="3" fill="${INK}"/><rect x="88" y="132" width="20" height="12" rx="3" fill="${INK}"/><g class="body"><rect x="40" y="50" width="80" height="86" rx="16" fill="#63E6BE" ${SW}/>${arm(38,108,22,124,'#63E6BE')}<path d="M80 50 V28" ${SW} stroke-width="4"/><circle class="lamp" cx="80" cy="22" r="7" fill="#FF6B35" ${SW}/><rect x="52" y="64" width="56" height="40" rx="8" fill="${INK}"/><g class="eyes"><rect x="61" y="74" width="11" height="13" rx="3" fill="#63E6BE"/><rect x="88" y="74" width="11" height="13" rx="3" fill="#63E6BE"/></g><path d="M68 96 h6 m4 0 h6 m4 0 h6" stroke="#63E6BE" stroke-width="3" stroke-linecap="round"/><circle cx="50" cy="120" r="4" fill="#868E96" ${SW} stroke-width="2"/><circle cx="110" cy="120" r="4" fill="#868E96" ${SW} stroke-width="2"/><g class="laptop">${arm(118,110,136,120,'#63E6BE')}<rect x="98" y="104" width="52" height="34" rx="5" fill="#495057" ${SW}/><rect x="103" y="109" width="42" height="24" fill="${INK}"/><text x="108" y="126" font-size="13" font-weight="700" fill="#A9E34B" font-family="ui-monospace,Menlo,monospace">&gt;_</text></g></g>`,
+ patcher:`${feet}<g class="body">${pear('#FF922B')}${arm(38,108,22,124,'#FF922B')}<path d="M44 50 C44 22 116 22 116 50Z" fill="#FFD43B" ${SW}/><rect x="34" y="46" width="92" height="10" rx="5" fill="#FFD43B" ${SW}/><rect x="72" y="28" width="16" height="18" rx="3" fill="#FF6B35" ${SW} stroke-width="2"/>${face(82)}<g transform="translate(100 120) rotate(-35)"><rect x="-16" y="-6" width="32" height="12" rx="6" fill="#F8D9B8" ${SW} stroke-width="2.5"/><rect x="-5" y="-4" width="10" height="8" rx="2" fill="#E8A77E"/></g><g class="hammer">${arm(118,106,140,86,'#FF922B')}<g transform="translate(140 86) rotate(20)"><rect x="-5" y="-10" width="10" height="44" rx="3" fill="#C08B5C" ${SW}/><rect x="-17" y="-26" width="34" height="18" rx="4" fill="#868E96" ${SW}/></g></g></g>`,
+ ghost:`<g class="body"><path d="M80 48 C52 48 36 74 36 102 C36 126 52 140 80 140 C108 140 124 126 124 102 C124 74 108 48 80 48Z" fill="#DEE2E6" stroke="#868E96" stroke-width="3" stroke-dasharray="7 5"/><text x="80" y="104" text-anchor="middle" font-size="44" font-weight="900" fill="#868E96">?</text></g>`};
+function charEl(key,o={}){
+ const c=CH[key]||{name:o.name||'?',short:o.short},d=document.createElement('div');
+ d.className='ch idle'+(o.cls?' '+o.cls:'');d.dataset.id=key;
+ d.innerHTML=`<div class="say"></div><svg viewBox="0 -40 160 196" role="img" aria-label="${c.name}">${ART[o.art||key]}${bubble}${check}</svg><div class="nm"><span class="full">${c.name}</span><span class="short">${c.short||c.name.split(' ').pop()}</span></div>${o.sub?`<div class="sub2">${o.sub}</div>`:''}`;
+ return d;}
+const bowlSVG=()=>`<svg class="bowl" viewBox="0 0 260 220" role="img" aria-label="비빔밥 그릇과 문제 카드"><g class="pcard"><rect x="78" y="8" width="104" height="74" rx="9" fill="#fff" ${SW}/><text x="130" y="40" text-anchor="middle" font-size="22" font-weight="900" fill="${INK}">문제</text><path d="M96 56 h68 M96 68 h46" stroke="#ADB5BD" stroke-width="5" stroke-linecap="round"/></g><path d="M28 112 C40 200 220 200 232 112Z" fill="#343A40" ${SW}/><ellipse cx="130" cy="112" rx="102" ry="18" fill="#495057" ${SW}/><ellipse cx="130" cy="112" rx="88" ry="12" fill="#fff"/><ellipse cx="84" cy="112" rx="22" ry="7" fill="#63E6BE"/><ellipse cx="176" cy="112" rx="22" ry="7" fill="#FF922B"/><ellipse cx="108" cy="104" rx="18" ry="5" fill="#A9E34B"/><ellipse cx="152" cy="104" rx="18" ry="5" fill="#B197FC"/><ellipse cx="130" cy="120" rx="24" ry="5" fill="#FF6B9D"/><circle cx="130" cy="110" r="13" fill="#FFD43B" ${SW} stroke-width="2"/><text x="130" y="172" text-anchor="middle" font-size="20" font-weight="900" fill="#FFD43B" letter-spacing="2">BIBIMBAP</text><g class="bowlcheck"><circle cx="214" cy="52" r="28" fill="#51CF66" ${SW}/><path d="M198 52 l11 11 l22 -24" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></g></svg>`;
+const clockSVG=()=>`<svg class="clock" viewBox="0 0 100 100" role="img" aria-label="시계"><circle cx="50" cy="50" r="45" fill="#fff" ${SW}/><path d="M50 10v7M90 50h-7M50 90v-7M10 50h7" ${SW} stroke-linecap="round"/><line id="hand" x1="50" y1="50" x2="50" y2="16" stroke="#E03131" stroke-width="5" stroke-linecap="round"/><circle cx="50" cy="50" r="4.5" fill="${INK}"/></svg>`;
+const icoSVG={
+ target:`<svg class="ico" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#fff" ${SW}/><circle cx="50" cy="50" r="28" fill="#FF6B9D" ${SW}/><circle cx="50" cy="50" r="13" fill="#FFD43B" ${SW}/><path d="M50 50 L88 12" ${SW} stroke-width="5" stroke-linecap="round"/><path d="M72 28 l16 -16 l-2 12 M72 28 l16 -16 l-12 2" fill="none" ${SW} stroke-width="4" stroke-linecap="round"/></svg>`,
+ battery:`<svg class="ico" viewBox="0 0 100 100"><rect x="8" y="28" width="74" height="44" rx="8" fill="#fff" ${SW}/><rect x="84" y="40" width="10" height="20" rx="3" fill="${INK}"/><rect x="15" y="35" width="22" height="30" rx="4" fill="#63E6BE" ${SW} stroke-width="2"/><path d="M56 30 l-12 22 h14 l-8 20 l20 -26 h-14 l8 -16z" fill="#FFD43B" ${SW} stroke-width="2.5" stroke-linejoin="round"/></svg>`,
+ eye:`<svg class="ico" viewBox="0 0 100 100"><path d="M6 50 C30 14 70 14 94 50 C70 86 30 86 6 50Z" fill="#fff" ${SW}/><circle cx="50" cy="50" r="18" fill="#4DABF7" ${SW}/><circle cx="50" cy="50" r="8" fill="${INK}"/><circle cx="56" cy="44" r="3" fill="#fff"/></svg>`};
+/* ── scene engine ── */
+let timers=[],rafs=[],fq=[],cur=0,auto=false;
+const FAST=/fast/.test(location.hash);if(FAST)document.documentElement.classList.add('fast'); /* #s3fast = jump to the scene's end state (screenshots / no-motion) */
+const at=(ms,f)=>{if(FAST)fq.push([ms,f]);else timers.push(setTimeout(f,ms));};
+function flush(){while(fq.length){fq.sort((a,b)=>a[0]-b[0]);fq.shift()[1]();}}
+function clearAll(){timers.forEach(clearTimeout);rafs.forEach(cancelAnimationFrame);timers=[];rafs=[];fq=[];}
+const el=(root,k)=>root.querySelector(`.ch[data-id="${k}"]`);
+function setState(e,s){if(!e)return;e.classList.remove('idle','working','done');e.classList.add(s);}
+function say(e,t){if(!e)return;const s=e.querySelector('.say');s.textContent=t||'';s.classList.toggle('on',!!t);}
+function countTo(node,n,ms,dec){if(!node)return;if(FAST){node.textContent=dec?n.toFixed(dec):fmt(n);return;}const t0=performance.now();const step=now=>{const p=Math.min(1,(now-t0)/ms),v=n*(1-Math.pow(1-p,3));node.textContent=dec?v.toFixed(dec):fmt(Math.round(v));if(p<1)rafs.push(requestAnimationFrame(step));else node.textContent=dec?n.toFixed(dec):fmt(n);};rafs.push(requestAnimationFrame(step));}
+function center(stage,e){const a=stage.getBoundingClientRect(),b=e.getBoundingClientRect();return{x:b.left-a.left+b.width/2,y:b.top-a.top+b.height*.42};}
+function flyNote(stage,from,to,text,delay,hold){const n=document.createElement('div');n.className='note';n.innerHTML=text;const p=center(stage,from),q=center(stage,to);n.style.left=p.x+'px';n.style.top=p.y+'px';stage.appendChild(n);
+ at(delay,()=>{n.classList.add('on');at(60,()=>{n.style.left=q.x+'px';n.style.top=(q.y-30)+'px';});});at(delay+1300+(hold||1200),()=>n.classList.remove('on'));return n;}
+const kv=(t,v)=>`<li><span class="t">${t}</span><span>${v}</span></li>`;
+const SCENES=[
+{title:'문제가 도착했어요',dur:4800,
+ build(root){root.innerHTML=`<div class="row"><div class="stage"></div><div class="panel">${bowlSVG()}<p class="kid"><b>문제</b>는 시험 문제 <b>한 개</b>예요. 이번 문제는 <b>${KIND[SOLVER]}</b> 문제!</p><p class="kid small">이 이야기는 진짜 기록으로 만들었어요: ${S4.ver}</p></div></div><div class="cap">비빔밥 그릇은 우리 팀 이름이에요. 다섯 친구가 한 그릇에 모여 있어요!</div>`;
+  const s=root.querySelector('.stage');KEYS.forEach(k=>s.appendChild(charEl(k)));},
+ play(root){const card=root.querySelector('.pcard');card.classList.remove('in');at(80,()=>card.classList.add('in'));
+  KEYS.forEach((k,i)=>{at(900+i*320,()=>say(el(root,k),CH[k].hi));at(3600+i*150,()=>say(el(root,k),''));});}},
+{title:'컨덕터가 한 명을 고릅니다',dur:6200,
+ build(root){const plan=R4.events.find(e=>e.type==='plan-ready'),n=plan&&plan.detail?plan.detail.taskCount:S4.tasks;
+  root.innerHTML=`<div class="row"><div class="stage"></div><div class="panel"><div class="elbl">컨덕터의 시계 (기록에서)</div><ul class="tl">${kv(f1(S4.startT)+'초','문제 카드를 읽기 시작해요 (planning-started)')}${kv(f1(S4.planT)+'초','심부름 쪽지 '+n+'장 완성! "PLAN READY" (plan-ready)')}${kv('→','심부름 받은 친구: <b>'+CH[SOLVER].name+'</b> 딱 한 명')}</ul><p class="kid small">컨덕터는 문제를 직접 풀지 않아요. 누가 풀지만 정해요.</p></div></div><div class="cap mint">쉬는 친구는 토큰(에너지)을 안 써요 — 기록에도 ${Object.keys(S4.byAgent).map(a=>CH[keyOf(a)]?CH[keyOf(a)].name:a).join(', ')} 말고는 호출이 0번이에요.</div>`;
+  const s=root.querySelector('.stage');KEYS.forEach(k=>s.appendChild(charEl(k)));},
+ play(root){const s=root.querySelector('.stage'),c=el(root,'conductor'),m=el(root,SOLVER),li=root.querySelectorAll('.tl li');
+  setState(c,'working');say(c,'읽는 중…');li[0].classList.add('on');
+  at(1800,()=>{setState(c,'idle');c.classList.add('point');say(c,CH[SOLVER].name.split(' ').pop()+', 네 차례!');li[1].classList.add('on');});
+  flyNote(s,c,m,'심부름 쪽지<br><b>SOLVE</b> → '+CH[SOLVER].agent,2000,1500);
+  at(3300,()=>{say(m,'네!');KEYS.filter(k=>k!==SOLVER&&k!=='conductor').forEach(k=>el(root,k).classList.add('dim'));li[2].classList.add('on');});
+  at(4400,()=>{say(c,'PLAN READY');setState(c,'done');setState(m,'working');});}},
+{title:`${CH[SOLVER].name.split(' ').pop()}가 생각합니다`,dur:7000,
+ build(root){root.innerHTML=`<div class="row"><div class="stage"></div><div class="panel energy"><div class="elbl">에너지(토큰) 막대</div><div class="track"><div class="fill in"></div><div class="fill out"></div></div><div class="legend"><span class="sw in"></span>읽기(입력) <b id="nIn">0</b> <span class="sw out"></span>쓰기(출력) <b id="nOut">0</b> → 합계 <b id="nTot">0</b> 토큰</div><div class="clockrow">${clockSVG()}<div><b id="nSec" style="font-size:30px">0.0</b>초 걸렸어요<br><small>혼자 푼 친구는 ${f1(S4.base.sec)}초</small></div></div><div class="calls" id="calls">${S4.calls.map((e,i)=>`<div>${i+1}번째 호출 — 읽기 ${fmt(e.tokens.prompt)} / 쓰기 ${fmt(e.tokens.completion)}</div>`).join('')}</div></div></div><div class="cap">토큰 = 읽고 쓴 글자 에너지예요. 읽은 글자(입력) + 쓴 글자(출력) = 합계!</div>`;
+  const s=root.querySelector('.stage');KEYS.forEach(k=>s.appendChild(charEl(k,{cls:k===SOLVER?'big':'small dim'})));},
+ play(root){const m=el(root,SOLVER);setState(m,'working');say(m,'음… 차근차근…');
+  const fi=root.querySelector('.fill.in'),fo=root.querySelector('.fill.out');fi.style.width='0';fo.style.width='0';
+  at(300,()=>{fi.style.width=(S4.prompt/S4.total*100)+'%';fo.style.width=(S4.completion/S4.total*100)+'%';countTo(root.querySelector('#nIn'),S4.prompt,1800);countTo(root.querySelector('#nOut'),S4.completion,1800);countTo(root.querySelector('#nTot'),S4.total,1800);
+   root.querySelector('#hand').style.transform=`rotate(${S4.end/60*360}deg)`;countTo(root.querySelector('#nSec'),S4.end,1800,1);});
+  root.querySelectorAll('.calls div').forEach((d,i)=>at(900+i*800,()=>d.classList.add('on')));
+  at(3400,()=>say(m,'말이 되나? 다시 확인!'));at(5200,()=>say(m,''));}},
+{title:'답만 말해요!',dur:5200,
+ build(root){const done=R4.events.find(e=>e.type==='task-completed');
+  root.innerHTML=`<div class="row"><div class="stage"></div><div class="panel">${bowlSVG()}<p class="kid">${f1(done?done.t:S4.end)}초에 심부름 끝! 쓴 글자는 딱 <b>${fmt(S4.completion)} 토큰</b> — 답만 썼거든요.</p><p class="kid small">답은 채점 선생님(컴퓨터)이 확인해요. 이 기록에는 답 글자가 적혀 있지 않아서 우리도 몰라요.</p></div></div><div class="cap lav">답은 채점 선생님(컴퓨터)이 확인해요 — 친구들은 "답"만 상자에 넣어서 내요.</div>`;
+  const s=root.querySelector('.stage');KEYS.forEach(k=>s.appendChild(charEl(k,{cls:k===SOLVER?'big':'small'})));root.querySelector('.pcard').classList.add('in');},
+ play(root){const m=el(root,SOLVER),c=el(root,'conductor'),bc=root.querySelector('.bowlcheck');bc.classList.remove('on');m.classList.remove('answer');
+  setState(m,'working');at(700,()=>{setState(m,'done');m.classList.add('answer');say(m,'답만 말해요!');});
+  at(1900,()=>{say(c,'PLAN READY → 완료!');setState(c,'done');});at(2600,()=>bc.classList.add('on'));
+  at(3400,()=>KEYS.filter(k=>k!==SOLVER&&k!=='conductor').forEach((k,i)=>at(i*200,()=>setState(el(root,k),'done'))));}},
+{title:'옛날 첫 번째 팀은요…',dur:8500,
+ build(root){const extra=S1.agents.filter(a=>!keyOf(a.name)).map(a=>a.name),unit=S4.total,solverCalls=S1.byAgent[S1.solver]||0;
+  root.innerHTML=`<div class="row"><div class="stage"></div><div class="panel"><ul class="stats"><li>친구 수<b>${S1.agents.length}명</b></li><li>같은 심부름<b>${S1.tasks}번 <small>(${S1.dup}번 중복!)</small></b></li><li>${CH[keyOf(S1.solver)||'math'].name.split(' ').pop()}가 뛴 횟수<b id="nCalls">0</b></li><li>걸린 시간<b>${f1(S1.end)}초</b></li></ul><div class="cmp"><div class="elbl">에너지 비교 — 1칸 = 지금 팀이 쓴 ${fmt(unit)} 토큰</div><div class="cmprow"><div class="who">혼자 푼 친구 <small>기준</small><span class="num">${fmt(S1.base.tok)}</span></div><div class="blocks" data-n="${S1.base.tok/unit}" data-c="#A9E34B"></div></div><div class="cmprow"><div class="who">지금 팀 <small>${S4.agents.length}명</small><span class="num">${fmt(S4.total)}</span></div><div class="blocks" data-n="1" data-c="#63E6BE"></div></div><div class="cmprow"><div class="who">옛날 첫 팀 <small>${S1.agents.length}명</small><span class="num">${fmt(S1.total)}</span></div><div class="blocks" data-n="${S1.total/unit}" data-c="#FF6B35" data-spill="1"><span class="burst">넘쳐요!</span></div></div></div></div></div><div class="cap coral">관측할 수 있으면 줄일 수 있어요 — 기록을 보고 고쳤더니 <b>${Math.round(RATIO)}배</b> 줄었어요 (${fmt(S1.total)} → ${fmt(S4.total)} 토큰).</div>`;
+  const s=root.querySelector('.stage');s.classList.add('tight');KEYS.forEach(k=>s.appendChild(charEl(k,{cls:'tiny'})));extra.forEach(n=>s.appendChild(charEl('ghost',{art:'ghost',name:'그림자 친구',short:'그림자 친구',cls:'ghost tiny',sub:n})));
+  s.querySelectorAll('.ch').forEach((e,i)=>{e.style.setProperty('--x',((i%2?-1:1)*(12+i*4))+'px');e.style.setProperty('--d',(.9+(i%4)*.25)+'s');e.style.animationDelay=(i*.17)+'s';});
+  root._solverCalls=solverCalls;},
+ play(root){const s=root.querySelector('.stage'),c=el(root,'conductor'),m=el(root,keyOf(S1.solver)||'math');
+  s.querySelectorAll('.ch').forEach(e=>e.classList.remove('bump'));setState(c,'working');say(c,'어… 누구? 다… 다 가!');
+  for(let i=0;i<S1.tasks;i++)flyNote(s,c,m,'심부름 쪽지 '+(i+1)+'<br><b>SOLVE</b>',900+i*600,2000);
+  at(1800,()=>{setState(m,'working');say(m,'또? 또?');countTo(root.querySelector('#nCalls'),root._solverCalls,4000);s.querySelectorAll('.ch').forEach(e=>e.classList.add('bump'));});
+  root.querySelectorAll('.blocks').forEach((b,row)=>{b.querySelectorAll('.blk').forEach(x=>x.remove());const n=+b.dataset.n,full=Math.floor(n),frac=n-full,tail=b.querySelector('.burst');
+   for(let i=0;i<full+(frac>.02?1:0);i++){const k=document.createElement('span');k.className='blk'+(b.dataset.spill&&i>=5?' spill':'');k.style.background=b.dataset.c;if(i===full)k.style.width=Math.max(5,22*frac)+'px';if(b.dataset.spill&&i>=5){k.style.setProperty('--rot',((i%3)-1)*10+'deg');k.style.setProperty('--dy',((i%2)?-4:4)+'px');}b.insertBefore(k,tail);at(2200+row*500+i*170,()=>k.classList.add('on'));}
+   if(b.dataset.spill)at(2200+row*500+(full+1)*170+200,()=>b.querySelector('.burst').classList.add('on'));});
+  at(6500,()=>{say(c,'기록을 보니… 알겠다!');setState(c,'done');});}},
+{title:'세 가지만 기억해요',dur:5200,
+ build(root){root.innerHTML=`<div class="three"><div class="card3" style="background:var(--pink);color:#fff">${icoSVG.target}<h3>정확하게</h3><p>정답을 맞혀요 (정답률)</p><p class="n">답만 딱!</p><p>답 말고는 아무것도 안 써요</p></div><div class="card3" style="background:var(--mint)">${icoSVG.battery}<h3>아껴서</h3><p>토큰(에너지)을 조금만 써요</p><p class="n">${fmt(S1.total)} → ${fmt(S4.total)}</p><p>${Math.round(RATIO)}배 줄었어요</p></div><div class="card3" style="background:var(--blue);color:#fff">${icoSVG.eye}<h3>잘 보이게</h3><p>기록을 그림으로 보면 고칠 수 있어요</p><p class="n">${R4.events.length}줄의 기록</p><p>이 그림책도 기록으로 만들었어요</p></div></div><div class="cap" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><span style="flex:1">다섯 친구가 각자 어떤 규칙을 지키는지 궁금하면?</span><button class="btn" onclick="openIntro()">친구들 소개 보기</button></div>`;},
+ play(root){root.querySelectorAll('.card3').forEach((c,i)=>{c.classList.remove('on');at(200+i*500,()=>c.classList.add('on'));});}}];
+function go(i,replay){clearAll();cur=(i+SCENES.length)%SCENES.length;const root=$('#scene');const sc=SCENES[cur];
+ root.innerHTML='';root.insertAdjacentHTML('afterbegin',`<h2><span class="tag">장면 ${cur+1}</span>${sc.title}</h2>`);
+ const body=document.createElement('div');body.style.cssText='display:flex;flex-direction:column;gap:16px;flex:1';root.appendChild(body);sc.build(body);root._body=body;
+ document.querySelectorAll('.dots button').forEach((b,j)=>b.setAttribute('aria-current',j===cur?'true':'false'));
+ if(!replay)history.replaceState(null,'','#s'+(cur+1)+(FAST?'fast':''));
+ if(FAST)play();else at(250,()=>play());}
+function play(){clearAll();const sc=SCENES[cur];sc.play($('#scene')._body);if(FAST)flush();else if(auto)at(sc.dur+1200,()=>go(cur+1));}
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);$('#play').onclick=()=>play();
+$('#auto').onclick=e=>{auto=!auto;e.currentTarget.setAttribute('aria-pressed',auto);e.currentTarget.textContent='자동 재생: '+(auto?'켜짐':'꺼짐');if(auto)play();};
+SCENES.forEach((s,i)=>{const b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label','장면 '+(i+1)+' '+s.title);b.onclick=()=>go(i);$('#dots').appendChild(b);});
+document.addEventListener('keydown',e=>{if($('#intro').open)return;if(e.key==='ArrowRight')go(cur+1);else if(e.key==='ArrowLeft')go(cur-1);else if(e.key===' '){e.preventDefault();play();}});
+/* ── intro dialog ── */
+function introTab(key){const c=CH[key],ag=R4.agents.find(a=>a.name===c.agent)||{};
+ return`<div class="ibox">${charEl(key).outerHTML}<div class="itext"><h3>${c.name}</h3><p class="role">${c.agent} · ${c.job}${ag.planner?' · 계획 담당':''}<br>모델: ${ag.model||'?'}</p><p class="quote">“${c.say}”</p><h4>내 규칙 3가지</h4><ol class="rules">${c.rules.map(r=>`<li>${r[0]}<small>원문: ${r[1]}</small></li>`).join('')}</ol></div></div>${key==='conductor'?'':`<div class="shared"><h4>푸는 친구들 모두의 약속</h4><ol class="rules">${SHARED.map(r=>`<li>${r[0]}<small>원문: ${r[1]}</small></li>`).join('')}</ol></div>`}`;}
+function showTab(key){$('#dbody').innerHTML=introTab(key);document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.k===key?'true':'false'));}
+KEYS.forEach(k=>{const b=document.createElement('button');b.textContent=CH[k].name;b.dataset.k=k;b.setAttribute('role','tab');b.onclick=()=>showTab(k);$('#tabs').appendChild(b);});
+function openIntro(){showTab(SOLVER);$('#intro').showModal();}
+$('#introBtn').onclick=openIntro;$('#closeIntro').onclick=()=>$('#intro').close();
+$('#intro').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
+/* ── start: read #s1..#s6 from the URL ── */
+const hashScene=()=>{const m=location.hash.match(/s([1-9])/);return m?Math.min(SCENES.length,+m[1])-1:0;};
+window.addEventListener('hashchange',()=>{if(hashScene()!==cur)go(hashScene(),true);});
+go(hashScene(),true);if(/intro/.test(location.hash))openIntro();
+</script>
+</body>
+</html>
