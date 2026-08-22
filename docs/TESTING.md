@@ -52,3 +52,9 @@ T1~T4 전 항목 통과 + T5 첫 항목(오프라인) 통과. 데모 엑스포�
 - 키: Space 재생 · ←/→ 이벤트 · N 다음 표시 지점 · C 비교/단일 전환 · H 첫 스쿼드(v1) 보기 · F 확대 · ? 키 도움말 · 드롭: events.jsonl + .squad.json / trace.json
 - 검증: `cd viewer && node test.js` → ALL ASSERTS PASSED (run-001 26,808/43.4×/28/3(2), run-004 1,611/2.6×/2/1(0), normalizeRaw 왕복 26,808/28, BENCH 값). 헤드리스 크롬 1280×4900 캡처로 6개 섹션 레이아웃 확인, 콘솔 오류 0.
 - 스펙: `docs/viewer-v3-spec.md`
+
+## T8. 간단 모드 + 안내 투어 (8/22 20:45)
+
+- 기본 진입 = **간단 모드(스코어보드)**: 헤드라인 + 카드 3장(정확도 60%→81% · 토큰 617→1,611 · 과정 = Mermaid풍 6노드 플로우 + 펄스) + "관측할 수 있으면 줄일 수 있다" + CTA. `E` 또는 「간단 | 원장」 토글로 원장 모드(6축 전체).
+- 투어: 첫 로드 1초 후 자동 5단계(localStorage `bbtour=done`이면 생략), `T`/투어 버튼 재시작, ←/→/Enter/Esc. `D` = 엑스포 자동 데모 루프(클릭하면 정지).
+- 확인: 헤드리스 크롬 file:// 1280×800 캡처(간단 모드·투어 1단계), 실브라우저 mode=simple · 콘솔 오류 0 (window.top 충돌 버그 수정 후). `node test.js` ALL ASSERTS PASSED.
