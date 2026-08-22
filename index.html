@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BIBIMBAP — Squad Trace Viewer</title>
+<style>
+  body{margin:0;background:#0f0d1a;color:#ece8ff;font:18px/1.6 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;display:grid;place-items:center;min-height:100vh}
+  main{max-width:760px;padding:2rem}
+  h1{font-size:2.2rem;margin:0 0 .3rem} .sub{color:#a39bd4;margin-bottom:1.6rem}
+  a.card{display:block;border:1px solid #332c5c;border-radius:14px;padding:1rem 1.2rem;margin:.8rem 0;color:inherit;text-decoration:none;background:#1f1b38}
+  a.card:hover{border-color:#b794f6} a.card b{font-size:1.15rem} a.card span{display:block;color:#a39bd4;font-size:.95rem}
+  .foot{color:#6b6690;font-size:.85rem;margin-top:1.6rem}
+</style></head><body><main>
+<h1>🥣 BIBIMBAP</h1>
+<div class="sub">JunctionX Korea 2026 · Lablup × FuriosaAI — 에이전트 스쿼드 실행 Trace 시각화 · <b>"관측할 수 있으면 줄일 수 있다"</b></div>
+<a class="card" href="viewer/viewer.html"><b>① Trace Viewer</b><span>간단 모드(스코어보드 · 투어) ↔ 원장 모드(6축 루브릭: 타임라인 · 에이전트 레인 · 원장 · 판단 · 각주). 단독 베이스라인 vs 스쿼드, 실제 로그(events.jsonl + .squad.json) 드롭 적재</span></a>
+<a class="card" href="viewer/kids.html"><b>② BIBIMBAP 친구들</b><span>초등학생도 이해하는 의인화 그림책 — 다섯 에이전트가 진짜 기록으로 문제 한 개를 푸는 이야기 · 실전 재생</span></a>
+<div class="foot">단일 HTML · 외부 의존성 없음 · 오프라인 동작. 소스: <a href="https://github.com/jsonpassion/bibimbap" style="color:#b794f6">github.com/jsonpassion/bibimbap</a> · 데이터: 공개 연습 세트 로컬 완주 로그만 사용(히든 문항 없음)</div>
+</main></body></html>

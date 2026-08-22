@@ -1,44 +1,30 @@
-# BIBIMBAP — Squad Trace Viewer
+# 🥣 BIBIMBAP — Squad Trace Viewer
 
-JunctionX Korea 2026 · Lablup × FuriosaAI 트랙 · 팀 541
+JunctionX Korea 2026 · Lablup × FuriosaAI "Build the Ultimate Agent Squad" — 팀 CouchPotato(541).
 
-AI:GO Squad의 실행 로그(`logs/events.jsonl`)를 읽어 문제 해결 과정을 인터랙티브하게 리플레이하는 정적 뷰어입니다. 빌드 없음, 의존성 없음 — `viewer/viewer.html` 하나.
+**"관측할 수 있으면 줄일 수 있다."** 첫 스쿼드는 단독 모델보다 43배의 토큰을 썼다(26,808 vs 617). 그 과정을 로그로 해부해 17배를 걷어냈고, 플래너 모델·프롬프트·출력 규칙을 측정으로 바꿨다. 이 저장소는 그 Trace를 보는 도구다.
 
-## 입력 (채점 기준: "로그(텍스트) 데이터로 표현된 Trace")
+## 데모 (GitHub Pages)
+- `viewer/viewer.html` — **Trace Viewer**: 간단 모드(스코어보드 · 5단계 투어 · 자동 데모) ↔ 원장 모드(6축 루브릭: observability · interpretability · traceability · explainability · clarity · insightfulness). 단독 베이스라인 vs 스쿼드(같은 문항), 트랙별 정확도·토큰(전수 측정), 원장(← 로그 줄 링크), 판단 카드, 정직 각주.
+- `viewer/kids.html` — **BIBIMBAP 친구들**: 실제 에이전트 스크립트에서 뽑은 다섯 캐릭터가 진짜 기록으로 문제를 푸는 그림책 + 실전 재생.
 
-| 파일 | 역할 |
-| --- | --- |
-| `logs/events.jsonl` | **원본 Trace (source of truth)** — AI:GO가 기록한 이벤트 로그. 뷰어가 직접 읽음 |
-| `.squad.json` | 에이전트 이름·역할·플래너 식별 (선택, 함께 드롭) |
-| `traces/*.json` | `normalize.py`가 만든 정규화 캐시 — 베이스라인·캘리브레이션 등 부가 데이터 동봉용 |
+둘 다 단일 HTML, 외부 의존성 0, 파일 더블클릭으로 열림(trace 내장). 원본 AI:GO 로그(`logs/events.jsonl` + `.squad.json`)를 드래그앤드롭하면 브라우저 안에서 정규화해 재생한다.
 
-뷰어의 모든 픽셀은 events.jsonl의 한 줄로 거슬러 올라갑니다(Traceability). 브라우저 안에서 정규화하므로 숨은 전처리가 없습니다.
-
-## 실행
-
-```bash
-cd viewer && python3 -m http.server 8642
+## 구성
 ```
-→ http://localhost:8642/viewer.html (기본으로 `traces/run-001.json` 로드)
+viewer/viewer.html      Trace Viewer v3 (간단/원장)
+viewer/kids.html        의인화 그림책
+viewer/traces/*.json    공개 연습 세트 문항의 로컬 완주 로그(정규화) — 히든 문항 없음
+viewer/normalize.py     AI:GO 워크스페이스 → trace.json (누적 토큰 → 호출별 Δ, 실행 구간 선택 --execution)
+viewer/analyze_run.py   마지막 실행 요약(태스크·호출·토큰·시간)
+viewer/test.js          derive()/normalizeRaw() 수용값 테스트 (node test.js)
+docs/viewer-v3-spec.md  설계 스펙 · docs/TESTING.md 테스트 절차
+```
 
-## 새 실행 로그 보기
+## 데이터 출처와 정직성
+- 정확도·토큰 수치는 jxc-selfeval(공식 채점 방식 재현: math-verify · letter_match · LiveCodeBench 실행)로 **공개 연습 세트 전수**를 측정한 값.
+- 솔버의 답 텍스트는 AI:GO 로그에 기록되지 않는다(형식 고정) — 뷰어는 이를 숨기지 않고 "로그에 없는 것"으로 표시한다.
+- 모델: furiosa-ai/gpt-oss-120b(솔버), Qwen3-32B-FP8(플래너, /no_think). EXAONE은 측정 후 제외.
 
-1. AI:GO에서 스쿼드 실행 완주
-2. 워크스페이스의 `.squad.json`과 `logs/events.jsonl`을 뷰어 창에 **드래그 앤 드롭** (둘 다, 순서 무관)
-3. 또는 CLI: `python3 viewer/normalize.py <workspace> -o viewer/traces/run-002.json [--baseline results.jsonl --item <id>] [--calibration confgate.jsonl]`
-
-## 화면 = 루브릭 6축
-
-| 화면 | 내용 | 축 |
-| --- | --- | --- |
-| ① The Bowl | 방사형 에이전트 그릇 + 상태·토큰 실시간 갱신 + 타임라인 스크러버·재생 | Observability · Clarity · Traceability |
-| ② Decision Lens | 스텝 상세(원본 이벤트 JSON) + 이 실행의 결정 요약(계획·반려·호출 패턴·비용 판단) | Interpretability · Explainability |
-| ③ The Receipt | 총 토큰·호출·시간·중복, 단독 모델 vs 스쿼드 비교, 에이전트별 토큰, 확신도 캘리브레이션 곡선 | Insightfulness |
-
-## 테스트 절차
-
-`docs/TESTING.md` 참조.
-
-## v2 (8/22 저녁)
-- 기본 런 = run-002(최신 5-agent 스쿼드), 헤더에서 run-001(v1)로 전환 가능 — Before/After.
-- Decision Lens에 라우팅 근거·원칙 0(불필요한 에이전트 사용 금지) 행, Receipt에 3단 Before/After 막대.
+## 라이선스·출처
+연습 세트: SWE-bench, LiveCodeBench, MATH-500, AIME 2024, MMLU-Pro(각 출처의 고지 유지). 코드: MIT.
