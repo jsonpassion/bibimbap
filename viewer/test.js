@@ -1,6 +1,6 @@
-// node test.js — extracts the DOM-free core <script> from viewer-v3.html, runs derive()/normalizeRaw()/splitsOf() and prints the acceptance table.
+// node test.js — extracts the DOM-free core <script> from viewer.html, runs derive()/normalizeRaw()/splitsOf() and prints the acceptance table.
 const fs=require('fs'),path=require('path'),dir=__dirname;
-const html=fs.readFileSync(path.join(dir,'viewer-v3.html'),'utf8');
+const html=fs.readFileSync(path.join(dir,'viewer.html'),'utf8');
 const blocks=html.split('<script>').slice(1).map(s=>s.split('</script>')[0]);
 new Function(blocks.join('\n'));                                   // 1. syntax of all JS blocks (concatenated in order)
 const C=new Function(blocks[0]+';return {derive,normalizeRaw,splitsOf,capOf,baseOf,baseLane,BENCH,benchVerdicts,LATEST,RUN_IDS};')();   // 2. core block alone, no DOM
