@@ -1,0 +1,880 @@
+{
+ "meta": {
+  "squad": "BIBIMBAP",
+  "request": "[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. Produce the minimal plan: ONE wave containing a SINGLE task — the task count must be exactly 1. Outputting 2 or more tasks is invalid. Two tasks with the same or similar description are duplicates and strictly forbidden. The single task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Nothing else belongs in the plan.\n\nYou are an elite competition-math squad. Solve the problem below with compact, reliable reasoning. The final answer must",
+  "startedAt": "2026-08-22T04:52:54.665414Z",
+  "completedAt": "2026-08-22T04:53:54.892647Z",
+  "durationSec": 60.2,
+  "rejectedPlansBefore": 6
+ },
+ "agents": [
+  {
+   "id": "agent-1787368242465-fezk8r8",
+   "name": "Conductor",
+   "role": "planner",
+   "model": "gpt-oss-120b",
+   "planner": true
+  },
+  {
+   "id": "agent-1787371848955-vy48dd2",
+   "name": "Context-Handler",
+   "role": "Context-Handler",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371889852-bjmjlyo",
+   "name": "Generic-Solver",
+   "role": "Generic-Solver",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371952162-avfl1wb",
+   "name": "Math-Solver",
+   "role": "Math-Solver",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371974406-lotikpk",
+   "name": "Math-Verifier",
+   "role": "reviewer",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787372031428-i9gs9g2",
+   "name": "LCB-Coder",
+   "role": "LCB-Coder",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787372065165-rdukj0a",
+   "name": "SWE-Patcher",
+   "role": "SWE-Patcher",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787372136283-ms9m8b5",
+   "name": "Format-Warden",
+   "role": "Format-Warden",
+   "model": "gpt-oss-120b",
+   "planner": false
+  }
+ ],
+ "tasks": [
+  {
+   "id": "b1cf52a5-f321-43c5-b8ec-4f91a9f46288",
+   "title": "SOLVE",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "agentName": "Math-Solver",
+   "status": "done",
+   "createdAt": "2026-08-22T04:53:14.871178Z",
+   "completedAt": "2026-08-22T04:53:54.080046Z",
+   "durationSec": 39.2
+  },
+  {
+   "id": "3c9a7996-0463-4143-954f-e5b5fcf7c3ab",
+   "title": "SOLVE",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "agentName": "Math-Solver",
+   "status": "done",
+   "createdAt": "2026-08-22T04:53:14.873909Z",
+   "completedAt": "2026-08-22T04:53:28.515344Z",
+   "durationSec": 13.6
+  },
+  {
+   "id": "6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7",
+   "title": "SOLVE",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "agentName": "Math-Solver",
+   "status": "done",
+   "createdAt": "2026-08-22T04:53:14.874739Z",
+   "completedAt": "2026-08-22T04:53:35.676806Z",
+   "durationSec": 20.8
+  }
+ ],
+ "events": [
+  {
+   "t": 0.0,
+   "ts": "2026-08-22T04:52:54.665414Z",
+   "type": "planning-started",
+   "phase": "planning",
+   "summary": "플래너가 요청을 분석해 계획을 수립합니다",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "request": "[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. Produce the minimal plan: ONE wave containing a SINGLE task — the task count must be exactly 1. Outputting 2 or more tasks is invalid. Two tasks with the same or similar description are duplicates and strictly forbidden. The single task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Nothing else belongs in the plan.\n\nYou are an elite competition-math squad. Solve the problem below with compact, reliable reasoning. The final answer must"
+   },
+   "agentName": "Conductor"
+  },
+  {
+   "t": 20.2,
+   "ts": "2026-08-22T04:53:14.867771Z",
+   "type": "plan-ready",
+   "phase": "planning",
+   "summary": "계획 완성 — 태스크 3개, 웨이브 1개",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "taskCount": 3,
+    "waves": [
+     [
+      "3c9a7996-0463-4143-954f-e5b5fcf7c3ab",
+      "6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7",
+      "b1cf52a5-f321-43c5-b8ec-4f91a9f46288"
+     ]
+    ],
+    "autoApprove": true
+   },
+   "agentName": "Conductor"
+  },
+  {
+   "t": 20.2,
+   "ts": "2026-08-22T04:53:14.867928Z",
+   "type": "execution-started",
+   "phase": "execution",
+   "summary": "실행 시작 — 태스크 3개 / 웨이브 1개"
+  },
+  {
+   "t": 20.21,
+   "ts": "2026-08-22T04:53:14.875785Z",
+   "type": "task-wave-started",
+   "phase": "execution",
+   "summary": "웨이브 1 시작 (태스크 3개 병렬)",
+   "detail": {
+    "taskIds": [
+     "3c9a7996-0463-4143-954f-e5b5fcf7c3ab",
+     "6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7",
+     "b1cf52a5-f321-43c5-b8ec-4f91a9f46288"
+    ]
+   }
+  },
+  {
+   "t": 20.21,
+   "ts": "2026-08-22T04:53:14.877826Z",
+   "type": "task-status-changed",
+   "phase": "execution",
+   "taskId": "3c9a7996-0463-4143-954f-e5b5fcf7c3ab",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "태스크 'SOLVE' pending → in_progress",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 20.51,
+   "ts": "2026-08-22T04:53:15.180381Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "Math-Solver 상태 → running",
+   "detail": {
+    "state": "running"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 21.47,
+   "ts": "2026-08-22T04:53:16.138233Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 487,
+    "completion": 56,
+    "cumPrompt": 487,
+    "cumCompletion": 56
+   },
+   "summary": "모델 호출 — 입력 487 / 출력 56 토큰 (누적 543)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 22.35,
+   "ts": "2026-08-22T04:53:17.014480Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 503,
+    "completion": 46,
+    "cumPrompt": 990,
+    "cumCompletion": 102
+   },
+   "summary": "모델 호출 — 입력 503 / 출력 46 토큰 (누적 1,092)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 23.11,
+   "ts": "2026-08-22T04:53:17.778539Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 686,
+    "completion": 44,
+    "cumPrompt": 1676,
+    "cumCompletion": 146
+   },
+   "summary": "모델 호출 — 입력 686 / 출력 44 토큰 (누적 1,822)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 24.33,
+   "ts": "2026-08-22T04:53:18.998835Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 869,
+    "completion": 65,
+    "cumPrompt": 2545,
+    "cumCompletion": 211
+   },
+   "summary": "모델 호출 — 입력 869 / 출력 65 토큰 (누적 2,756)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 25.7,
+   "ts": "2026-08-22T04:53:20.364981Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 893,
+    "completion": 77,
+    "cumPrompt": 3438,
+    "cumCompletion": 288
+   },
+   "summary": "모델 호출 — 입력 893 / 출력 77 토큰 (누적 3,726)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 26.75,
+   "ts": "2026-08-22T04:53:21.418342Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 917,
+    "completion": 69,
+    "cumPrompt": 4355,
+    "cumCompletion": 357
+   },
+   "summary": "모델 호출 — 입력 917 / 출력 69 토큰 (누적 4,712)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 28.15,
+   "ts": "2026-08-22T04:53:22.813478Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 941,
+    "completion": 78,
+    "cumPrompt": 5296,
+    "cumCompletion": 435
+   },
+   "summary": "모델 호출 — 입력 941 / 출력 78 토큰 (누적 5,731)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 30.17,
+   "ts": "2026-08-22T04:53:24.832806Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 965,
+    "completion": 152,
+    "cumPrompt": 6261,
+    "cumCompletion": 587
+   },
+   "summary": "모델 호출 — 입력 965 / 출력 152 토큰 (누적 6,848)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 31.34,
+   "ts": "2026-08-22T04:53:26.002473Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1088,
+    "completion": 64,
+    "cumPrompt": 7349,
+    "cumCompletion": 651
+   },
+   "summary": "모델 호출 — 입력 1,088 / 출력 64 토큰 (누적 8,000)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 32.42,
+   "ts": "2026-08-22T04:53:27.088967Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1211,
+    "completion": 74,
+    "cumPrompt": 8560,
+    "cumCompletion": 725
+   },
+   "summary": "모델 호출 — 입력 1,211 / 출력 74 토큰 (누적 9,285)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 33.85,
+   "ts": "2026-08-22T04:53:28.514988Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1277,
+    "completion": 67,
+    "cumPrompt": 9837,
+    "cumCompletion": 792
+   },
+   "summary": "모델 호출 — 입력 1,277 / 출력 67 토큰 (누적 10,629)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 33.85,
+   "ts": "2026-08-22T04:53:28.515200Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "Math-Solver 상태 → idle",
+   "detail": {
+    "state": "idle"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 33.85,
+   "ts": "2026-08-22T04:53:28.515286Z",
+   "type": "token-usage-update",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "Math-Solver 누적 토큰 10,629",
+   "detail": {
+    "cumPrompt": 9837,
+    "cumCompletion": 792
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 33.85,
+   "ts": "2026-08-22T04:53:28.516816Z",
+   "type": "task-completed",
+   "phase": "execution",
+   "taskId": "3c9a7996-0463-4143-954f-e5b5fcf7c3ab",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "태스크 'SOLVE' 완료 (성공)",
+   "detail": {
+    "success": true,
+    "error": null,
+    "taskCounts": {
+     "cancelled": 0,
+     "completed": 1,
+     "failed": 0,
+     "pending": 2,
+     "running": 0,
+     "skipped": 0,
+     "total": 3
+    }
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 34.16,
+   "ts": "2026-08-22T04:53:28.823005Z",
+   "type": "task-status-changed",
+   "phase": "execution",
+   "taskId": "6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "태스크 'SOLVE' pending → in_progress",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 34.46,
+   "ts": "2026-08-22T04:53:29.124157Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "Math-Solver 상태 → running",
+   "detail": {
+    "state": "running"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 35.14,
+   "ts": "2026-08-22T04:53:29.804674Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 487,
+    "completion": 48,
+    "cumPrompt": 10324,
+    "cumCompletion": 840
+   },
+   "summary": "모델 호출 — 입력 487 / 출력 48 토큰 (누적 11,164)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 35.83,
+   "ts": "2026-08-22T04:53:30.497704Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 503,
+    "completion": 36,
+    "cumPrompt": 10827,
+    "cumCompletion": 876
+   },
+   "summary": "모델 호출 — 입력 503 / 출력 36 토큰 (누적 11,703)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 36.74,
+   "ts": "2026-08-22T04:53:31.400992Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 686,
+    "completion": 64,
+    "cumPrompt": 11513,
+    "cumCompletion": 940
+   },
+   "summary": "모델 호출 — 입력 686 / 출력 64 토큰 (누적 12,453)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 37.67,
+   "ts": "2026-08-22T04:53:32.334302Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 710,
+    "completion": 67,
+    "cumPrompt": 12223,
+    "cumCompletion": 1007
+   },
+   "summary": "모델 호출 — 입력 710 / 출력 67 토큰 (누적 13,230)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 38.93,
+   "ts": "2026-08-22T04:53:33.594758Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 734,
+    "completion": 72,
+    "cumPrompt": 12957,
+    "cumCompletion": 1079
+   },
+   "summary": "모델 호출 — 입력 734 / 출력 72 토큰 (누적 14,036)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 41.01,
+   "ts": "2026-08-22T04:53:35.675880Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 758,
+    "completion": 165,
+    "cumPrompt": 13715,
+    "cumCompletion": 1244
+   },
+   "summary": "모델 호출 — 입력 758 / 출력 165 토큰 (누적 14,959)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 41.01,
+   "ts": "2026-08-22T04:53:35.676375Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "Math-Solver 상태 → idle",
+   "detail": {
+    "state": "idle"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 41.01,
+   "ts": "2026-08-22T04:53:35.676541Z",
+   "type": "token-usage-update",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "Math-Solver 누적 토큰 14,959",
+   "detail": {
+    "cumPrompt": 13715,
+    "cumCompletion": 1244
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 41.01,
+   "ts": "2026-08-22T04:53:35.678692Z",
+   "type": "task-completed",
+   "phase": "execution",
+   "taskId": "6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "태스크 'SOLVE' 완료 (성공)",
+   "detail": {
+    "success": true,
+    "error": null,
+    "taskCounts": {
+     "cancelled": 0,
+     "completed": 2,
+     "failed": 0,
+     "pending": 1,
+     "running": 0,
+     "skipped": 0,
+     "total": 3
+    }
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 41.32,
+   "ts": "2026-08-22T04:53:35.983998Z",
+   "type": "task-status-changed",
+   "phase": "execution",
+   "taskId": "b1cf52a5-f321-43c5-b8ec-4f91a9f46288",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "태스크 'SOLVE' pending → in_progress",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 41.62,
+   "ts": "2026-08-22T04:53:36.286119Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "Math-Solver 상태 → running",
+   "detail": {
+    "state": "running"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 42.37,
+   "ts": "2026-08-22T04:53:37.039429Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 522,
+    "completion": 39,
+    "cumPrompt": 14237,
+    "cumCompletion": 1283
+   },
+   "summary": "모델 호출 — 입력 522 / 출력 39 토큰 (누적 15,520)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 42.9,
+   "ts": "2026-08-22T04:53:37.563534Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 538,
+    "completion": 35,
+    "cumPrompt": 14775,
+    "cumCompletion": 1318
+   },
+   "summary": "모델 호출 — 입력 538 / 출력 35 토큰 (누적 16,093)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 43.6,
+   "ts": "2026-08-22T04:53:38.262506Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 721,
+    "completion": 36,
+    "cumPrompt": 15496,
+    "cumCompletion": 1354
+   },
+   "summary": "모델 호출 — 입력 721 / 출력 36 토큰 (누적 16,850)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 44.29,
+   "ts": "2026-08-22T04:53:38.955521Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 904,
+    "completion": 36,
+    "cumPrompt": 16400,
+    "cumCompletion": 1390
+   },
+   "summary": "모델 호출 — 입력 904 / 출력 36 토큰 (누적 17,790)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 45.44,
+   "ts": "2026-08-22T04:53:40.102911Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1087,
+    "completion": 72,
+    "cumPrompt": 17487,
+    "cumCompletion": 1462
+   },
+   "summary": "모델 호출 — 입력 1,087 / 출력 72 토큰 (누적 18,949)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 48.29,
+   "ts": "2026-08-22T04:53:42.953269Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1111,
+    "completion": 167,
+    "cumPrompt": 18598,
+    "cumCompletion": 1629
+   },
+   "summary": "모델 호출 — 입력 1,111 / 출력 167 토큰 (누적 20,227)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 50.23,
+   "ts": "2026-08-22T04:53:44.898637Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1127,
+    "completion": 149,
+    "cumPrompt": 19725,
+    "cumCompletion": 1778
+   },
+   "summary": "모델 호출 — 입력 1,127 / 출력 149 토큰 (누적 21,503)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 51.43,
+   "ts": "2026-08-22T04:53:46.092069Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1151,
+    "completion": 96,
+    "cumPrompt": 20876,
+    "cumCompletion": 1874
+   },
+   "summary": "모델 호출 — 입력 1,151 / 출력 96 토큰 (누적 22,750)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 56.5,
+   "ts": "2026-08-22T04:53:51.170404Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1175,
+    "completion": 315,
+    "cumPrompt": 22051,
+    "cumCompletion": 2189
+   },
+   "summary": "모델 호출 — 입력 1,175 / 출력 315 토큰 (누적 24,240)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 58.02,
+   "ts": "2026-08-22T04:53:52.683161Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1199,
+    "completion": 101,
+    "cumPrompt": 23250,
+    "cumCompletion": 2290
+   },
+   "summary": "모델 호출 — 입력 1,199 / 출력 101 토큰 (누적 25,540)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 59.41,
+   "ts": "2026-08-22T04:53:54.079521Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "tokens": {
+    "prompt": 1196,
+    "completion": 72,
+    "cumPrompt": 24446,
+    "cumCompletion": 2362
+   },
+   "summary": "모델 호출 — 입력 1,196 / 출력 72 토큰 (누적 26,808)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 59.41,
+   "ts": "2026-08-22T04:53:54.079805Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "Math-Solver 상태 → idle",
+   "detail": {
+    "state": "idle"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 59.41,
+   "ts": "2026-08-22T04:53:54.079937Z",
+   "type": "token-usage-update",
+   "phase": "execution",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "Math-Solver 누적 토큰 26,808",
+   "detail": {
+    "cumPrompt": 24446,
+    "cumCompletion": 2362
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 59.42,
+   "ts": "2026-08-22T04:53:54.081676Z",
+   "type": "task-completed",
+   "phase": "execution",
+   "taskId": "b1cf52a5-f321-43c5-b8ec-4f91a9f46288",
+   "agentId": "agent-1787371952162-avfl1wb",
+   "summary": "태스크 'SOLVE' 완료 (성공)",
+   "detail": {
+    "success": true,
+    "error": null,
+    "taskCounts": {
+     "cancelled": 0,
+     "completed": 3,
+     "failed": 0,
+     "pending": 0,
+     "running": 0,
+     "skipped": 0,
+     "total": 3
+    }
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 59.72,
+   "ts": "2026-08-22T04:53:54.386219Z",
+   "type": "aggregation-started",
+   "phase": "aggregation",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "summary": "취합 시작 — 태스크 3개 결과 합성",
+   "agentName": "Conductor"
+  },
+  {
+   "t": 60.23,
+   "ts": "2026-08-22T04:53:54.892647Z",
+   "type": "execution-completed",
+   "phase": "aggregation",
+   "summary": "실행 완료",
+   "detail": {
+    "result": "**Execution complete** — 3 task(s) processed in 1 wave(s).\n\n1. ✅ **SOLVE**  \n   Agent: `Math-Solver`\n2. ✅ **SOLVE**  \n   Agent: `Math-Solver`\n3. ✅ **SOLVE**  \n   Agent: `Math-Solver`",
+    "tokenUsage": {
+     "completionTokens": 2362,
+     "promptTokens": 24446
+    }
+   }
+  }
+ ],
+ "tokens": {
+  "prompt": 24446,
+  "completion": 2362,
+  "total": 26808,
+  "calls": 28,
+  "byAgent": {
+   "agent-1787371952162-avfl1wb": {
+    "name": "Math-Solver",
+    "prompt": 24446,
+    "completion": 2362,
+    "calls": 28
+   }
+  },
+  "byPhase": {
+   "execution": {
+    "prompt": 24446,
+    "completion": 2362,
+    "calls": 28
+   }
+  }
+ },
+ "insights": {
+  "taskCount": 3,
+  "duplicateTasks": 2,
+  "plannerShare": 0.0,
+  "callsPerTask": 9.3
+ },
+ "baseline": {
+  "item": "math-visible-0001",
+  "model": "furiosa-ai/gpt-oss-120b",
+  "correct": true,
+  "prompt": 131,
+  "completion": 486,
+  "seconds": 5.09
+ },
+ "calibration": [
+  {
+   "conf": 0,
+   "correct": 0,
+   "n": 2
+  },
+  {
+   "conf": 3,
+   "correct": 1,
+   "n": 2
+  },
+  {
+   "conf": 5,
+   "correct": 0,
+   "n": 3
+  },
+  {
+   "conf": 7,
+   "correct": 7,
+   "n": 11
+  },
+  {
+   "conf": 8,
+   "correct": 20,
+   "n": 29
+  },
+  {
+   "conf": 9,
+   "correct": 46,
+   "n": 57
+  },
+  {
+   "conf": 10,
+   "correct": 36,
+   "n": 36
+  }
+ ]
+}

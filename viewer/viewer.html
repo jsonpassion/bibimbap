@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BIBIMBAP — Squad Trace Viewer</title>
+<style>
+  :root { --bg:#0f0d1a; --panel:#17142a; --card:#1f1b38; --line:#332c5c; --ink:#ece8ff; --dim:#a39bd4;
+          --idle:#6b6690; --think:#f5c542; --run:#5aa8ff; --done:#3ddc97; --fail:#ff6b6b; --accent:#b794f6; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+  header{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--line);background:var(--panel)}
+  header h1{font-size:1.05rem;margin:0;letter-spacing:.04em} header .sub{color:var(--dim);font-size:.8rem}
+  header .sp{flex:1} header label{font-size:.78rem;color:var(--dim);cursor:pointer;border:1px dashed var(--line);padding:.3rem .7rem;border-radius:8px}
+  nav{display:flex;gap:.3rem;padding:.6rem 1.2rem 0;background:var(--panel)}
+  nav button{background:none;border:none;color:var(--dim);font:inherit;font-size:.9rem;padding:.5rem .9rem;border-radius:9px 9px 0 0;cursor:pointer}
+  nav button.on{background:var(--bg);color:var(--ink);font-weight:700;box-shadow:inset 0 2px 0 var(--accent)}
+  main{padding:1rem 1.2rem 2rem;max-width:1180px;margin:0 auto}
+  .view{display:none}.view.on{display:block}
+  .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:1rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.9rem 1rem}
+  .card h3{margin:0 0 .5rem;font-size:.82rem;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
+  svg text{font-family:inherit}
+  .controls{display:flex;align-items:center;gap:.7rem;margin-top:.6rem;font-size:.85rem}
+  .controls button{background:var(--accent);color:#1a1430;border:none;border-radius:8px;padding:.35rem .9rem;font:inherit;font-weight:700;cursor:pointer}
+  .controls input[type=range]{flex:1;accent-color:var(--accent)}
+  .controls select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:.2rem .4rem}
+  .now{font-variant-numeric:tabular-nums;color:var(--dim);min-width:8.5rem}
+  .feed{max-height:420px;overflow:auto;font-size:.84rem}
+  .feed .ev{padding:.38rem .5rem;border-left:3px solid var(--line);margin:.25rem 0;cursor:pointer;border-radius:0 6px 6px 0}
+  .feed .ev:hover,.feed .ev.sel{background:var(--panel)} .feed .ev .t{color:var(--dim);font-variant-numeric:tabular-nums;margin-right:.5rem}
+  .feed .ev.cur{border-left-color:var(--accent)}
+  .badge{display:inline-block;padding:.05rem .45rem;border-radius:999px;font-size:.7rem;font-weight:700;margin-left:.3rem}
+  .b-planning{background:#4a3d8a}.b-execution{background:#1e4f8a}.b-aggregation{background:#2d6b4f}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-bottom:1rem}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.7rem .9rem}
+  .kpi .v{font-size:1.5rem;font-weight:800;line-height:1.15} .kpi .l{font-size:.74rem;color:var(--dim)}
+  .kpi.hero{grid-column:span 2;border-color:var(--accent)} .kpi.hero .v{font-size:2rem;color:var(--accent)}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.7rem;font-size:.76rem;overflow:auto;max-height:260px;white-space:pre-wrap}
+  .legend{display:flex;gap:.9rem;font-size:.74rem;color:var(--dim);margin-top:.4rem;flex-wrap:wrap}
+  .legend i{display:inline-block;width:.7rem;height:.7rem;border-radius:50%;margin-right:.3rem;vertical-align:middle}
+  table{border-collapse:collapse;width:100%;font-size:.83rem} th,td{border-bottom:1px solid var(--line);padding:.35rem .5rem;text-align:left} th{color:var(--dim);font-weight:600}
+  .muted{color:var(--dim);font-size:.8rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>🥣 BIBIMBAP <span class="sub">Squad Trace Viewer</span></h1>
+  <span class="sub" id="meta"></span>
+  <span class="sp"></span>
+  <label>열기: events.jsonl / .squad.json / trace.json <input id="file" type="file" accept=".json,.jsonl" multiple hidden></label>
+</header>
+<nav>
+  <button class="on" data-v="bowl">① The Bowl</button>
+  <button data-v="lens">② Decision Lens</button>
+  <button data-v="receipt">③ The Receipt</button>
+</nav>
+<main>
+  <section class="view on" id="v-bowl">
+    <div class="grid">
+      <div class="card">
+        <h3>Observability · Clarity — 에이전트 그릇</h3>
+        <svg id="bowl" viewBox="0 0 640 520" width="100%"></svg>
+        <div class="legend"><span><i style="background:var(--idle)"></i>대기</span><span><i style="background:var(--think)"></i>계획/취합</span><span><i style="background:var(--run)"></i>실행 중</span><span><i style="background:var(--done)"></i>완료</span><span><i style="background:var(--fail)"></i>실패</span></div>
+        <div class="controls">
+          <button id="play">▶ 재생</button>
+          <input id="scrub" type="range" min="0" max="0" step="1" value="0">
+          <span class="now" id="now">0.0s · 0/0</span>
+          <select id="speed"><option value="1">1×</option><option value="4" selected>4×</option><option value="10">10×</option><option value="30">30×</option></select>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Traceability — 타임라인 (클릭 = 그 시점으로)</h3>
+        <div class="feed" id="feed"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-lens">
+    <div class="grid">
+      <div class="card">
+        <h3>Interpretability — 스텝 상세</h3>
+        <div id="lens-summary" class="muted">① The Bowl의 타임라인에서 스텝을 클릭하면 여기에 해석이 표시됩니다.</div>
+        <pre id="lens-json"></pre>
+      </div>
+      <div class="card">
+        <h3>Explainability — 이 실행의 결정들</h3>
+        <div id="decisions"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-receipt">
+    <div class="kpis" id="kpis"></div>
+    <div class="grid">
+      <div class="card"><h3>Insightfulness — 단독 모델 vs 스쿼드 (같은 문항)</h3><svg id="race" viewBox="0 0 520 170" width="100%"></svg><div class="muted" id="race-note"></div></div>
+      <div class="card"><h3>에이전트별 토큰 · 호출</h3><svg id="agents" viewBox="0 0 520 200" width="100%"></svg></div>
+      <div class="card"><h3>확신도 캘리브레이션 (self-reported confidence → 정답률)</h3><svg id="calib" viewBox="0 0 520 220" width="100%"></svg><div class="muted">Generic-Solver가 보고한 확신도별 실제 정답률(연습 세트 140문항). 단조 증가 = 확신도가 정직하다는 증거.</div></div>
+      <div class="card"><h3>태스크</h3><table id="tasks"></table></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const C = {idle:"#6b6690", think:"#f5c542", run:"#5aa8ff", done:"#3ddc97", fail:"#ff6b6b", accent:"#b794f6", dim:"#a39bd4", line:"#332c5c"};
+let T = null, idx = 0, playing = false, timer = null;
+
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-" + b.dataset.v));
+});
+
+// ---------- 원본 로그(events.jsonl) 직접 수용 — 채점 대상인 "로그(텍스트) Trace"를 그대로 읽는다 ----------
+let SQUAD = null; // .squad.json을 함께 드롭하면 에이전트 이름·플래너 식별에 사용
+function normalizeRaw(text, squad) {
+  const raw = text.split("\n").filter(l => l.trim()).map(l => JSON.parse(l));
+  const cfg = squad ? (squad.config || squad) : null;
+  const agents = {};
+  (cfg?.agents || []).forEach(a => agents[a.id] = {id: a.id, name: a.name, role: a.role?.value || a.role?.type, model: ((a.modelPreferences || {}).preferredModelId || "").split("/").pop(), planner: a.id === cfg.plannerAgentId});
+  const plannerId = cfg?.plannerAgentId || null;
+  const ts = s => new Date(s).getTime() / 1000;
+  const execIdx = Math.max(...raw.map((e, i) => e.eventType === "squad:execution-started" ? i : -1));
+  if (execIdx < 0) throw new Error("execution-started 이벤트가 없습니다 (완주된 실행 로그가 필요)");
+  const planIdx = Math.max(...raw.slice(0, execIdx).map((e, i) => e.eventType === "squad:planning-started" ? i : -1));
+  const evs = raw.slice(Math.max(planIdx, 0)); const t0 = ts(evs[0].timestamp);
+  const rejected = raw.slice(0, Math.max(planIdx, 0)).filter(e => e.eventType === "squad:plan-ready").length;
+  const tasks = {}; // 로그만으로 복원: wave의 taskIds + task-completed title
+  let phase = "planning", cur = null, prev = [0, 0]; const events = [], calls = [];
+  const name = id => agents[id]?.name || (id ? "agent-" + String(id).slice(-6) : "?");
+  const ensureAgent = id => { if (id && !agents[id]) agents[id] = {id, name: name(id), role: "?", model: "?", planner: id === plannerId}; };
+  for (const e of evs) {
+    const p = e.payload || {}, et = e.eventType.split(":")[1], t = +(ts(e.timestamp) - t0).toFixed(2);
+    const ev = {t, ts: e.timestamp, type: et, phase};
+    if (et === "planning-started") { ev.agentId = plannerId; ev.summary = "플래너가 요청을 분석해 계획을 수립합니다"; ev.detail = {request: (p.request || "").slice(0, 600)}; }
+    else if (et === "plan-ready") { ev.agentId = plannerId; ev.summary = `계획 완성 — 태스크 ${p.taskCount}개, 웨이브 ${(p.waves || []).length}개`; ev.detail = {taskCount: p.taskCount, waves: p.waves, autoApprove: p.autoApprove}; }
+    else if (et === "execution-started") { phase = "execution"; ev.phase = phase; ev.summary = `실행 시작 — 태스크 ${p.totalTasks}개 / 웨이브 ${p.totalWaves}개`; }
+    else if (et === "task-wave-started") { (p.taskIds || []).forEach(id => tasks[id] = tasks[id] || {id, title: "task", status: "pending"}); ev.summary = `웨이브 ${(p.waveIndex || 0) + 1} 시작 (태스크 ${(p.taskIds || []).length}개 병렬)`; ev.detail = {taskIds: p.taskIds}; }
+    else if (et === "task-status-changed") { ev.taskId = p.taskId; ev.agentId = cur; ev.summary = `태스크 ${p.oldStatus} → ${p.newStatus}`; }
+    else if (et === "agent-state-changed") { ensureAgent(p.agentId); ev.agentId = p.agentId; if (p.state === "running") cur = p.agentId; ev.summary = `${name(p.agentId)} 상태 → ${p.state}`; ev.detail = {state: p.state}; }
+    else if (et === "execution-token-usage") { const cp = p.promptTokens || 0, cc = p.completionTokens || 0; const dp = cp >= prev[0] ? cp - prev[0] : cp, dc = cc >= prev[1] ? cc - prev[1] : cc; prev = [cp, cc];
+      ev.agentId = phase === "execution" ? cur : plannerId; ensureAgent(ev.agentId); ev.tokens = {prompt: dp, completion: dc, cumPrompt: cp, cumCompletion: cc}; ev.summary = `모델 호출 — 입력 ${dp.toLocaleString()} / 출력 ${dc.toLocaleString()} 토큰 (누적 ${(cp + cc).toLocaleString()})`; calls.push({agentId: ev.agentId, phase, prompt: dp, completion: dc}); }
+    else if (et === "token-usage-update") { ensureAgent(p.agentId); ev.agentId = p.agentId; ev.summary = `${name(p.agentId)} 누적 토큰 ${(p.total || 0).toLocaleString()}`; }
+    else if (et === "task-completed") { ev.taskId = p.taskId; ev.agentId = cur; tasks[p.taskId] = {...(tasks[p.taskId] || {id: p.taskId}), title: p.taskTitle || "task", status: p.success ? "done" : "failed", agentId: cur, agentName: name(cur)}; ev.summary = `태스크 '${p.taskTitle}' 완료 (${p.success ? "성공" : "실패"})`; ev.detail = {success: p.success, error: p.error, taskCounts: p.taskCounts}; }
+    else if (et === "aggregation-started") { phase = "aggregation"; ev.phase = phase; ev.agentId = plannerId; ev.summary = `취합 시작 — 태스크 ${(p.taskIds || []).length}개 결과 합성`; }
+    else if (et === "execution-completed") { ev.summary = "실행 완료"; ev.detail = {result: p.result, tokenUsage: p.tokenUsage}; }
+    else ev.summary = et;
+    if (ev.agentId) ev.agentName = name(ev.agentId);
+    events.push(ev);
+  }
+  const byAgent = {}; let tp = 0, tc = 0;
+  calls.forEach(c => { const b = byAgent[c.agentId] = byAgent[c.agentId] || {name: name(c.agentId), prompt: 0, completion: 0, calls: 0}; b.prompt += c.prompt; b.completion += c.completion; b.calls++; tp += c.prompt; tc += c.completion; });
+  const fin = evs.find(e => e.eventType === "squad:execution-completed"); const tu = fin?.payload?.tokenUsage; if (tu) { tp = tu.promptTokens ?? tp; tc = tu.completionTokens ?? tc; }
+  const tl = Object.values(tasks); const dupMap = {}; tl.forEach(x => { const k = x.title + "|" + x.agentId; dupMap[k] = (dupMap[k] || 0) + 1; });
+  const duplicates = Object.values(dupMap).reduce((a, v) => a + (v > 1 ? v - 1 : 0), 0);
+  const execCalls = calls.filter(c => c.phase === "execution").length;
+  return {meta: {squad: cfg?.name || "squad", request: events.find(e => e.type === "planning-started")?.detail?.request || "", startedAt: evs[0].timestamp, completedAt: evs[evs.length - 1].timestamp, durationSec: +(ts(evs[evs.length - 1].timestamp) - t0).toFixed(1), rejectedPlansBefore: rejected, source: "events.jsonl (원본 로그에서 브라우저 내 정규화)"},
+          agents: Object.values(agents), tasks: tl, events, tokens: {prompt: tp, completion: tc, total: tp + tc, calls: calls.length, byAgent},
+          insights: {taskCount: tl.length, duplicateTasks: duplicates, plannerShare: 0, callsPerTask: +(execCalls / Math.max(tl.length, 1)).toFixed(1)},
+          baseline: T?.baseline, calibration: T?.calibration};
+}
+async function ingest(file) {
+  const text = await file.text();
+  if (file.name.endsWith(".squad.json") || file.name === "squad.json") { SQUAD = JSON.parse(text); $("#meta").textContent = "스쿼드 설정 적재됨 — 이제 events.jsonl을 드롭하세요"; return; }
+  if (file.name.endsWith(".jsonl")) { load(normalizeRaw(text, SQUAD || (T ? {config: {name: T.meta.squad, agents: T.agents.map(a => ({id: a.id, name: a.name, role: {value: a.role}, modelPreferences: {preferredModelId: a.model}})), plannerAgentId: T.agents.find(a => a.planner)?.id}} : null))); return; }
+  load(JSON.parse(text));
+}
+
+$("#file").onchange = async e => { const f = e.target.files[0]; if (f) ingest(f); };
+document.body.addEventListener("dragover", e => e.preventDefault());
+document.body.addEventListener("drop", async e => { e.preventDefault(); for (const f of e.dataTransfer.files) await ingest(f); });
+
+function load(t) {
+  T = t; idx = 0; stop();
+  $("#meta").textContent = `${t.meta.squad} · ${t.meta.durationSec}s · ${t.tokens.total.toLocaleString()} tok · ${t.events.length} events${t.meta.source ? " · " + t.meta.source : ""}`;
+  $("#scrub").max = t.events.length - 1; $("#scrub").value = 0;
+  renderFeed(); renderState(); renderReceipt(); renderDecisions();
+}
+
+// ---------- state reconstruction up to idx ----------
+function stateAt(i) {
+  const ag = {}; T.agents.forEach(a => ag[a.id] = {status:"idle", tokens:0, calls:0});
+  const tk = {}; T.tasks.forEach(t => tk[t.id] = "pending");
+  let phase = "planning", msgs = [];
+  for (let k = 0; k <= i; k++) {
+    const e = T.events[k]; phase = e.phase;
+    if (e.type === "planning-started" || e.type === "aggregation-started") { if (e.agentId) ag[e.agentId].status = "think"; }
+    if (e.type === "plan-ready" && e.agentId) ag[e.agentId].status = "idle";
+    if (e.type === "agent-state-changed" && e.agentId) ag[e.agentId].status = e.detail.state === "running" ? "run" : (e.detail.state === "error" ? "fail" : "idle");
+    if (e.type === "task-status-changed" && e.taskId) tk[e.taskId] = e.summary.includes("in_progress") ? "run" : tk[e.taskId];
+    if (e.type === "task-completed" && e.taskId) tk[e.taskId] = e.detail.success ? "done" : "fail";
+    if (e.tokens && e.agentId) { ag[e.agentId].tokens += e.tokens.prompt + e.tokens.completion; ag[e.agentId].calls++; msgs.push(e); }
+    if (e.type === "execution-completed") Object.values(ag).forEach(a => { if (a.status === "run") a.status = "done"; });
+  }
+  return {ag, tk, phase, lastMsg: msgs[msgs.length - 1]};
+}
+
+// ---------- The Bowl ----------
+function renderState() {
+  const s = stateAt(idx), e = T.events[idx];
+  const svg = $("#bowl"); const cx = 320, cy = 250, R = 185;
+  const n = T.agents.length;
+  let out = `<defs><radialGradient id="g"><stop offset="0" stop-color="#2a2350"/><stop offset="1" stop-color="#17142a"/></radialGradient></defs>
+    <circle cx="${cx}" cy="${cy}" r="${R + 40}" fill="url(#g)" stroke="${C.line}" stroke-width="2"/>`;
+  // center problem
+  out += `<circle cx="${cx}" cy="${cy}" r="46" fill="#241f45" stroke="${C.accent}" stroke-width="2"/>
+    <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">문항</text>
+    <text x="${cx}" y="${cy + 13}" text-anchor="middle" fill="${C.dim}" font-size="10">${s.phase}</text>`;
+  T.agents.forEach((a, i) => {
+    const ang = -Math.PI / 2 + i * 2 * Math.PI / n, x = cx + R * Math.cos(ang), y = cy + R * Math.sin(ang);
+    const st = s.ag[a.id], col = C[st.status] || C.idle, active = st.status !== "idle";
+    if (active || st.calls) out += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${active ? col : C.line}" stroke-width="${active ? 3 : 1}" ${active ? 'stroke-dasharray="6 5"' : ""} opacity=".9"/>`;
+    out += `<circle cx="${x}" cy="${y}" r="${active ? 30 : 24}" fill="${col}" opacity="${active ? 1 : .55}" ${active ? `style="filter:drop-shadow(0 0 10px ${col})"` : ""}/>
+      <text x="${x}" y="${y + 4}" text-anchor="middle" fill="#120f22" font-size="9" font-weight="800">${a.planner ? "★" : ""}${a.name.split("-")[0]}</text>
+      <text x="${x}" y="${y + 44}" text-anchor="middle" fill="${C.dim}" font-size="9.5">${a.name}</text>
+      <text x="${x}" y="${y + 56}" text-anchor="middle" fill="${st.tokens ? "#fff" : C.dim}" font-size="9">${st.tokens ? st.tokens.toLocaleString() + " tok · " + st.calls + "회" : ""}</text>`;
+  });
+  // tasks strip
+  T.tasks.forEach((t, i) => {
+    const col = C[s.tk[t.id] === "pending" ? "idle" : s.tk[t.id]] || C.idle;
+    out += `<rect x="${20 + i * 80}" y="490" width="70" height="18" rx="5" fill="${col}" opacity=".9"/><text x="${55 + i * 80}" y="503" text-anchor="middle" fill="#120f22" font-size="9" font-weight="700">${t.title} ${i + 1}</text>`;
+  });
+  svg.innerHTML = out;
+  $("#now").textContent = `${e.t.toFixed(1)}s · ${idx + 1}/${T.events.length}`;
+  $("#scrub").value = idx;
+  document.querySelectorAll("#feed .ev").forEach((d, k) => d.classList.toggle("cur", k === idx));
+  const cur = document.querySelector("#feed .ev.cur"); if (cur) cur.scrollIntoView({block: "nearest"});
+  renderLens(e);
+}
+function renderFeed() {
+  $("#feed").innerHTML = T.events.map((e, k) => `<div class="ev" data-k="${k}"><span class="t">${e.t.toFixed(1)}s</span>${e.summary}<span class="badge b-${e.phase}">${e.phase}</span></div>`).join("");
+  document.querySelectorAll("#feed .ev").forEach(d => d.onclick = () => { stop(); idx = +d.dataset.k; renderState(); });
+}
+$("#scrub").oninput = e => { stop(); idx = +e.target.value; renderState(); };
+function step() { if (idx >= T.events.length - 1) { stop(); return; } idx++; renderState();
+  const dt = Math.min(2000, Math.max(120, (T.events[idx + 1]?.t - T.events[idx].t || .3) * 1000 / +$("#speed").value));
+  timer = setTimeout(step, dt); }
+function stop() { playing = false; clearTimeout(timer); $("#play").textContent = "▶ 재생"; }
+$("#play").onclick = () => { if (playing) return stop(); if (idx >= T.events.length - 1) idx = 0; playing = true; $("#play").textContent = "⏸ 일시정지"; step(); };
+
+// ---------- Decision Lens ----------
+function renderLens(e) {
+  const who = e.agentName ? `<b>${e.agentName}</b> · ` : "";
+  $("#lens-summary").innerHTML = `${who}${e.summary} <span class="badge b-${e.phase}">${e.phase}</span><div class="muted">t=${e.t}s · ${e.ts}</div>`;
+  $("#lens-json").textContent = JSON.stringify({type: e.type, agent: e.agentName, task: e.taskId, tokens: e.tokens, detail: e.detail}, null, 1);
+}
+function renderDecisions() {
+  const plan = T.events.find(e => e.type === "plan-ready"), ins = T.insights;
+  const rows = [
+    ["계획", plan ? `플래너가 태스크 ${plan.detail.taskCount}개를 생성 (웨이브 ${plan.detail.waves.length}개). ${ins.duplicateTasks ? `⚠️ 동일 태스크 ${ins.duplicateTasks}개 중복 — 내장 플래너의 분해 성향` : "✅ 중복 없음"}` : "—"],
+    ["승인 전 반려", `${T.meta.rejectedPlansBefore}회 (사람이 계획을 거부·재계획)`],
+    ["실행 방식", `태스크당 평균 ${ins.callsPerTask}회 모델 호출 — 에이전트 루프가 반복마다 컨텍스트를 재전송 → 입력 토큰이 출력의 ${(T.tokens.prompt / Math.max(T.tokens.completion, 1)).toFixed(1)}배`],
+    ["취합", T.events.some(e => e.type === "aggregation-started") ? "태스크 결과를 플래너가 합성해 최종 응답 생성" : "—"],
+    ["비용 판단", T.baseline ? `같은 문항을 단독 모델이 ${(T.baseline.prompt + T.baseline.completion).toLocaleString()} 토큰에 풀었음 → 스쿼드 오버헤드 ${(T.tokens.total / (T.baseline.prompt + T.baseline.completion)).toFixed(1)}배. 중복 제거·호출 축소가 다음 최적화 대상` : "베이스라인 없음"],
+  ];
+  $("#decisions").innerHTML = `<table>${rows.map(r => `<tr><th style="width:7rem">${r[0]}</th><td>${r[1]}</td></tr>`).join("")}</table>`;
+}
+
+// ---------- The Receipt ----------
+function bar(svg, rows, w, colorFn) {
+  const max = Math.max(...rows.map(r => r.v), 1), bh = 26, gap = 10, lx = 150;
+  svg.innerHTML = rows.map((r, i) => { const y = 14 + i * (bh + gap), bw = (w - lx - 90) * r.v / max;
+    return `<text x="${lx - 8}" y="${y + 17}" text-anchor="end" fill="${C.dim}" font-size="11">${r.k}</text>
+      <rect x="${lx}" y="${y}" width="${Math.max(bw, 2)}" height="${bh}" rx="6" fill="${colorFn(r, i)}"/>
+      <text x="${lx + bw + 8}" y="${y + 17}" fill="#fff" font-size="11" font-weight="700">${r.label ?? r.v.toLocaleString()}</text>`; }).join("");
+}
+function renderReceipt() {
+  const t = T.tokens, b = T.baseline, perCorrect = t.total;
+  const k = [
+    {l: "이 문항에 쓴 총 토큰", v: t.total.toLocaleString(), hero: true},
+    {l: "입력 / 출력", v: `${t.prompt.toLocaleString()} / ${t.completion.toLocaleString()}`},
+    {l: "모델 호출", v: `${t.calls}회`},
+    {l: "소요 시간", v: `${T.meta.durationSec}s`},
+    {l: "태스크 (중복)", v: `${T.insights.taskCount} (${T.insights.duplicateTasks})`},
+    {l: "단독 모델 대비", v: b ? `${(t.total / (b.prompt + b.completion)).toFixed(1)}×` : "—"},
+  ];
+  $("#kpis").innerHTML = k.map(x => `<div class="kpi ${x.hero ? "hero" : ""}"><div class="v">${x.v}</div><div class="l">${x.l}</div></div>`).join("");
+  // race
+  const rows = b ? [{k: "단독 gpt-oss", v: b.prompt + b.completion, label: `${(b.prompt + b.completion).toLocaleString()} tok · ${b.seconds}s · ${b.correct ? "정답" : "오답"}`},
+                    {k: "BIBIMBAP 스쿼드", v: t.total, label: `${t.total.toLocaleString()} tok · ${T.meta.durationSec}s`}] : [];
+  bar($("#race"), rows, 520, (r, i) => i === 0 ? C.done : C.accent);
+  $("#race-note").textContent = b ? `문항 ${b.item}. 스쿼드 비용의 ${Math.round(100 * t.prompt / t.total)}%가 입력(컨텍스트 재전송) — 호출 횟수 축소가 가장 큰 절감 레버.` : "";
+  // agents
+  const ag = Object.values(t.byAgent).sort((a, b2) => b2.prompt + b2.completion - a.prompt - a.completion);
+  bar($("#agents"), ag.map(a => ({k: a.name, v: a.prompt + a.completion, label: `${(a.prompt + a.completion).toLocaleString()} tok · ${a.calls}회`})), 520, () => C.run);
+  // calibration
+  const cal = T.calibration || [], svg = $("#calib");
+  if (cal.length) {
+    const W = 520, H = 220, px = 50, py = 20, pw = W - px - 20, ph = H - py - 40;
+    let o = `<line x1="${px}" y1="${py + ph}" x2="${px + pw}" y2="${py + ph}" stroke="${C.line}"/><line x1="${px}" y1="${py}" x2="${px}" y2="${py + ph}" stroke="${C.line}"/>`;
+    [0, 50, 100].forEach(p => { const y = py + ph - ph * p / 100; o += `<text x="${px - 6}" y="${y + 4}" text-anchor="end" fill="${C.dim}" font-size="10">${p}%</text><line x1="${px}" y1="${y}" x2="${px + pw}" y2="${y}" stroke="${C.line}" stroke-dasharray="3 4"/>`; });
+    const pts = cal.map(c => { const x = px + pw * c.conf / 10, y = py + ph - ph * (c.correct / c.n); return {x, y, ...c}; });
+    o += `<polyline points="${pts.map(p => p.x + "," + p.y).join(" ")}" fill="none" stroke="${C.accent}" stroke-width="2.5"/>`;
+    pts.forEach(p => o += `<circle cx="${p.x}" cy="${p.y}" r="${3 + Math.min(6, p.n / 5)}" fill="${C.think}" opacity=".9"/><text x="${p.x}" y="${py + ph + 16}" text-anchor="middle" fill="${C.dim}" font-size="10">${p.conf}</text><text x="${p.x}" y="${p.y - 10}" text-anchor="middle" fill="#fff" font-size="9">${Math.round(100 * p.correct / p.n)}% (n=${p.n})</text>`);
+    o += `<text x="${px + pw / 2}" y="${H - 4}" text-anchor="middle" fill="${C.dim}" font-size="10">self-reported confidence (0–10)</text>`;
+    svg.innerHTML = o;
+  } else svg.innerHTML = `<text x="10" y="30" fill="${C.dim}" font-size="12">캘리브레이션 데이터 없음</text>`;
+  $("#tasks").innerHTML = `<tr><th>#</th><th>태스크</th><th>에이전트</th><th>상태</th><th>소요</th></tr>` +
+    T.tasks.map((x, i) => `<tr><td>${i + 1}</td><td>${x.title}</td><td>${x.agentName}</td><td>${x.status}</td><td>${x.durationSec ?? "—"}s</td></tr>`).join("");
+}
+
+fetch("traces/run-001.json").then(r => r.json()).then(load).catch(() => { $("#meta").textContent = "trace.json을 드래그해서 여세요"; });
+</script>
+</body>
+</html>
