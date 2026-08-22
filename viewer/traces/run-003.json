@@ -1,0 +1,306 @@
+{
+ "meta": {
+  "squad": "BIBIMBAP",
+  "request": "[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. The plan must contain EXACTLY ONE task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Do not create extraction, parsing, analysis, review, or duplicate tasks. Exactly one agent may work on this request — no reviewer, verifier, formatter, or helper agent. A plan with more than one task is invalid.\n\n[FINAL RESPONSE RULE] The squad's final response must be exactly the specialist's answer in the REQUIRED OUTPUT format — never a status summ",
+  "startedAt": "2026-08-22T09:08:03.461530Z",
+  "completedAt": "2026-08-22T09:08:19.457299Z",
+  "durationSec": 16.0,
+  "rejectedPlansBefore": 17,
+  "version": "v3.5 (5 agents · Qwen3 planner · 원칙 0)"
+ },
+ "agents": [
+  {
+   "id": "agent-1787368242465-fezk8r8",
+   "name": "Conductor",
+   "role": "planner",
+   "model": "Qwen3-32B-FP8",
+   "planner": true
+  },
+  {
+   "id": "agent-1787371848955-vy48dd2",
+   "name": "Generic-Solver",
+   "role": "Generic-Solver",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371889852-bjmjlyo",
+   "name": "Math-Solver",
+   "role": "Math-Solver",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371952162-avfl1wb",
+   "name": "LCB-Coder",
+   "role": "LCB-Coder",
+   "model": "gpt-oss-120b",
+   "planner": false
+  },
+  {
+   "id": "agent-1787371974406-lotikpk",
+   "name": "SWE-Patcher",
+   "role": "SWE-Patcher",
+   "model": "gpt-oss-120b",
+   "planner": false
+  }
+ ],
+ "tasks": [
+  {
+   "id": "a0bcf68f-1dff-4b35-a85d-70c236373637",
+   "title": "SOLVE",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "agentName": "Math-Solver",
+   "status": "done",
+   "createdAt": "2026-08-22T09:08:15.935929Z",
+   "completedAt": "2026-08-22T09:08:18.645665Z",
+   "durationSec": 2.7
+  }
+ ],
+ "events": [
+  {
+   "t": 0.0,
+   "ts": "2026-08-22T09:08:03.461530Z",
+   "type": "planning-started",
+   "phase": "planning",
+   "summary": "플래너가 요청을 분석해 계획을 수립합니다",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "request": "[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. The plan must contain EXACTLY ONE task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Do not create extraction, parsing, analysis, review, or duplicate tasks. Exactly one agent may work on this request — no reviewer, verifier, formatter, or helper agent. A plan with more than one task is invalid.\n\n[FINAL RESPONSE RULE] The squad's final response must be exactly the specialist's answer in the REQUIRED OUTPUT format — never a status summ"
+   },
+   "agentName": "Conductor"
+  },
+  {
+   "t": 12.47,
+   "ts": "2026-08-22T09:08:15.930164Z",
+   "type": "plan-ready",
+   "phase": "planning",
+   "summary": "계획 완성 — 태스크 1개, 웨이브 1개",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "detail": {
+    "taskCount": 1,
+    "waves": [
+     [
+      "a0bcf68f-1dff-4b35-a85d-70c236373637"
+     ]
+    ],
+    "autoApprove": true
+   },
+   "agentName": "Conductor"
+  },
+  {
+   "t": 12.47,
+   "ts": "2026-08-22T09:08:15.930600Z",
+   "type": "execution-started",
+   "phase": "execution",
+   "summary": "실행 시작 — 태스크 1개 / 웨이브 1개"
+  },
+  {
+   "t": 12.48,
+   "ts": "2026-08-22T09:08:15.937285Z",
+   "type": "task-wave-started",
+   "phase": "execution",
+   "summary": "웨이브 1 시작 (태스크 1개 병렬)",
+   "detail": {
+    "taskIds": [
+     "a0bcf68f-1dff-4b35-a85d-70c236373637"
+    ]
+   }
+  },
+  {
+   "t": 12.48,
+   "ts": "2026-08-22T09:08:15.939524Z",
+   "type": "task-status-changed",
+   "phase": "execution",
+   "taskId": "a0bcf68f-1dff-4b35-a85d-70c236373637",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "태스크 'SOLVE' pending → in_progress",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 12.78,
+   "ts": "2026-08-22T09:08:16.242290Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "Math-Solver 상태 → running",
+   "detail": {
+    "state": "running"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 14.26,
+   "ts": "2026-08-22T09:08:17.724913Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "tokens": {
+    "prompt": 809,
+    "completion": 80,
+    "cumPrompt": 809,
+    "cumCompletion": 80
+   },
+   "summary": "모델 호출 — 입력 809 / 출력 80 토큰 (누적 889)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 15.18,
+   "ts": "2026-08-22T09:08:18.644599Z",
+   "type": "execution-token-usage",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "tokens": {
+    "prompt": 692,
+    "completion": 64,
+    "cumPrompt": 1501,
+    "cumCompletion": 144
+   },
+   "summary": "모델 호출 — 입력 692 / 출력 64 토큰 (누적 1,645)",
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 15.18,
+   "ts": "2026-08-22T09:08:18.645163Z",
+   "type": "agent-state-changed",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "Math-Solver 상태 → idle",
+   "detail": {
+    "state": "idle"
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 15.18,
+   "ts": "2026-08-22T09:08:18.645377Z",
+   "type": "token-usage-update",
+   "phase": "execution",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "Math-Solver 누적 토큰 4,208",
+   "detail": {
+    "cumPrompt": 3827,
+    "cumCompletion": 381
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 15.19,
+   "ts": "2026-08-22T09:08:18.648740Z",
+   "type": "task-completed",
+   "phase": "execution",
+   "taskId": "a0bcf68f-1dff-4b35-a85d-70c236373637",
+   "agentId": "agent-1787371889852-bjmjlyo",
+   "summary": "태스크 'SOLVE' 완료 (성공)",
+   "detail": {
+    "success": true,
+    "error": null,
+    "taskCounts": {
+     "cancelled": 0,
+     "completed": 1,
+     "failed": 0,
+     "pending": 0,
+     "running": 0,
+     "skipped": 0,
+     "total": 1
+    }
+   },
+   "agentName": "Math-Solver"
+  },
+  {
+   "t": 15.49,
+   "ts": "2026-08-22T09:08:18.950867Z",
+   "type": "aggregation-started",
+   "phase": "aggregation",
+   "agentId": "agent-1787368242465-fezk8r8",
+   "summary": "취합 시작 — 태스크 1개 결과 합성",
+   "agentName": "Conductor"
+  },
+  {
+   "t": 16.0,
+   "ts": "2026-08-22T09:08:19.457299Z",
+   "type": "execution-completed",
+   "phase": "aggregation",
+   "summary": "실행 완료",
+   "detail": {
+    "result": "**Execution complete** — 1 task(s) processed in 1 wave(s).\n\n1. ✅ **SOLVE**  \n   Agent: `Math-Solver`",
+    "tokenUsage": {
+     "completionTokens": 144,
+     "promptTokens": 1501
+    }
+   }
+  }
+ ],
+ "tokens": {
+  "prompt": 1501,
+  "completion": 144,
+  "total": 1645,
+  "calls": 2,
+  "byAgent": {
+   "agent-1787371889852-bjmjlyo": {
+    "name": "Math-Solver",
+    "prompt": 1501,
+    "completion": 144,
+    "calls": 2
+   }
+  },
+  "byPhase": {
+   "execution": {
+    "prompt": 1501,
+    "completion": 144,
+    "calls": 2
+   }
+  }
+ },
+ "insights": {
+  "taskCount": 1,
+  "duplicateTasks": 0,
+  "plannerShare": 0.0,
+  "callsPerTask": 2.0
+ },
+ "baseline": {
+  "item": "math-visible-0001",
+  "model": "furiosa-ai/gpt-oss-120b",
+  "correct": true,
+  "prompt": 131,
+  "completion": 486,
+  "seconds": 5.09
+ },
+ "calibration": [
+  {
+   "conf": 0,
+   "correct": 0,
+   "n": 2
+  },
+  {
+   "conf": 3,
+   "correct": 1,
+   "n": 2
+  },
+  {
+   "conf": 5,
+   "correct": 0,
+   "n": 3
+  },
+  {
+   "conf": 7,
+   "correct": 7,
+   "n": 11
+  },
+  {
+   "conf": 8,
+   "correct": 20,
+   "n": 29
+  },
+  {
+   "conf": 9,
+   "correct": 46,
+   "n": 57
+  },
+  {
+   "conf": 10,
+   "correct": 36,
+   "n": 36
+  }
+ ]
+}
