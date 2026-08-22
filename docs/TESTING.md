@@ -44,3 +44,11 @@ T1~T4 전 항목 통과 + T5 첫 항목(오프라인) 통과. 데모 엑스포�
 - The Receipt: KPI 8개(가동 에이전트/로스터, v1 대비 ÷17 추가) + **3단 막대**(단독 617 / v1 26,808 / v3.2 1,564) + 원칙 0 해설.
 - 확인법: `python3 -m http.server 8765 --directory viewer` → http://localhost:8765/viewer.html → ③ The Receipt에서 막대 3개·라벨 잘림 없음, ② Decision Lens 첫 행이 "라우팅 근거".
 - v3.4 스쿼드로 새 완주 로그가 생기면: `python3 viewer/normalize.py <workspace> -o viewer/traces/run-003.json --baseline <results.jsonl> --item math-visible-0001` 후 `meta.version`에 "v3.4 (5 agents · 원칙 0)" 기입, `#runsel`에 옵션 추가.
+
+## T7. 뷰어 v3 (8/22 20:20) — 평가 3축 구성 · 단독 베이스라인 vs 최신(v3.7b)
+
+- `viewer/viewer.html` = v3 (단일 파일, run-001·run-004 내장 → file:// 더블클릭으로 열림). 이전 v2는 `viewer-v2.html`.
+- 구성: 고정 헤더(누적 토큰 면적이 곧 스크러버 · SPLIT 칩) → **A 얼마나 정확한가**(트랙별 베이스라인 vs 최신, n·CI90) → **B 얼마나 토큰 효율적인가**(617→1,611 히어로, 트랙별 출력 토큰, 누적 면적) → **C 얼마나 잘 보이는가**(C.0 상호작용 스트립 · C.1 단독 vs 스쿼드 레이스 · C.2 에이전트 레인 · C.3 원장(← 로그 #k) · C.4 판단 카드·비교표 · C.5 각주·캘리브레이션·methods) → 루브릭 레일.
+- 키: Space 재생 · ←/→ 이벤트 · N 다음 표시 지점 · C 비교/단일 전환 · H 첫 스쿼드(v1) 보기 · F 확대 · ? 키 도움말 · 드롭: events.jsonl + .squad.json / trace.json
+- 검증: `cd viewer && node test.js` → ALL ASSERTS PASSED (run-001 26,808/43.4×/28/3(2), run-004 1,611/2.6×/2/1(0), normalizeRaw 왕복 26,808/28, BENCH 값). 헤드리스 크롬 1280×4900 캡처로 6개 섹션 레이아웃 확인, 콘솔 오류 0.
+- 스펙: `docs/viewer-v3-spec.md`

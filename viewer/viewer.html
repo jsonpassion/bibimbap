@@ -1,323 +1,562 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BIBIMBAP — Squad Trace Viewer</title>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BIBIMBAP · 원장 — Squad Trace Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#0f0d1a; --panel:#17142a; --card:#1f1b38; --line:#332c5c; --ink:#ece8ff; --dim:#a39bd4;
-          --idle:#6b6690; --think:#f5c542; --run:#5aa8ff; --done:#3ddc97; --fail:#ff6b6b; --accent:#b794f6; }
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-  header{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--line);background:var(--panel)}
-  header h1{font-size:1.05rem;margin:0;letter-spacing:.04em} header .sub{color:var(--dim);font-size:.8rem}
-  header .sp{flex:1} header select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:.3rem .5rem;font:inherit;font-size:.78rem}
-  header label{font-size:.78rem;color:var(--dim);cursor:pointer;border:1px dashed var(--line);padding:.3rem .7rem;border-radius:8px}
-  nav{display:flex;gap:.3rem;padding:.6rem 1.2rem 0;background:var(--panel)}
-  nav button{background:none;border:none;color:var(--dim);font:inherit;font-size:.9rem;padding:.5rem .9rem;border-radius:9px 9px 0 0;cursor:pointer}
-  nav button.on{background:var(--bg);color:var(--ink);font-weight:700;box-shadow:inset 0 2px 0 var(--accent)}
-  main{padding:1rem 1.2rem 2rem;max-width:1180px;margin:0 auto}
-  .view{display:none}.view.on{display:block}
-  .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:1rem}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.9rem 1rem}
-  .card h3{margin:0 0 .5rem;font-size:.82rem;color:var(--dim);letter-spacing:.08em;text-transform:uppercase}
-  svg text{font-family:inherit}
-  .controls{display:flex;align-items:center;gap:.7rem;margin-top:.6rem;font-size:.85rem}
-  .controls button{background:var(--accent);color:#1a1430;border:none;border-radius:8px;padding:.35rem .9rem;font:inherit;font-weight:700;cursor:pointer}
-  .controls input[type=range]{flex:1;accent-color:var(--accent)}
-  .controls select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:.2rem .4rem}
-  .now{font-variant-numeric:tabular-nums;color:var(--dim);min-width:8.5rem}
-  .feed{max-height:420px;overflow:auto;font-size:.84rem}
-  .feed .ev{padding:.38rem .5rem;border-left:3px solid var(--line);margin:.25rem 0;cursor:pointer;border-radius:0 6px 6px 0}
-  .feed .ev:hover,.feed .ev.sel{background:var(--panel)} .feed .ev .t{color:var(--dim);font-variant-numeric:tabular-nums;margin-right:.5rem}
-  .feed .ev.cur{border-left-color:var(--accent)}
-  .badge{display:inline-block;padding:.05rem .45rem;border-radius:999px;font-size:.7rem;font-weight:700;margin-left:.3rem}
-  .b-planning{background:#4a3d8a}.b-execution{background:#1e4f8a}.b-aggregation{background:#2d6b4f}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;margin-bottom:1rem}
-  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.7rem .9rem}
-  .kpi .v{font-size:1.5rem;font-weight:800;line-height:1.15} .kpi .l{font-size:.74rem;color:var(--dim)}
-  .kpi.hero{grid-column:span 2;border-color:var(--accent)} .kpi.hero .v{font-size:2rem;color:var(--accent)}
-  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.7rem;font-size:.76rem;overflow:auto;max-height:260px;white-space:pre-wrap}
-  .legend{display:flex;gap:.9rem;font-size:.74rem;color:var(--dim);margin-top:.4rem;flex-wrap:wrap}
-  .legend i{display:inline-block;width:.7rem;height:.7rem;border-radius:50%;margin-right:.3rem;vertical-align:middle}
-  table{border-collapse:collapse;width:100%;font-size:.83rem} th,td{border-bottom:1px solid var(--line);padding:.35rem .5rem;text-align:left} th{color:var(--dim);font-weight:600}
-  .muted{color:var(--dim);font-size:.8rem}
-</style>
-</head>
+/* ---- §8 tokens (dark, projector) ---- */
+:root{--bg:#0c0d10;--panel:#111318;--line:#22262e;--fg:#e6e9ef;--dim:#98a0ae;--mute:#5c6472;--pl:#e8b44a;--ex:#5b9cf5;--prompt:#3a4f80;--comp:#8fe3ff;--ag:#3ddc97;--bad:#ff6b6b;--warn:#ffa94d;--acc:#ffffff;--mono:"JetBrains Mono","SF Mono",Menlo,monospace;--sans:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--sans);font-variant-numeric:tabular-nums}
+.mono,#counter,#rows,table,.chip,#methods,.flag .t,.metric b,#splits,.panel .hd,.panel pre,.claim .src{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button,select,input{font:inherit;color:inherit}
+/* ---- §1.1 sticky header ---- */
+#bar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 24px 4px}
+.row1{display:flex;align-items:center;gap:12px;height:30px;white-space:nowrap}
+.row1>b{letter-spacing:.02em}.row1>b small{color:var(--dim);font-weight:400;margin-left:6px;font-size:12px}
+.seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg button,.ctl button,.ctl select{background:none;border:0;color:var(--dim);padding:2px 9px;cursor:pointer}
+.seg button.on{background:var(--fg);color:var(--bg)}.seg button+button{border-left:1px solid var(--line)}
+.ctl{display:flex;border:1px solid var(--line);border-radius:4px}.ctl button{color:var(--fg);min-width:28px}.ctl select{background:var(--bg)}
+.tog{color:var(--dim);display:flex;align-items:center;gap:5px;cursor:pointer}.help{background:none;border:1px solid var(--line);color:var(--dim);border-radius:50%;width:24px;height:24px;cursor:pointer;font-weight:700;line-height:1}.help:hover{color:var(--fg);border-color:var(--fg)}
+#sections{display:flex;gap:2px}#sections button{background:none;border:1px solid var(--line);color:var(--dim);padding:0 6px;border-radius:3px;cursor:pointer;font-size:12px}
+#counter{margin-left:auto;color:var(--dim);font-size:13px;min-width:0;overflow:hidden;text-overflow:ellipsis}#counter b{color:var(--fg);font-weight:700}
+#scrub{width:100%;height:64px;display:block;cursor:crosshair;touch-action:none}
+#range{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+#capline{display:flex;align-items:baseline;gap:12px;height:28px;overflow:hidden}
+#caption{font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#sub{color:var(--dim);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+#skip{display:none;background:var(--pl);color:#000;border:0;border-radius:3px;padding:1px 8px;font-size:12px;cursor:pointer;white-space:nowrap}
+#splits{display:none;gap:8px;align-items:center;height:26px;font-size:13px}#splits .t{color:var(--dim);font-size:11px;letter-spacing:.08em}
+.sp{padding:1px 9px;border:1px solid var(--line);border-radius:3px;opacity:.3;white-space:nowrap}.sp small{color:var(--dim);margin-right:5px;font-size:11px}
+.sp.on{opacity:1}.sp.good{color:var(--ag);border-color:rgba(61,220,151,.45)}.sp.bad{color:var(--bad);border-color:rgba(255,107,107,.45)}.sp.tok{cursor:pointer}.sp.fixed{color:var(--pl);border-color:rgba(232,180,74,.5)}
+/* ---- sections ---- */
+main{max-width:1140px;margin:0 auto;padding:0 20px 60px}
+section{padding:24px 0 18px;border-bottom:1px solid var(--line);scroll-margin-top:160px}
+h2{font-size:15px;font-weight:700;letter-spacing:.04em;margin-bottom:12px}h2 em{font-style:normal;color:var(--dim);margin-left:8px;font-weight:400;font-size:12px}
+.crumb{margin-left:8px;font-size:12px;color:var(--pl);border:1px solid var(--pl);padding:0 6px;border-radius:3px;font-weight:400}
+/* ---- 00 hero ---- */
+#hero{display:grid;grid-template-columns:1fr auto 1fr;gap:0 24px;align-items:end;padding-top:24px}
+.slot{display:flex;flex-direction:column;gap:6px}.slot small{color:var(--dim);font-size:13px}
+.big{white-space:nowrap;font-size:clamp(72px,9vw,140px);font-weight:800;line-height:.9;letter-spacing:-.04em}.big .x{font-size:.4em;font-weight:600;color:var(--dim);margin-left:4px}
+#ratio-after{color:var(--ag)}.ratio{font-size:22px;font-weight:600;color:var(--dim);margin-top:6px}.ratio b{font-size:40px;color:var(--ag)}#arrow{font-size:48px;color:var(--dim);padding-bottom:22px}
+#sent{grid-column:1/-1;font-size:28px;font-weight:600;margin-top:18px}#sent small{display:block;font-size:14px;color:var(--dim);font-weight:400}
+#herocap{grid-column:1/-1;color:var(--dim);font-size:14px;margin-top:6px}#herocap b{color:var(--fg)}#herocap .warn{color:var(--warn)}
+#herobar{grid-column:1/-1;margin-top:10px}#rngd{grid-column:1/-1;color:var(--mute);font-size:12px;display:none}
+/* ---- svg ---- */
+svg{width:100%;display:block;overflow:visible}svg text{font-family:var(--mono);font-variant-numeric:tabular-nums;fill:var(--dim);font-size:12px}
+svg .lbl{fill:var(--fg)}svg .ph{stroke:var(--acc);stroke-width:1.5;pointer-events:none}
+.future{opacity:.22;transition:opacity .12s}[data-i]{cursor:pointer}svg .sel{stroke:var(--acc);stroke-width:1.5}
+/* ---- 03 ledger ---- */
+#rows{font-size:13px;border-top:1px dashed var(--line)}
+.row{display:grid;grid-template-columns:44px 62px 120px 1fr 120px 70px 90px;gap:8px;padding:3px 6px;border-bottom:1px solid #15171c;align-items:center;cursor:pointer}
+.row:hover{background:#14161b}.row.sel{background:#1a1d24;box-shadow:inset 2px 0 var(--acc)}.row .r{text-align:right}.row .d{color:var(--dim)}
+.row.ev{color:var(--dim)}.row.ev .txt{color:var(--fg)}.row .dl{color:var(--warn);font-size:12px}
+details>summary{list-style:none}details>summary::-webkit-details-marker{display:none}
+.row.sum{background:var(--panel);font-weight:700;border-top:1px dashed #3a3f4a}.row.sum .tri::before{content:"▸ "}details[open]>.row.sum .tri::before{content:"▾ "}
+.row.tot{font-size:14px;font-weight:700;border-top:1px solid var(--fg);border-bottom:1px solid var(--fg);padding:6px}
+.row.hd{cursor:default;color:var(--dim);font-size:12px}
+.badge{display:inline-block;font-weight:700;font-size:11px;padding:0 5px;border-radius:3px;margin-right:6px;vertical-align:1px;font-family:var(--mono)}
+.b-gap{background:#3a3020;color:var(--pl)}.b-dup{background:#402020;color:var(--bad)}.b-over,.b-ctx{background:#3c2c18;color:var(--warn)}.b-serial{background:#1e2a3c;color:var(--ex)}.b-done{background:#163828;color:var(--ag)}
+/* ---- §4.1 inline panel ---- */
+.panel{background:var(--panel);border:1px solid var(--line);border-left:2px solid var(--acc);margin:0 0 6px 44px;padding:10px 14px;font-family:var(--sans);font-size:13px;cursor:default}
+.panel .hd{color:var(--dim);font-size:12px;display:flex;gap:14px;align-items:center}.panel .tabs{margin-left:auto;display:flex;gap:12px}.panel .tabs span{cursor:pointer}.panel .tabs .on{color:var(--fg);font-weight:700}
+.metrics{display:flex;gap:28px;margin:8px 0;border-bottom:1px solid var(--line);padding-bottom:8px}.metric{font-size:12px;color:var(--dim)}.metric b{display:block;font-size:20px;color:var(--fg)}
+.panel .body{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px}.panel dl{display:grid;grid-template-columns:96px 1fr;gap:4px 10px;align-content:start}.panel dt{color:var(--dim)}
+.na{border:1px dashed #3a3f4a;color:var(--dim);padding:0 6px;border-radius:3px;display:inline-block}
+.claim{border-left:3px solid var(--ex);background:var(--bg);padding:5px 8px;margin-bottom:6px}.claim.warn{border-left-color:var(--bad)}.claim.ok{border-left-color:var(--ag)}
+.claim .src{display:block;color:var(--dim);font-size:12px}.claim .src a{color:var(--pl);cursor:pointer;text-decoration:underline dotted}
+.panel pre{grid-column:1/-1;font-size:12px;white-space:pre-wrap;color:#b4bbc8;max-height:280px;overflow:auto}
+/* ---- 04 판단 ---- */
+#flags{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:8px;margin-bottom:20px}
+.flag{border:1px solid var(--line);padding:8px 12px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;font-size:13px}.flag:hover{border-color:var(--dim)}.flag .t{color:var(--dim);font-size:12px;margin-top:3px}.flag .t a{color:var(--pl)}
+table{border-collapse:collapse;font-size:13px;width:100%;cursor:pointer}th,td{text-align:right;padding:5px 10px;border-bottom:1px solid var(--line)}th:first-child,td:first-child{text-align:left;color:var(--dim);font-family:var(--sans)}
+th{color:var(--dim);font-weight:500}td.cur{color:var(--fg);font-weight:700}.dimv{color:var(--mute);font-weight:400}
+.chip{display:inline-block;margin-left:6px;padding:0 5px;border-radius:3px;font-size:11px;background:rgba(61,220,151,.15);color:var(--ag)}.chip.worse{background:rgba(255,107,107,.15);color:var(--bad)}
+#sentence{font-size:15px;margin-top:14px;line-height:1.6}#sentence b{color:var(--pl)}
+/* ---- 05 각주 ---- */
+#honest{display:grid;grid-template-columns:1fr 1fr 320px;gap:28px}#honest ul{list-style:none;font-size:13px}#honest li{padding:4px 0;border-bottom:1px solid #15171c}
+#honest li.no{color:var(--dim);border-bottom:1px dashed #3a3f4a}#honest li.no::before{content:"✕ ";color:var(--bad)}#honest li.yes::before{content:"✓ ";color:var(--ag)}
+#quote{grid-column:1/-1;border-left:3px solid var(--bad);padding:6px 12px;color:var(--dim);font-size:13px;line-height:1.6}#quote b{color:var(--fg)}#quote i{display:block;font-size:12px}
+#calcap,#rngdl{color:var(--dim);font-size:12px;margin-top:4px}#methods{grid-column:1/-1;font-size:12px;color:var(--dim);line-height:1.7;border-top:1px dashed var(--line);padding-top:10px}
+/* ---- §3.8 footer rail · overlays ---- */
+#rail{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);display:flex;gap:6px;align-items:center;padding:6px 24px;font-size:12px;color:var(--dim);flex-wrap:wrap;z-index:10}
+#rail .rb{border:1px solid var(--line);border-radius:999px;padding:1px 10px;cursor:help}#rail .rb:hover{color:var(--fg);border-color:var(--fg)}#railDef{flex:1;min-width:240px}
+#rail label{border:1px dashed var(--line);padding:1px 8px;border-radius:3px;cursor:pointer}#rail kbd{cursor:pointer}
+#keys{display:none;position:fixed;right:16px;bottom:44px;background:var(--panel);border:1px solid var(--line);padding:8px 12px;font-size:12px;color:var(--dim);font-family:var(--mono);max-width:600px;line-height:1.7;z-index:20}
+#toast{position:fixed;left:50%;bottom:48px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:6px 14px;border-radius:4px;display:none;font-weight:600;z-index:30}
+body.drag::after{content:"여기에 events.jsonl + .squad.json 또는 trace.json";position:fixed;inset:12px;border:2px dashed var(--pl);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--pl);background:rgba(12,13,16,.85);z-index:50}
+body[data-spot] [data-rubric]{transition:opacity .2s}
+body[data-spot=observability] [data-rubric]:not([data-rubric~=observability]),body[data-spot=interpretability] [data-rubric]:not([data-rubric~=interpretability]),body[data-spot=traceability] [data-rubric]:not([data-rubric~=traceability]),body[data-spot=explainability] [data-rubric]:not([data-rubric~=explainability]),body[data-spot=clarity] [data-rubric]:not([data-rubric~=clarity]),body[data-spot=insightfulness] [data-rubric]:not([data-rubric~=insightfulness]){opacity:.15}
+@media (max-width:1400px){.row1>b small{display:none}}
+@media (max-width:1300px){#honest{grid-template-columns:1fr 1fr}#honest .calbox{grid-column:1/-1}}
+/* ---- A/B/C axis headings · bench tables · interaction strip ---- */
+.axis{padding-top:34px}.axis h1{font-size:22px;font-weight:800;letter-spacing:.02em;margin-bottom:6px}.axis h1 .n{display:inline-block;width:34px;height:34px;line-height:32px;text-align:center;border:2px solid var(--fg);border-radius:4px;margin-right:12px;font-size:18px}.axis h1 em{font-style:normal;color:var(--dim);font-size:13px;font-weight:400;margin-left:10px}
+.verdict{font-size:17px;font-weight:600;margin:6px 0 14px;padding:8px 12px;border-left:3px solid var(--ag);background:var(--panel)}.verdict b{color:var(--ag)}.verdict small{display:block;font-weight:400;font-size:12px;color:var(--dim);margin-top:2px}
+table.bench{cursor:default;margin-bottom:8px}table.bench td.bars{width:30%}table.bench td.ref{color:var(--dim)}.bb{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);height:13px}.bb i{display:block;height:7px;background:var(--dim);opacity:.55}.bb.l i{background:var(--ag);opacity:1}
+.note{color:var(--dim);font-size:12px;margin:4px 0 10px}h2.sub{margin-top:22px}
+#strip{display:grid;grid-template-columns:1fr 26px 1fr 26px 1fr 26px 1fr 26px 1fr 26px 1fr;margin-bottom:16px}
+.sbox{border:1px solid var(--line);padding:8px 10px;min-height:78px;background:var(--panel);transition:border-color .2s}.sbox b{display:block;font-size:13px}.sbox small{display:block;color:var(--dim);font-size:12px;line-height:1.4;margin-top:3px}
+.sbox .st{float:right;font-size:11px;padding:0 6px;border-radius:3px;background:#1a1d24;color:var(--dim);font-family:var(--mono)}
+.sbox.run{border-color:var(--ex)}.sbox.run .st{background:rgba(91,156,245,.2);color:var(--ex)}.sbox.done{border-color:#2f4a3a}.sbox.done .st{background:rgba(61,220,151,.15);color:var(--ag)}
+.sbox.flash{animation:flash .6s}@keyframes flash{0%{background:rgba(91,156,245,.4)}100%{background:var(--panel)}}
+.edge{position:relative}.edge::before{content:"";position:absolute;left:2px;right:6px;top:50%;height:1px;background:var(--line)}.edge::after{content:"▸";position:absolute;right:0;top:50%;transform:translateY(-55%);color:var(--line);font-size:12px}
+.edge.done::before{background:var(--ag)}.edge.done::after{color:var(--ag)}.edge i{position:absolute;top:50%;left:0;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:var(--acc);opacity:0}
+.edge.pulse i{animation:travel .7s ease-out forwards}@keyframes travel{0%{left:0;opacity:1}100%{left:calc(100% - 10px);opacity:.25}}
+</style></head>
 <body>
-<header>
-  <h1>🥣 BIBIMBAP <span class="sub">Squad Trace Viewer</span></h1>
-  <span class="sub" id="meta"></span>
-  <span class="sp"></span>
-  <select id="runsel" title="내장 런 전환 (Before / After)"><option value="traces/run-003.json">After · run-003 (v3.5 · Qwen3 planner)</option><option value="traces/run-002.json">Mid · run-002 (v3.2 · gpt-oss planner)</option><option value="traces/run-001.json">Before · run-001 (v1 · 8 agents)</option></select>
-  <label>열기: events.jsonl / .squad.json / trace.json <input id="file" type="file" accept=".json,.jsonl" multiple hidden></label>
+<header id="bar">
+  <div class="row1"><b>BIBIMBAP · 원장<small>Squad Trace Ledger · run replay</small></b><div class="seg" id="runs"></div>
+    <label class="tog"><input type="checkbox" id="hist"> 첫 스쿼드(v1) 보기 (H)</label>
+    <label class="tog"><input type="checkbox" id="cmp" checked> 비교 · 레이스 (C)</label>
+    <div class="ctl"><button id="rst" title="처음으로 (R)">⟲</button><button id="play" title="재생 (Space)">▶</button><select id="spd" title="속도"><option value="auto">자동</option><option value="1">1×</option><option value="4">4×</option><option value="10">10×</option></select></div><button id="help" class="help" title="키 안내 (?)">?</button>
+    <div id="counter"></div></div>
+  <svg id="scrub" viewBox="0 0 1100 64" preserveAspectRatio="none" data-rubric="observability"></svg><input id="range" type="range" min="0" max="60" step="0.01" value="0" aria-label="재생 시각">
+  <div id="capline"><div id="caption" data-rubric="interpretability"></div><div id="sub"></div><button id="skip"></button><div id="sections"></div></div>
+  <div id="splits" data-rubric="insightfulness"></div>
 </header>
-<nav>
-  <button class="on" data-v="bowl">① The Bowl</button>
-  <button data-v="lens">② Decision Lens</button>
-  <button data-v="receipt">③ The Receipt</button>
-</nav>
 <main>
-  <section class="view on" id="v-bowl">
-    <div class="grid">
-      <div class="card">
-        <h3>Observability · Clarity — 에이전트 그릇</h3>
-        <svg id="bowl" viewBox="0 0 640 520" width="100%"></svg>
-        <div class="legend"><span><i style="background:var(--idle)"></i>대기</span><span><i style="background:var(--think)"></i>계획/취합</span><span><i style="background:var(--run)"></i>실행 중</span><span><i style="background:var(--done)"></i>완료</span><span><i style="background:var(--fail)"></i>실패</span></div>
-        <div class="controls">
-          <button id="play">▶ 재생</button>
-          <input id="scrub" type="range" min="0" max="0" step="1" value="0">
-          <span class="now" id="now">0.0s · 0/0</span>
-          <select id="speed"><option value="1">1×</option><option value="4" selected>4×</option><option value="10">10×</option><option value="30">30×</option></select>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Traceability — 타임라인 (클릭 = 그 시점으로)</h3>
-        <div class="feed" id="feed"></div>
-      </div>
+  <section id="sA" class="axis"><h1><span class="n">A</span>얼마나 정확한가<em>정확도 40점 · 베이스라인(단순 프롬프트, 에이전트 없음) vs 최신 스쿼드 · 가시 연습셋 · jxc-selfeval</em></h1>
+    <div class="verdict" id="vA"></div><table id="accT" class="bench"></table><div class="note" id="accNote"></div></section>
+  <section id="sB" class="axis"><h1><span class="n">B</span>얼마나 토큰 효율적인가<em>토큰 효율 30점 · 문항당 출력 토큰(트랙별) + 같은 문항 trace 비교</em></h1>
+    <div class="verdict" id="vB"></div>
+    <div id="hero" data-rubric="clarity">
+      <div class="slot"><small id="lab-before"></small><div class="big"><span id="tok-before">—</span><span class="x">tok</span></div><div class="ratio"><b style="color:var(--dim)">1</b>× · 기준</div></div><div id="arrow">→</div>
+      <div class="slot"><small id="lab-after"></small><div class="big"><span id="tok-after">—</span><span class="x">tok</span></div><div class="ratio">단독의 <b id="ratio-after">—</b>×</div></div>
+      <div id="sent"></div><div id="herocap"></div><svg id="herobar" viewBox="0 0 1100 110"></svg><div id="rngd"></div>
     </div>
+    <table id="tokT" class="bench"></table><div class="note" id="tokNote"></div>
+    <div class="note">같은 문항의 누적 토큰 (리플레이와 같은 시계 · 플레이헤드 연동)</div><svg id="cumB" viewBox="0 0 1100 90" data-rubric="observability"></svg>
   </section>
-
-  <section class="view" id="v-lens">
-    <div class="grid">
-      <div class="card">
-        <h3>Interpretability — 스텝 상세</h3>
-        <div id="lens-summary" class="muted">① The Bowl의 타임라인에서 스텝을 클릭하면 여기에 해석이 표시됩니다.</div>
-        <pre id="lens-json"></pre>
-      </div>
-      <div class="card">
-        <h3>Explainability — 이 실행의 결정들</h3>
-        <div id="decisions"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="view" id="v-receipt">
-    <div class="kpis" id="kpis"></div>
-    <div class="grid">
-      <div class="card"><h3>Insightfulness — 단독 모델 vs 스쿼드 Before/After (같은 문항)</h3><svg id="race" viewBox="0 0 520 130" width="100%"></svg><div class="muted" id="race-note"></div></div>
-      <div class="card"><h3>에이전트별 토큰 · 호출</h3><svg id="agents" viewBox="0 0 520 200" width="100%"></svg></div>
-      <div class="card"><h3>확신도 캘리브레이션 (self-reported confidence → 정답률)</h3><svg id="calib" viewBox="0 0 520 220" width="100%"></svg><div class="muted">Generic-Solver가 보고한 확신도별 실제 정답률(연습 세트 140문항). 단조 증가 = 확신도가 정직하다는 증거.</div></div>
-      <div class="card"><h3>태스크</h3><table id="tasks"></table></div>
-    </div>
-  </section>
+  <section id="sC" class="axis"><h1><span class="n">C</span>얼마나 잘 보이는가<em>시각화 30점 · 실행 리플레이 · 6축 루브릭 (하단 레일)</em></h1>
+    <div class="verdict" id="vC"></div>
+    <h2>C.0 상호작용<em>요청 → 계획 → 태스크 → 풀이 → 취합 → 최종 · 플레이헤드가 지나는 이벤트마다 상태와 한 줄 설명</em></h2><div id="strip" data-rubric="interpretability observability"></div>
+    <h2 class="sub">C.1 시간<em>호출 1개 = 막대 1개, 높이 = 입력 토큰(컨텍스트 재전송) · 한 시계 위의 단독 vs 스쿼드</em><span id="crumb"></span></h2><svg id="tl" viewBox="0 0 1100 230" data-rubric="observability explainability insightfulness"></svg>
+    <h2 class="sub">C.2 에이전트<em>정의된 에이전트 전부, 유휴도 보인다</em><span class="crumb" id="lnhead"></span></h2><svg id="ln" data-rubric="observability"></svg></section>
+  <section id="s03"><h2>C.3 원장<em>로그 한 줄 = 원장 한 줄, 누르면 해석과 원본</em></h2><div id="rows" data-rubric="traceability interpretability explainability"></div></section>
+  <section id="s04"><h2>C.4 판단<em>규칙으로만 도출, 손으로 쓴 문장 없음</em></h2><div id="flags" data-rubric="explainability"></div><table id="cmpt" data-rubric="insightfulness" title="클릭: ×배 → 절대차 → % 전환"></table><div id="sentence" data-rubric="insightfulness"></div></section>
+  <section id="s05"><h2>C.5 각주<em>이 로그에 있는 것과 없는 것 · 재료</em></h2>
+    <div id="honest" data-rubric="traceability">
+      <div><ul><li class="yes">토큰 누적치 (execution-token-usage → 호출별 Δ 복원)</li><li class="yes">상태 전이 (agent-state-changed · task-status-changed)</li><li class="yes">타임스탬프 · 계획 태스크 수 · 거절된 계획 수</li><li class="yes">단독 베이스라인 (baseline 필드, 외부 채점 러너) · 트랙별 정확도·토큰 (jxc-selfeval)</li></ul>
+        <label id="rngdl"><input type="checkbox" id="rngdTog"> RNGD 환산 추정 보기 (측정 아님)</label></div>
+      <div><ul><li class="no">솔버의 답 텍스트 — AI:GO가 저장하지 않음 (로그 형식 고정, 운영진 확인)</li><li class="no">추론 내용 · 프롬프트 본문</li><li class="no">스쿼드 답의 정답 여부 — 로그에 없음. 이 뷰어는 맞았는지 말하지 않는다; 정답은 외부 채점(baseline.correct) + selfeval 로만 표시</li><li class="no" id="sessNote">token-usage-update 의 세션 누적치는 이 실행의 합계가 아님 → 차트에 쓰지 않음</li></ul></div>
+      <div class="calbox" data-rubric="insightfulness"><div style="color:var(--dim);font-size:12px;margin-bottom:4px">Generic-Solver 확신도 캘리브레이션 (채점 러너)</div><svg id="cal" viewBox="0 0 520 220"></svg><div id="calcap"></div></div>
+      <blockquote id="quote"><b>이 로그에 없는 것.</b> 솔버의 답 텍스트는 AI:GO가 저장하지 않는다(로그 형식 고정, 운영진 확인). 추론 내용과 프롬프트 본문도 없다. 따라서 이 뷰어는 스쿼드가 맞았는지 말하지 않는다 — 정답 여부는 외부 채점 러너(<code>baseline.correct</code>)와 selfeval 로만 표시하고, 화면의 모든 수치는 토큰 누적치·상태 전이·타임스탬프에서만 파생된다. <code>token-usage-update</code>의 세션 누적치는 이 실행의 합계가 아니므로 어떤 차트에도 쓰지 않는다.<i>Not in the log: the solver's answer text (AI:GO does not record it), reasoning, prompt bodies. Correctness shown only from the external grader.</i></blockquote>
+      <div id="ingred" class="note" style="grid-column:1/-1"></div><div id="methods"></div>
+    </div></section>
 </main>
-
+<footer id="rail"></footer>
+<div id="keys">Space 재생 · ←/→ 이벤트 · N / Shift+N 다음·이전 표시 · 1/2/3 런 · H 첫 스쿼드(v1) · C 레이스 · F 태스크 확대 · Esc 닫기/축소 · R 처음 · Home/End · Shift+1…6 섹션 · Tab 다음 섹션 · ? 이 안내 · 드롭: events.jsonl + .squad.json / trace.json · 창이 가려지면 재생이 멈춤</div>
+<div id="toast"></div>
+<!-- §2.2 inlined traces (verbatim JSON, minified) — file works under file:// -->
+<script type="application/json" id="run-001">{"meta":{"squad":"BIBIMBAP","request":"[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. Produce the minimal plan: ONE wave containing a SINGLE task — the task count must be exactly 1. Outputting 2 or more tasks is invalid. Two tasks with the same or similar description are duplicates and strictly forbidden. The single task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Nothing else belongs in the plan.\n\nYou are an elite competition-math squad. Solve the problem below with compact, reliable reasoning. The final answer must","startedAt":"2026-08-22T04:52:54.665414Z","completedAt":"2026-08-22T04:53:54.892647Z","durationSec":60.2,"rejectedPlansBefore":6,"version":"v1 (8 agents · 프롬프트 v2)"},"agents":[{"id":"agent-1787368242465-fezk8r8","name":"Conductor","role":"planner","model":"gpt-oss-120b","planner":true},{"id":"agent-1787371848955-vy48dd2","name":"Context-Handler","role":"Context-Handler","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371889852-bjmjlyo","name":"Generic-Solver","role":"Generic-Solver","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371952162-avfl1wb","name":"Math-Solver","role":"Math-Solver","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371974406-lotikpk","name":"Math-Verifier","role":"reviewer","model":"gpt-oss-120b","planner":false},{"id":"agent-1787372031428-i9gs9g2","name":"LCB-Coder","role":"LCB-Coder","model":"gpt-oss-120b","planner":false},{"id":"agent-1787372065165-rdukj0a","name":"SWE-Patcher","role":"SWE-Patcher","model":"gpt-oss-120b","planner":false},{"id":"agent-1787372136283-ms9m8b5","name":"Format-Warden","role":"Format-Warden","model":"gpt-oss-120b","planner":false}],"tasks":[{"id":"b1cf52a5-f321-43c5-b8ec-4f91a9f46288","title":"SOLVE","agentId":"agent-1787371952162-avfl1wb","agentName":"Math-Solver","status":"done","createdAt":"2026-08-22T04:53:14.871178Z","completedAt":"2026-08-22T04:53:54.080046Z","durationSec":39.2},{"id":"3c9a7996-0463-4143-954f-e5b5fcf7c3ab","title":"SOLVE","agentId":"agent-1787371952162-avfl1wb","agentName":"Math-Solver","status":"done","createdAt":"2026-08-22T04:53:14.873909Z","completedAt":"2026-08-22T04:53:28.515344Z","durationSec":13.6},{"id":"6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","title":"SOLVE","agentId":"agent-1787371952162-avfl1wb","agentName":"Math-Solver","status":"done","createdAt":"2026-08-22T04:53:14.874739Z","completedAt":"2026-08-22T04:53:35.676806Z","durationSec":20.8}],"events":[{"t":0,"ts":"2026-08-22T04:52:54.665414Z","type":"planning-started","phase":"planning","summary":"플래너가 요청을 분석해 계획을 수립합니다","agentId":"agent-1787368242465-fezk8r8","detail":{"request":"[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. Produce the minimal plan: ONE wave containing a SINGLE task — the task count must be exactly 1. Outputting 2 or more tasks is invalid. Two tasks with the same or similar description are duplicates and strictly forbidden. The single task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Nothing else belongs in the plan.\n\nYou are an elite competition-math squad. Solve the problem below with compact, reliable reasoning. The final answer must"},"agentName":"Conductor"},{"t":20.2,"ts":"2026-08-22T04:53:14.867771Z","type":"plan-ready","phase":"planning","summary":"계획 완성 — 태스크 3개, 웨이브 1개","agentId":"agent-1787368242465-fezk8r8","detail":{"taskCount":3,"waves":[["3c9a7996-0463-4143-954f-e5b5fcf7c3ab","6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","b1cf52a5-f321-43c5-b8ec-4f91a9f46288"]],"autoApprove":true},"agentName":"Conductor"},{"t":20.2,"ts":"2026-08-22T04:53:14.867928Z","type":"execution-started","phase":"execution","summary":"실행 시작 — 태스크 3개 / 웨이브 1개"},{"t":20.21,"ts":"2026-08-22T04:53:14.875785Z","type":"task-wave-started","phase":"execution","summary":"웨이브 1 시작 (태스크 3개 병렬)","detail":{"taskIds":["3c9a7996-0463-4143-954f-e5b5fcf7c3ab","6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","b1cf52a5-f321-43c5-b8ec-4f91a9f46288"]}},{"t":20.21,"ts":"2026-08-22T04:53:14.877826Z","type":"task-status-changed","phase":"execution","taskId":"3c9a7996-0463-4143-954f-e5b5fcf7c3ab","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' pending → in_progress","agentName":"Math-Solver"},{"t":20.51,"ts":"2026-08-22T04:53:15.180381Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → running","detail":{"state":"running"},"agentName":"Math-Solver"},{"t":21.47,"ts":"2026-08-22T04:53:16.138233Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":487,"completion":56,"cumPrompt":487,"cumCompletion":56},"summary":"모델 호출 — 입력 487 / 출력 56 토큰 (누적 543)","agentName":"Math-Solver"},{"t":22.35,"ts":"2026-08-22T04:53:17.014480Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":503,"completion":46,"cumPrompt":990,"cumCompletion":102},"summary":"모델 호출 — 입력 503 / 출력 46 토큰 (누적 1,092)","agentName":"Math-Solver"},{"t":23.11,"ts":"2026-08-22T04:53:17.778539Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":686,"completion":44,"cumPrompt":1676,"cumCompletion":146},"summary":"모델 호출 — 입력 686 / 출력 44 토큰 (누적 1,822)","agentName":"Math-Solver"},{"t":24.33,"ts":"2026-08-22T04:53:18.998835Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":869,"completion":65,"cumPrompt":2545,"cumCompletion":211},"summary":"모델 호출 — 입력 869 / 출력 65 토큰 (누적 2,756)","agentName":"Math-Solver"},{"t":25.7,"ts":"2026-08-22T04:53:20.364981Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":893,"completion":77,"cumPrompt":3438,"cumCompletion":288},"summary":"모델 호출 — 입력 893 / 출력 77 토큰 (누적 3,726)","agentName":"Math-Solver"},{"t":26.75,"ts":"2026-08-22T04:53:21.418342Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":917,"completion":69,"cumPrompt":4355,"cumCompletion":357},"summary":"모델 호출 — 입력 917 / 출력 69 토큰 (누적 4,712)","agentName":"Math-Solver"},{"t":28.15,"ts":"2026-08-22T04:53:22.813478Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":941,"completion":78,"cumPrompt":5296,"cumCompletion":435},"summary":"모델 호출 — 입력 941 / 출력 78 토큰 (누적 5,731)","agentName":"Math-Solver"},{"t":30.17,"ts":"2026-08-22T04:53:24.832806Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":965,"completion":152,"cumPrompt":6261,"cumCompletion":587},"summary":"모델 호출 — 입력 965 / 출력 152 토큰 (누적 6,848)","agentName":"Math-Solver"},{"t":31.34,"ts":"2026-08-22T04:53:26.002473Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1088,"completion":64,"cumPrompt":7349,"cumCompletion":651},"summary":"모델 호출 — 입력 1,088 / 출력 64 토큰 (누적 8,000)","agentName":"Math-Solver"},{"t":32.42,"ts":"2026-08-22T04:53:27.088967Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1211,"completion":74,"cumPrompt":8560,"cumCompletion":725},"summary":"모델 호출 — 입력 1,211 / 출력 74 토큰 (누적 9,285)","agentName":"Math-Solver"},{"t":33.85,"ts":"2026-08-22T04:53:28.514988Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1277,"completion":67,"cumPrompt":9837,"cumCompletion":792},"summary":"모델 호출 — 입력 1,277 / 출력 67 토큰 (누적 10,629)","agentName":"Math-Solver"},{"t":33.85,"ts":"2026-08-22T04:53:28.515200Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → idle","detail":{"state":"idle"},"agentName":"Math-Solver"},{"t":33.85,"ts":"2026-08-22T04:53:28.515286Z","type":"token-usage-update","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 누적 토큰 10,629","detail":{"cumPrompt":9837,"cumCompletion":792},"agentName":"Math-Solver"},{"t":33.85,"ts":"2026-08-22T04:53:28.516816Z","type":"task-completed","phase":"execution","taskId":"3c9a7996-0463-4143-954f-e5b5fcf7c3ab","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' 완료 (성공)","detail":{"success":true,"error":null,"taskCounts":{"cancelled":0,"completed":1,"failed":0,"pending":2,"running":0,"skipped":0,"total":3}},"agentName":"Math-Solver"},{"t":34.16,"ts":"2026-08-22T04:53:28.823005Z","type":"task-status-changed","phase":"execution","taskId":"6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' pending → in_progress","agentName":"Math-Solver"},{"t":34.46,"ts":"2026-08-22T04:53:29.124157Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → running","detail":{"state":"running"},"agentName":"Math-Solver"},{"t":35.14,"ts":"2026-08-22T04:53:29.804674Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":487,"completion":48,"cumPrompt":10324,"cumCompletion":840},"summary":"모델 호출 — 입력 487 / 출력 48 토큰 (누적 11,164)","agentName":"Math-Solver"},{"t":35.83,"ts":"2026-08-22T04:53:30.497704Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":503,"completion":36,"cumPrompt":10827,"cumCompletion":876},"summary":"모델 호출 — 입력 503 / 출력 36 토큰 (누적 11,703)","agentName":"Math-Solver"},{"t":36.74,"ts":"2026-08-22T04:53:31.400992Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":686,"completion":64,"cumPrompt":11513,"cumCompletion":940},"summary":"모델 호출 — 입력 686 / 출력 64 토큰 (누적 12,453)","agentName":"Math-Solver"},{"t":37.67,"ts":"2026-08-22T04:53:32.334302Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":710,"completion":67,"cumPrompt":12223,"cumCompletion":1007},"summary":"모델 호출 — 입력 710 / 출력 67 토큰 (누적 13,230)","agentName":"Math-Solver"},{"t":38.93,"ts":"2026-08-22T04:53:33.594758Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":734,"completion":72,"cumPrompt":12957,"cumCompletion":1079},"summary":"모델 호출 — 입력 734 / 출력 72 토큰 (누적 14,036)","agentName":"Math-Solver"},{"t":41.01,"ts":"2026-08-22T04:53:35.675880Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":758,"completion":165,"cumPrompt":13715,"cumCompletion":1244},"summary":"모델 호출 — 입력 758 / 출력 165 토큰 (누적 14,959)","agentName":"Math-Solver"},{"t":41.01,"ts":"2026-08-22T04:53:35.676375Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → idle","detail":{"state":"idle"},"agentName":"Math-Solver"},{"t":41.01,"ts":"2026-08-22T04:53:35.676541Z","type":"token-usage-update","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 누적 토큰 14,959","detail":{"cumPrompt":13715,"cumCompletion":1244},"agentName":"Math-Solver"},{"t":41.01,"ts":"2026-08-22T04:53:35.678692Z","type":"task-completed","phase":"execution","taskId":"6436bbe7-f9c5-4848-a9ff-bc9fbce9b9c7","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' 완료 (성공)","detail":{"success":true,"error":null,"taskCounts":{"cancelled":0,"completed":2,"failed":0,"pending":1,"running":0,"skipped":0,"total":3}},"agentName":"Math-Solver"},{"t":41.32,"ts":"2026-08-22T04:53:35.983998Z","type":"task-status-changed","phase":"execution","taskId":"b1cf52a5-f321-43c5-b8ec-4f91a9f46288","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' pending → in_progress","agentName":"Math-Solver"},{"t":41.62,"ts":"2026-08-22T04:53:36.286119Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → running","detail":{"state":"running"},"agentName":"Math-Solver"},{"t":42.37,"ts":"2026-08-22T04:53:37.039429Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":522,"completion":39,"cumPrompt":14237,"cumCompletion":1283},"summary":"모델 호출 — 입력 522 / 출력 39 토큰 (누적 15,520)","agentName":"Math-Solver"},{"t":42.9,"ts":"2026-08-22T04:53:37.563534Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":538,"completion":35,"cumPrompt":14775,"cumCompletion":1318},"summary":"모델 호출 — 입력 538 / 출력 35 토큰 (누적 16,093)","agentName":"Math-Solver"},{"t":43.6,"ts":"2026-08-22T04:53:38.262506Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":721,"completion":36,"cumPrompt":15496,"cumCompletion":1354},"summary":"모델 호출 — 입력 721 / 출력 36 토큰 (누적 16,850)","agentName":"Math-Solver"},{"t":44.29,"ts":"2026-08-22T04:53:38.955521Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":904,"completion":36,"cumPrompt":16400,"cumCompletion":1390},"summary":"모델 호출 — 입력 904 / 출력 36 토큰 (누적 17,790)","agentName":"Math-Solver"},{"t":45.44,"ts":"2026-08-22T04:53:40.102911Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1087,"completion":72,"cumPrompt":17487,"cumCompletion":1462},"summary":"모델 호출 — 입력 1,087 / 출력 72 토큰 (누적 18,949)","agentName":"Math-Solver"},{"t":48.29,"ts":"2026-08-22T04:53:42.953269Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1111,"completion":167,"cumPrompt":18598,"cumCompletion":1629},"summary":"모델 호출 — 입력 1,111 / 출력 167 토큰 (누적 20,227)","agentName":"Math-Solver"},{"t":50.23,"ts":"2026-08-22T04:53:44.898637Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1127,"completion":149,"cumPrompt":19725,"cumCompletion":1778},"summary":"모델 호출 — 입력 1,127 / 출력 149 토큰 (누적 21,503)","agentName":"Math-Solver"},{"t":51.43,"ts":"2026-08-22T04:53:46.092069Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1151,"completion":96,"cumPrompt":20876,"cumCompletion":1874},"summary":"모델 호출 — 입력 1,151 / 출력 96 토큰 (누적 22,750)","agentName":"Math-Solver"},{"t":56.5,"ts":"2026-08-22T04:53:51.170404Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1175,"completion":315,"cumPrompt":22051,"cumCompletion":2189},"summary":"모델 호출 — 입력 1,175 / 출력 315 토큰 (누적 24,240)","agentName":"Math-Solver"},{"t":58.02,"ts":"2026-08-22T04:53:52.683161Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1199,"completion":101,"cumPrompt":23250,"cumCompletion":2290},"summary":"모델 호출 — 입력 1,199 / 출력 101 토큰 (누적 25,540)","agentName":"Math-Solver"},{"t":59.41,"ts":"2026-08-22T04:53:54.079521Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371952162-avfl1wb","tokens":{"prompt":1196,"completion":72,"cumPrompt":24446,"cumCompletion":2362},"summary":"모델 호출 — 입력 1,196 / 출력 72 토큰 (누적 26,808)","agentName":"Math-Solver"},{"t":59.41,"ts":"2026-08-22T04:53:54.079805Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 상태 → idle","detail":{"state":"idle"},"agentName":"Math-Solver"},{"t":59.41,"ts":"2026-08-22T04:53:54.079937Z","type":"token-usage-update","phase":"execution","agentId":"agent-1787371952162-avfl1wb","summary":"Math-Solver 누적 토큰 26,808","detail":{"cumPrompt":24446,"cumCompletion":2362},"agentName":"Math-Solver"},{"t":59.42,"ts":"2026-08-22T04:53:54.081676Z","type":"task-completed","phase":"execution","taskId":"b1cf52a5-f321-43c5-b8ec-4f91a9f46288","agentId":"agent-1787371952162-avfl1wb","summary":"태스크 'SOLVE' 완료 (성공)","detail":{"success":true,"error":null,"taskCounts":{"cancelled":0,"completed":3,"failed":0,"pending":0,"running":0,"skipped":0,"total":3}},"agentName":"Math-Solver"},{"t":59.72,"ts":"2026-08-22T04:53:54.386219Z","type":"aggregation-started","phase":"aggregation","agentId":"agent-1787368242465-fezk8r8","summary":"취합 시작 — 태스크 3개 결과 합성","agentName":"Conductor"},{"t":60.23,"ts":"2026-08-22T04:53:54.892647Z","type":"execution-completed","phase":"aggregation","summary":"실행 완료","detail":{"result":"**Execution complete** — 3 task(s) processed in 1 wave(s).\n\n1. ✅ **SOLVE**  \n   Agent: `Math-Solver`\n2. ✅ **SOLVE**  \n   Agent: `Math-Solver`\n3. ✅ **SOLVE**  \n   Agent: `Math-Solver`","tokenUsage":{"completionTokens":2362,"promptTokens":24446}}}],"tokens":{"prompt":24446,"completion":2362,"total":26808,"calls":28,"byAgent":{"agent-1787371952162-avfl1wb":{"name":"Math-Solver","prompt":24446,"completion":2362,"calls":28}},"byPhase":{"execution":{"prompt":24446,"completion":2362,"calls":28}}},"insights":{"taskCount":3,"duplicateTasks":2,"plannerShare":0,"callsPerTask":9.3},"baseline":{"item":"math-visible-0001","model":"furiosa-ai/gpt-oss-120b","correct":true,"prompt":131,"completion":486,"seconds":5.09},"calibration":[{"conf":0,"correct":0,"n":2},{"conf":3,"correct":1,"n":2},{"conf":5,"correct":0,"n":3},{"conf":7,"correct":7,"n":11},{"conf":8,"correct":20,"n":29},{"conf":9,"correct":46,"n":57},{"conf":10,"correct":36,"n":36}]}</script>
+<script type="application/json" id="run-004">{"meta":{"squad":"BIBIMBAP","request":"[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. The plan must contain EXACTLY ONE task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Do not create extraction, parsing, analysis, review, or duplicate tasks. Exactly one agent may work on this request — no reviewer, verifier, formatter, or helper agent. A plan with more than one task is invalid.\n\n[FINAL RESPONSE RULE] The squad's final response must be exactly the specialist's answer in the REQUIRED OUTPUT format — never a status summ","startedAt":"2026-08-22T10:42:55.829838Z","completedAt":"2026-08-22T10:43:13.177898Z","durationSec":17.3,"rejectedPlansBefore":23,"version":"v3.7b (5 agents · Qwen3 /no_think planner · 답만 출력)"},"agents":[{"id":"agent-1787368242465-fezk8r8","name":"Conductor","role":"planner","model":"Qwen3-32B-FP8","planner":true},{"id":"agent-1787371848955-vy48dd2","name":"Generic-Solver","role":"Generic-Solver","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371889852-bjmjlyo","name":"Math-Solver","role":"Math-Solver","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371952162-avfl1wb","name":"LCB-Coder","role":"LCB-Coder","model":"gpt-oss-120b","planner":false},{"id":"agent-1787371974406-lotikpk","name":"SWE-Patcher","role":"SWE-Patcher","model":"gpt-oss-120b","planner":false}],"tasks":[{"id":"19391f46-4592-41d2-a4b8-ff02c786dea3","title":"SOLVE","agentId":"agent-1787371889852-bjmjlyo","agentName":"Math-Solver","status":"done","createdAt":"2026-08-22T10:43:10.279415Z","completedAt":"2026-08-22T10:43:12.363289Z","durationSec":2.1}],"events":[{"t":0,"ts":"2026-08-22T10:42:55.829838Z","type":"planning-started","phase":"planning","summary":"플래너가 요청을 분석해 계획을 수립합니다","agentId":"agent-1787368242465-fezk8r8","detail":{"request":"[PLANNING DIRECTIVE] This request is ONE atomic benchmark problem. The plan must contain EXACTLY ONE task: title \"SOLVE\", assigned to Math-Solver, description \"Solve the problem completely and output only the final answer in the required format.\" Do not create extraction, parsing, analysis, review, or duplicate tasks. Exactly one agent may work on this request — no reviewer, verifier, formatter, or helper agent. A plan with more than one task is invalid.\n\n[FINAL RESPONSE RULE] The squad's final response must be exactly the specialist's answer in the REQUIRED OUTPUT format — never a status summ"},"agentName":"Conductor"},{"t":14.44,"ts":"2026-08-22T10:43:10.272667Z","type":"plan-ready","phase":"planning","summary":"계획 완성 — 태스크 1개, 웨이브 1개","agentId":"agent-1787368242465-fezk8r8","detail":{"taskCount":1,"waves":[["19391f46-4592-41d2-a4b8-ff02c786dea3"]],"autoApprove":true},"agentName":"Conductor"},{"t":14.44,"ts":"2026-08-22T10:43:10.273073Z","type":"execution-started","phase":"execution","summary":"실행 시작 — 태스크 1개 / 웨이브 1개"},{"t":14.45,"ts":"2026-08-22T10:43:10.280964Z","type":"task-wave-started","phase":"execution","summary":"웨이브 1 시작 (태스크 1개 병렬)","detail":{"taskIds":["19391f46-4592-41d2-a4b8-ff02c786dea3"]}},{"t":14.45,"ts":"2026-08-22T10:43:10.283515Z","type":"task-status-changed","phase":"execution","taskId":"19391f46-4592-41d2-a4b8-ff02c786dea3","agentId":"agent-1787371889852-bjmjlyo","summary":"태스크 'SOLVE' pending → in_progress","agentName":"Math-Solver"},{"t":14.76,"ts":"2026-08-22T10:43:10.585524Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","summary":"Math-Solver 상태 → running","detail":{"state":"running"},"agentName":"Math-Solver"},{"t":15.89,"ts":"2026-08-22T10:43:11.722795Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","tokens":{"prompt":809,"completion":62,"cumPrompt":809,"cumCompletion":62},"summary":"모델 호출 — 입력 809 / 출력 62 토큰 (누적 871)","agentName":"Math-Solver"},{"t":16.53,"ts":"2026-08-22T10:43:12.362334Z","type":"execution-token-usage","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","tokens":{"prompt":692,"completion":48,"cumPrompt":1501,"cumCompletion":110},"summary":"모델 호출 — 입력 692 / 출력 48 토큰 (누적 1,611)","agentName":"Math-Solver"},{"t":16.53,"ts":"2026-08-22T10:43:12.362798Z","type":"agent-state-changed","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","summary":"Math-Solver 상태 → idle","detail":{"state":"idle"},"agentName":"Math-Solver"},{"t":16.53,"ts":"2026-08-22T10:43:12.363064Z","type":"token-usage-update","phase":"execution","agentId":"agent-1787371889852-bjmjlyo","summary":"Math-Solver 누적 토큰 5,819","detail":{"cumPrompt":5328,"cumCompletion":491},"agentName":"Math-Solver"},{"t":16.54,"ts":"2026-08-22T10:43:12.366315Z","type":"task-completed","phase":"execution","taskId":"19391f46-4592-41d2-a4b8-ff02c786dea3","agentId":"agent-1787371889852-bjmjlyo","summary":"태스크 'SOLVE' 완료 (성공)","detail":{"success":true,"error":null,"taskCounts":{"cancelled":0,"completed":1,"failed":0,"pending":0,"running":0,"skipped":0,"total":1}},"agentName":"Math-Solver"},{"t":16.84,"ts":"2026-08-22T10:43:12.671207Z","type":"aggregation-started","phase":"aggregation","agentId":"agent-1787368242465-fezk8r8","summary":"취합 시작 — 태스크 1개 결과 합성","agentName":"Conductor"},{"t":17.35,"ts":"2026-08-22T10:43:13.177898Z","type":"execution-completed","phase":"aggregation","summary":"실행 완료","detail":{"result":"**Execution complete** — 1 task(s) processed in 1 wave(s).\n\n1. ✅ **SOLVE**  \n   Agent: `Math-Solver`","tokenUsage":{"completionTokens":110,"promptTokens":1501}}}],"tokens":{"prompt":1501,"completion":110,"total":1611,"calls":2,"byAgent":{"agent-1787371889852-bjmjlyo":{"name":"Math-Solver","prompt":1501,"completion":110,"calls":2}},"byPhase":{"execution":{"prompt":1501,"completion":110,"calls":2}}},"insights":{"taskCount":1,"duplicateTasks":0,"plannerShare":0,"callsPerTask":2},"baseline":{"item":"math-visible-0001","model":"furiosa-ai/gpt-oss-120b","correct":true,"prompt":131,"completion":486,"seconds":5.09},"calibration":[{"conf":0,"correct":0,"n":2},{"conf":3,"correct":1,"n":2},{"conf":5,"correct":0,"n":3},{"conf":7,"correct":7,"n":11},{"conf":8,"correct":20,"n":29},{"conf":9,"correct":46,"n":57},{"conf":10,"correct":36,"n":36}]}</script>
 <script>
-const $ = s => document.querySelector(s);
-const C = {idle:"#6b6690", think:"#f5c542", run:"#5aa8ff", done:"#3ddc97", fail:"#ff6b6b", accent:"#b794f6", dim:"#a39bd4", line:"#332c5c"};
-let T = null, idx = 0, playing = false, timer = null;
-let BEFORE = null; // run-001(v1) 요약 — Before/After 비교용. 현재 런이 run-001 자신이면 비교 생략
-const short = v => (v || "").split(" ")[0] || "현재";
-const summarize = t => ({version: t.meta.version || "이전 런", total: t.tokens.total, calls: t.tokens.calls, tasks: t.insights.taskCount, agents: t.agents.length, seconds: t.meta.durationSec, startedAt: t.meta.startedAt});
+// =================================================================================================
+// CORE (DOM-free) — §2.3 derive · §5 rules · §2.4 normalizeRaw · §6 splits · BENCH (owner-provided, verbatim)
+// Everything in this block runs in node (see test.js). No document/window access here.
+// =================================================================================================
+'use strict';
+const LATEST='run-004',HISTORY=['run-001'],RUN_IDS=[LATEST].concat(HISTORY);   // swap LATEST when run-005 arrives
+const fmt=n=>Math.round(+n||0).toLocaleString('en-US'),f1=n=>(+n).toFixed(1),f2=n=>(+n).toFixed(2),sgn=n=>(n>0?'+':n<0?'−':'')+fmt(Math.abs(n));
+const SYM={gap:'⏳',dup:'??',over:'?',ctx:'?!',serial:'⇉',done:'✓'};
+const modelShort=m=>String(m||'?').replace(/^.*\//,'').replace(/-\d+[bB].*$/,'');
+const baseOf=T=>{const b=T.baseline;return b&&(b.prompt!=null||b.completion!=null)?{tok:(b.prompt||0)+(b.completion||0),prompt:b.prompt||0,completion:b.completion||0,s:+b.seconds||0,correct:b.correct,item:b.item||'?',model:b.model||'?'}:null;};
+const sessOf=e=>{const d=e.detail||{};if(d.cumPrompt!=null||d.cumCompletion!=null)return(d.cumPrompt||0)+(d.cumCompletion||0);const m=/([\d,]+)\s*$/.exec(e.summary||'');return m?+m[1].replace(/,/g,''):0;};
 
-document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
-  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
-  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-" + b.dataset.v));
-});
+// ---- BENCH: measured on visible practice sets with jxc-selfeval; output tokens per item; all gpt-oss-120b (owner numbers, verbatim) ----
+const BENCH={tracks:[
+  {id:'generic',name:'generic (MMLU-Pro/GPQA)',base:{acc:60.0,n:20,tok:572},latest:{acc:80.9,n:136,ci:[75,87],tok:450}},
+  {id:'math',name:'math (algebra-level practice)',base:{acc:100,n:15,tok:740},latest:{acc:100,n:14,ci:[100,100],tok:385}},
+  {id:'aime',name:'math AIME-2024 (hard, segment test)',ref:'난이도 참고 · 베이스라인 미측정',base:null,latest:{acc:72.4,n:29,ci:[59,86],tok:3021}},
+  {id:'coding',name:'coding LCB',base:{acc:85.0,n:20,tok:2036},latest:{acc:90.0,n:20,ci:[80,100],tok:1489}}],
+ excluded:'Qwen3-32B generic 66.9% (n=140) · AIME 43.3% (n=30, 6,911 tok); EXAONE AIME 38.9% (n=18, 6,947 tok)',
+ planner:{qwen:{model:'Qwen3-32B /no_think',tok:61,sec:1.4},gptoss:{model:'gpt-oss-120b',tok:193,dup:'4회 중 3회 태스크 중복'}},
+ baseLabel:'단독 gpt-oss-120b · 단순 프롬프트 · 에이전트 없음',latestLabel:'BIBIMBAP v3.7b'};
+// verdict templates (slots filled from BENCH only — no hand-written per-number text)
+function benchVerdicts(){const tr=BENCH.tracks.filter(t=>t.base);
+  const accParts=tr.map(t=>{const d=t.latest.acc-t.base.acc;return`${t.id} ${d>0?'+'+Math.round(d)+'%p':d<0?Math.round(d)+'%p':'유지 '+t.latest.acc+'%'}`;});
+  const allUp=tr.every(t=>t.latest.acc>=t.base.acc),allDown=tr.every(t=>t.latest.tok<t.base.tok);
+  return{A:`${accParts.join(' · ')} — ${allUp?'전 트랙 베이스라인 이상':'일부 트랙 하락'}`,
+    B:`솔버 출력 토큰은 ${allDown?'전 트랙 감소':'일부 트랙 증가'}(${tr.map(t=>`${t.id} ${fmt(t.base.tok)}→${fmt(t.latest.tok)}`).join(', ')}), 오케스트레이션 고정비 ≈ 플래너 ${BENCH.planner.qwen.tok} tok + 컨텍스트 재전송`};}
 
-// ---------- 원본 로그(events.jsonl) 직접 수용 — 채점 대상인 "로그(텍스트) Trace"를 그대로 읽는다 ----------
-let SQUAD = null; // .squad.json을 함께 드롭하면 에이전트 이름·플래너 식별에 사용
-function normalizeRaw(text, squad) {
-  const raw = text.split("\n").filter(l => l.trim()).map(l => JSON.parse(l));
-  const cfg = squad ? (squad.config || squad) : null;
-  const agents = {};
-  (cfg?.agents || []).forEach(a => agents[a.id] = {id: a.id, name: a.name, role: a.role?.value || a.role?.type, model: ((a.modelPreferences || {}).preferredModelId || "").split("/").pop(), planner: a.id === cfg.plannerAgentId});
-  const plannerId = cfg?.plannerAgentId || null;
-  const ts = s => new Date(s).getTime() / 1000;
-  const execIdx = Math.max(...raw.map((e, i) => e.eventType === "squad:execution-started" ? i : -1));
-  if (execIdx < 0) throw new Error("execution-started 이벤트가 없습니다 (완주된 실행 로그가 필요)");
-  const planIdx = Math.max(...raw.slice(0, execIdx).map((e, i) => e.eventType === "squad:planning-started" ? i : -1));
-  const evs = raw.slice(Math.max(planIdx, 0)); const t0 = ts(evs[0].timestamp);
-  const rejected = raw.slice(0, Math.max(planIdx, 0)).filter(e => e.eventType === "squad:plan-ready").length;
-  const tasks = {}; // 로그만으로 복원: 이 실행의 wave taskIds + task-completed (index.json 비의존)
-  let phase = "planning", cur = null, prev = [0, 0]; const events = [], calls = [];
-  const name = id => agents[id]?.name || (id ? "agent-" + String(id).slice(-6) : "?");
-  const ensureAgent = id => { if (id && !agents[id]) agents[id] = {id, name: name(id), role: "?", model: "?", planner: id === plannerId}; };
-  for (const e of evs) {
-    const p = e.payload || {}, et = e.eventType.split(":")[1], t = +(ts(e.timestamp) - t0).toFixed(2);
-    const ev = {t, ts: e.timestamp, type: et, phase};
-    if (et === "planning-started") { ev.agentId = plannerId; ev.summary = "플래너가 요청을 분석해 계획을 수립합니다"; ev.detail = {request: (p.request || "").slice(0, 600)}; }
-    else if (et === "plan-ready") { ev.agentId = plannerId; ev.summary = `계획 완성 — 태스크 ${p.taskCount}개, 웨이브 ${(p.waves || []).length}개`; ev.detail = {taskCount: p.taskCount, waves: p.waves, autoApprove: p.autoApprove}; }
-    else if (et === "execution-started") { phase = "execution"; ev.phase = phase; ev.summary = `실행 시작 — 태스크 ${p.totalTasks}개 / 웨이브 ${p.totalWaves}개`; }
-    else if (et === "task-wave-started") { (p.taskIds || []).forEach(id => tasks[id] = tasks[id] || {id, title: "task", status: "pending"}); ev.summary = `웨이브 ${(p.waveIndex || 0) + 1} 시작 (태스크 ${(p.taskIds || []).length}개 병렬)`; ev.detail = {taskIds: p.taskIds}; }
-    else if (et === "task-status-changed") { ev.taskId = p.taskId; ev.agentId = cur; ev.summary = `태스크 ${p.oldStatus} → ${p.newStatus}`; }
-    else if (et === "agent-state-changed") { ensureAgent(p.agentId); ev.agentId = p.agentId; if (p.state === "running") cur = p.agentId; ev.summary = `${name(p.agentId)} 상태 → ${p.state}`; ev.detail = {state: p.state}; }
-    else if (et === "execution-token-usage") { const cp = p.promptTokens || 0, cc = p.completionTokens || 0; const dp = cp >= prev[0] ? cp - prev[0] : cp, dc = cc >= prev[1] ? cc - prev[1] : cc; prev = [cp, cc];
-      ev.agentId = phase === "execution" ? cur : plannerId; ensureAgent(ev.agentId); ev.tokens = {prompt: dp, completion: dc, cumPrompt: cp, cumCompletion: cc}; ev.summary = `모델 호출 — 입력 ${dp.toLocaleString()} / 출력 ${dc.toLocaleString()} 토큰 (누적 ${(cp + cc).toLocaleString()})`; calls.push({agentId: ev.agentId, phase, prompt: dp, completion: dc}); }
-    else if (et === "token-usage-update") { ensureAgent(p.agentId); ev.agentId = p.agentId; ev.summary = `${name(p.agentId)} 누적 토큰 ${(p.total || 0).toLocaleString()}`; }
-    else if (et === "task-completed") { ev.taskId = p.taskId; ev.agentId = cur; tasks[p.taskId] = {...(tasks[p.taskId] || {id: p.taskId}), title: p.taskTitle || "task", status: p.success ? "done" : "failed", agentId: cur, agentName: name(cur)}; ev.summary = `태스크 '${p.taskTitle}' 완료 (${p.success ? "성공" : "실패"})`; ev.detail = {success: p.success, error: p.error, taskCounts: p.taskCounts}; }
-    else if (et === "aggregation-started") { phase = "aggregation"; ev.phase = phase; ev.agentId = plannerId; ev.summary = `취합 시작 — 태스크 ${(p.taskIds || []).length}개 결과 합성`; }
-    else if (et === "execution-completed") { ev.summary = "실행 완료"; ev.detail = {result: p.result, tokenUsage: p.tokenUsage}; }
-    else ev.summary = et;
-    if (ev.agentId) ev.agentName = name(ev.agentId);
-    events.push(ev);
-  }
-  const byAgent = {}; let tp = 0, tc = 0;
-  calls.forEach(c => { const b = byAgent[c.agentId] = byAgent[c.agentId] || {name: name(c.agentId), prompt: 0, completion: 0, calls: 0}; b.prompt += c.prompt; b.completion += c.completion; b.calls++; tp += c.prompt; tc += c.completion; });
-  const fin = evs.find(e => e.eventType === "squad:execution-completed"); const tu = fin?.payload?.tokenUsage; if (tu) { tp = tu.promptTokens ?? tp; tc = tu.completionTokens ?? tc; }
-  const tl = Object.values(tasks); const dupMap = {}; tl.forEach(x => { const k = x.title + "|" + x.agentId; dupMap[k] = (dupMap[k] || 0) + 1; });
-  const duplicates = Object.values(dupMap).reduce((a, v) => a + (v > 1 ? v - 1 : 0), 0);
-  const execCalls = calls.filter(c => c.phase === "execution").length;
-  return {meta: {squad: cfg?.name || "squad", request: events.find(e => e.type === "planning-started")?.detail?.request || "", startedAt: evs[0].timestamp, completedAt: evs[evs.length - 1].timestamp, durationSec: +(ts(evs[evs.length - 1].timestamp) - t0).toFixed(1), rejectedPlansBefore: rejected, source: "events.jsonl (원본 로그에서 브라우저 내 정규화)"},
-          agents: Object.values(agents), tasks: tl, events, tokens: {prompt: tp, completion: tc, total: tp + tc, calls: calls.length, byAgent},
-          insights: {taskCount: tl.length, duplicateTasks: duplicates, plannerShare: 0, callsPerTask: +(execCalls / Math.max(tl.length, 1)).toFixed(1)},
-          baseline: T?.baseline, calibration: T?.calibration};
-}
-async function ingest(file) {
-  const text = await file.text();
-  if (file.name.endsWith(".squad.json") || file.name === "squad.json") { SQUAD = JSON.parse(text); $("#meta").textContent = "스쿼드 설정 적재됨 — 이제 events.jsonl을 드롭하세요"; return; }
-  if (file.name.endsWith(".jsonl")) { load(normalizeRaw(text, SQUAD || (T ? {config: {name: T.meta.squad, agents: T.agents.map(a => ({id: a.id, name: a.name, role: {value: a.role}, modelPreferences: {preferredModelId: a.model}})), plannerAgentId: T.agents.find(a => a.planner)?.id}} : null))); return; }
-  load(JSON.parse(text));
-}
+// ---- §2.3 derive(T) → D. Per-event derived data lives in parallel arrays (D.flag[i], D.task[i], D.k[i], D.cum[i]); events[] are never mutated. ----
+function derive(T){
+  const ev=T.events,N=ev.length,flag=Array(N).fill(null),task=Array(N).fill(null),k=Array(N).fill(null),cum=Array(N).fill(null);
+  const first=t=>{const i=ev.findIndex(e=>e.type===t);return i<0?null:{i,t:ev[i].t,e:ev[i]};};
+  const plan=first('plan-ready'),exec0=first('execution-started'),agg=first('aggregation-started'),fin=first('execution-completed'),wave=first('task-wave-started');
+  const dur=Math.max((T.meta||{}).durationSec||0,ev[N-1].t);
+  const phases=[['planning',0,plan?plan.t:dur],['execution',plan?plan.t:dur,agg?agg.t:dur],['aggregation',agg?agg.t:dur,fin?fin.t:dur]];
+  const spans=[],calls=[];let open=null,run=0,rp=0;
+  const close=(s,i,t)=>{s.t1=t;s.i1=i;s.dur=+(t-s.t0).toFixed(2);if(s===open)open=null;};
+  ev.forEach((e,i)=>{
+    if(e.type==='task-status-changed'&&/in_progress/.test((e.summary||'')+' '+((e.detail||{}).newStatus||''))){
+      if(open)close(open,i,e.t);
+      const tk=(T.tasks||[]).find(x=>x.id===e.taskId)||{};
+      open={n:spans.length+1,i0:i,t0:e.t,t1:null,i1:null,dur:null,taskId:e.taskId||tk.id||null,agentId:e.agentId||tk.agentId||null,agentName:e.agentName||tk.agentName||'?',title:tk.title||((e.summary||'').match(/'(.+?)'/)||[])[1]||'task',calls:[],prompt:0,completion:0,first:0,last:0,peak:0,wallDur:tk.durationSec??null,dup:false};
+      spans.push(open);task[i]=open.n;}
+    else if(e.type==='execution-token-usage'&&e.tokens){const p=e.tokens.prompt||0,c=e.tokens.completion||0;run+=p+c;rp+=p;cum[i]=run;
+      const rec={i,t:e.t,p,c,cum:run,logCum:(e.tokens.cumPrompt||0)+(e.tokens.cumCompletion||0),task:open?open.n:null,k:open?open.calls.length+1:null,agentId:e.agentId};calls.push(rec);
+      if(open){open.calls.push(i);open.prompt+=p;open.completion+=c;task[i]=open.n;k[i]=rec.k;if(rec.k===1)open.first=p;open.last=p;open.peak=Math.max(open.peak,p);}}
+    else if(e.type==='task-completed'){const s=(open&&(!e.taskId||open.taskId===e.taskId))?open:spans.find(x=>x.t1==null&&x.taskId===e.taskId)||open;if(s){task[i]=s.n;close(s,i,e.t);}}
+    else if(open)task[i]=open.n;});
+  if(open)close(open,N-1,dur);
+  const seen={};spans.forEach(s=>{const key=s.title+'|'+s.agentId;s.dup=!!seen[key];seen[key]=1;});
+  const dupCount=spans.filter(s=>s.dup).length;
+  // serial claim: "parallel" wave that actually ran serially, and tasks[].durationSec measured from wave start
+  let serialClaim=null;const waveIds=wave?((wave.e.detail||{}).taskIds||[]):[];
+  if(waveIds.length>=2&&spans.length>=2&&!spans.some((a,i)=>spans.some((b,j)=>j>i&&a.t0<b.t1&&b.t0<a.t1)))serialClaim=`웨이브 1: 태스크 ${waveIds.length}개 '병렬' → 실제 직렬 (겹침 0)`;
+  const lag=spans.find(s=>s.wallDur!=null&&s.wallDur-s.dur>1);
+  if(lag)serialClaim=(serialClaim?serialClaim+' · ':'')+`tasks[].durationSec ${lag.wallDur}s는 웨이브 시작 기준, 이벤트 기준 ${f1(lag.dur)}s — 앞 태스크를 기다렸다`;
+  // agent lanes: running→idle pairs; planner lane gets planning + aggregation
+  const runs={},openR={};ev.forEach(e=>{if(e.type!=='agent-state-changed'||!e.agentId)return;const st=(e.detail||{}).state;if(st==='running')openR[e.agentId]=e.t;else if(openR[e.agentId]!=null){(runs[e.agentId]=runs[e.agentId]||[]).push([openR[e.agentId],e.t,'execution']);delete openR[e.agentId];}});
+  Object.keys(openR).forEach(id=>(runs[id]=runs[id]||[]).push([openR[id],dur,'execution']));
+  const planner=(T.agents||[]).find(a=>a.planner)||null;
+  if(planner){const r=runs[planner.id]=runs[planner.id]||[];if(plan)r.unshift([0,plan.t,'planning']);if(agg)r.push([agg.t,fin?fin.t:dur,'aggregation']);}
+  const byAgent={};calls.forEach(c=>{const b=byAgent[c.agentId]=byAgent[c.agentId]||{calls:0,prompt:0,completion:0};b.calls++;b.prompt+=c.p;b.completion+=c.c;});
+  const gaps=[];ev.forEach((e,i)=>{if(i&&e.t-ev[i-1].t>3)gaps.push({t0:ev[i-1].t,t1:e.t,i});});
+  // §5.1 flags (one per event; first rule wins)
+  const set=(i,f)=>{if(i!=null&&flag[i]==null)flag[i]=f;};
+  if(plan&&plan.t>5)set(plan.i,'gap');
+  spans.forEach(s=>{if(s.dup)set(s.i0,'dup');});
+  const over=spans.find(s=>s.calls.length>=3);if(over)set(over.calls[2],'over');
+  spans.forEach(s=>{if(s.calls.length>=2&&s.last>s.first)set(s.calls[s.calls.length-1],'ctx');});
+  if(serialClaim&&spans[0]&&spans[0].i1!=null)set(spans[0].i1,'serial');
+  if(fin)set(fin.i,'done');
+  const flags=[];flag.forEach((f,i)=>{if(f)flags.push(i);});
+  const total=run,base=baseOf(T);
+  return{dur,plan,exec0,agg,fin,wave,phases,spans,calls,cum,total,prompt:rp,completion:total-rp,dupCount,serialClaim,runs,byAgent,active:Object.keys(byAgent).length,planner,gaps,base,flag,task,k,flags,
+    callMax:calls.reduce((m,c)=>Math.max(m,c.p+c.c),0),checkpoints:{plan:plan?plan.t:null,firstCall:calls.length?calls[0].t:null,finish:fin?fin.t:dur,tokens:total},
+    traceTotal:(T.tokens||{}).total??null,ratio:base&&base.tok?total/base.tok:null,solver:calls.length?((T.agents||[]).find(a=>a.id===calls[0].agentId)||{name:ev[calls[0].i].agentName||'?'}):null};}
+// synthetic one-call lane for the 단독 baseline (no event log exists — built from T.baseline only)
+function baseLane(base){if(!base)return null;return{dur:base.s,calls:[{i:-1,t:base.s,p:base.prompt,c:base.completion,cum:base.tok,k:1,task:null}],total:base.tok,plan:null,agg:null,fin:{t:base.s},spans:[{n:1,t0:0,t1:base.s,dur:base.s,title:'호출 1',dup:false,calls:[-1]}],phases:[['execution',0,base.s]],gaps:[],callMax:base.tok,synthetic:true,checkpoints:{plan:null,firstCall:base.s,finish:base.s,tokens:base.tok},ratio:1,label:`단독 ${modelShort(base.model)} · 호출 1 · ${fmt(base.tok)} tok${base.correct?' · 정답':''}`};}
+// §6.5 SPLIT deltas (After − Before) on the shared clock
+function splitsOf(Db,Da){const d=(a,b)=>a==null||b==null?null:+(a-b).toFixed(2);const cb=Db.checkpoints,ca=Da.checkpoints;
+  return{plan:d(ca.plan,cb.plan),first:d(ca.firstCall,cb.firstCall),finish:d(ca.finish,cb.finish),tokens:Da.total-Db.total,pct:+((Da.total/Db.total-1)*100).toFixed(1),div:+(Db.total/Da.total).toFixed(1)};}
 
-$("#file").onchange = async e => { const f = e.target.files[0]; if (f) ingest(f); };
-document.body.addEventListener("dragover", e => e.preventDefault());
-document.body.addEventListener("drop", async e => { e.preventDefault(); for (const f of e.dataTransfer.files) await ingest(f); });
+// ---- §5.2 captions: template slots only, no per-run text ----
+function capOf(T,D,i){const e=T.events[i],f=D.flag[i],b=D.base,s=D.task[i]?D.spans[D.task[i]-1]:null,pm=(D.planner||{}).model||'?';
+  const ci=e.tokens?D.calls.find(c=>c.i===i):null,prev=ci&&ci.k>1?D.calls.find(c=>c.task===ci.task&&c.k===ci.k-1):null;
+  switch(f){
+    case'gap':return`플래너(${pm})가 ${f1(e.t)}s 침묵 후 태스크 ${(e.detail||{}).taskCount??D.spans.length}개 — 지시문은 1개${D.dupCount?` (중복 ${D.dupCount})`:''}`;
+    case'dup':return`${s.title} #${s.n} 시작 — 이미 끝난 태스크의 반복, 컨텍스트 재전송이 처음부터 다시`;
+    case'over':return`같은 태스크 ${ci.k}번째 호출 — 단독 모델은 1회`;
+    case'ctx':return`태스크 #${s.n}: 호출 ${s.calls.length}회, 입력 ${fmt(s.first)}→${fmt(s.last)} — 같은 대화를 매번 다시 보냈다`;
+    case'done':return`합계 ${fmt(D.total)} tok${b&&b.tok?` = 단독 ${fmt(b.tok)}의 ${f1(D.total/b.tok)}×`:''} · ${f1(D.dur)}s${b?` vs ${b.s}s`:''}`;}
+  switch(e.type){
+    case'planning-started':return`플래너 ${pm}가 생각 중 — 이벤트 0개 구간`;
+    case'plan-ready':return`플래너(${pm}) 계획 완료 ${f1(e.t)}s — 태스크 ${(e.detail||{}).taskCount??D.spans.length}개 — 지시문은 1개`;
+    case'task-status-changed':return s&&s.i0===i?`${s.title} #${s.n} 시작 → ${e.agentName||s.agentName}`:e.summary||e.type;
+    case'execution-token-usage':if(!ci)return e.summary||e.type;if(!ci.k||ci.k===1)return`태스크 #${ci.task??'?'} 첫 호출 — 입력 ${fmt(ci.p)}`;
+      {const d=ci.p-prev.p;return ci.k===2?`2번째 호출 — 입력 ${fmt(ci.p)} (${sgn(d)})`:`같은 태스크 ${ci.k}번째 호출 — 입력 ${fmt(prev.p)}→${fmt(ci.p)} (${sgn(d)})${d>0?': 컨텍스트가 다시 전송됐다':''} · 누적 ${fmt(ci.cum)}`;}
+    case'task-completed':return s?`${s.title} #${s.n} 완료 · ${s.calls.length}회 · ${fmt(s.prompt+s.completion)} tok · ${f1(s.dur)}s${f==='serial'?' · '+D.serialClaim:''}`:e.summary||e.type;
+    case'token-usage-update':return`세션 누적 ${fmt(sessOf(e))} (이 실행 합계 아님)`;
+    case'aggregation-started':return`취합 시작 — 플래너가 ${D.spans.length}개 결과 합성`;
+    default:return e.summary||e.type;}}
 
-function load(t) {
-  T = t; idx = 0; stop();
-  $("#meta").textContent = `${t.meta.squad}${t.meta.version ? " " + t.meta.version : ""} · ${t.agents.length} agents · ${t.meta.durationSec}s · ${t.tokens.total.toLocaleString()} tok · ${t.events.length} events${t.meta.source ? " · " + t.meta.source : ""}`;
-  $("#scrub").max = t.events.length - 1; $("#scrub").value = 0;
-  renderFeed(); renderState(); renderReceipt(); renderDecisions();
-}
-
-// ---------- state reconstruction up to idx ----------
-function stateAt(i) {
-  const ag = {}; T.agents.forEach(a => ag[a.id] = {status:"idle", tokens:0, calls:0});
-  const tk = {}; T.tasks.forEach(t => tk[t.id] = "pending");
-  let phase = "planning", msgs = [];
-  for (let k = 0; k <= i; k++) {
-    const e = T.events[k]; phase = e.phase;
-    if (e.type === "planning-started" || e.type === "aggregation-started") { if (e.agentId) ag[e.agentId].status = "think"; }
-    if (e.type === "plan-ready" && e.agentId) ag[e.agentId].status = "idle";
-    if (e.type === "agent-state-changed" && e.agentId) ag[e.agentId].status = e.detail.state === "running" ? "run" : (e.detail.state === "error" ? "fail" : "idle");
-    if (e.type === "task-status-changed" && e.taskId) tk[e.taskId] = e.summary.includes("in_progress") ? "run" : tk[e.taskId];
-    if (e.type === "task-completed" && e.taskId) tk[e.taskId] = e.detail.success ? "done" : "fail";
-    if (e.tokens && e.agentId) { ag[e.agentId].tokens += e.tokens.prompt + e.tokens.completion; ag[e.agentId].calls++; msgs.push(e); }
-    if (e.type === "execution-completed") Object.values(ag).forEach(a => { if (a.status === "run") a.status = "done"; });
-  }
-  return {ag, tk, phase, lastMsg: msgs[msgs.length - 1]};
-}
-
-// ---------- The Bowl ----------
-function renderState() {
-  const s = stateAt(idx), e = T.events[idx];
-  const svg = $("#bowl"); const cx = 320, cy = 250, R = 185;
-  const n = T.agents.length;
-  let out = `<defs><radialGradient id="g"><stop offset="0" stop-color="#2a2350"/><stop offset="1" stop-color="#17142a"/></radialGradient></defs>
-    <circle cx="${cx}" cy="${cy}" r="${R + 40}" fill="url(#g)" stroke="${C.line}" stroke-width="2"/>`;
-  // center problem
-  out += `<circle cx="${cx}" cy="${cy}" r="46" fill="#241f45" stroke="${C.accent}" stroke-width="2"/>
-    <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">문항</text>
-    <text x="${cx}" y="${cy + 13}" text-anchor="middle" fill="${C.dim}" font-size="10">${s.phase}</text>
-    <text x="${cx}" y="${cy + 27}" text-anchor="middle" fill="${C.accent}" font-size="9" font-weight="700">홉 ${Object.values(s.ag).filter(a => a.calls).length}</text>`;
-  T.agents.forEach((a, i) => {
-    const ang = -Math.PI / 2 + i * 2 * Math.PI / n, x = cx + R * Math.cos(ang), y = cy + R * Math.sin(ang);
-    const st = s.ag[a.id], col = C[st.status] || C.idle, active = st.status !== "idle";
-    if (active || st.calls) out += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${active ? col : C.line}" stroke-width="${active ? 3 : 1}" ${active ? 'stroke-dasharray="6 5"' : ""} opacity=".9"/>`;
-    out += `<circle cx="${x}" cy="${y}" r="${active ? 30 : 24}" fill="${col}" opacity="${active ? 1 : .55}" ${active ? `style="filter:drop-shadow(0 0 10px ${col})"` : ""}/>
-      <text x="${x}" y="${y + 4}" text-anchor="middle" fill="#120f22" font-size="9" font-weight="800">${a.planner ? "★" : ""}${a.name.split("-")[0]}</text>
-      <text x="${x}" y="${y + 44}" text-anchor="middle" fill="${C.dim}" font-size="9.5">${a.name}</text>
-      <text x="${x}" y="${y + 56}" text-anchor="middle" fill="${st.tokens ? "#fff" : C.dim}" font-size="9">${st.tokens ? st.tokens.toLocaleString() + " tok · " + st.calls + "회" : (a.model && a.model !== "?" ? a.model : "")}</text>`;
-  });
-  // tasks strip
-  T.tasks.forEach((t, i) => {
-    const col = C[s.tk[t.id] === "pending" ? "idle" : s.tk[t.id]] || C.idle;
-    out += `<rect x="${20 + i * 80}" y="490" width="70" height="18" rx="5" fill="${col}" opacity=".9"/><text x="${55 + i * 80}" y="503" text-anchor="middle" fill="#120f22" font-size="9" font-weight="700">${t.title} ${i + 1}</text>`;
-  });
-  svg.innerHTML = out;
-  $("#now").textContent = `${e.t.toFixed(1)}s · ${idx + 1}/${T.events.length}`;
-  $("#scrub").value = idx;
-  document.querySelectorAll("#feed .ev").forEach((d, k) => d.classList.toggle("cur", k === idx));
-  const cur = document.querySelector("#feed .ev.cur"); if (cur) cur.scrollIntoView({block: "nearest"});
-  renderLens(e);
-}
-function renderFeed() {
-  $("#feed").innerHTML = T.events.map((e, k) => `<div class="ev" data-k="${k}"><span class="t">${e.t.toFixed(1)}s</span>${e.summary}<span class="badge b-${e.phase}">${e.phase}</span></div>`).join("");
-  document.querySelectorAll("#feed .ev").forEach(d => d.onclick = () => { stop(); idx = +d.dataset.k; renderState(); });
-}
-$("#scrub").oninput = e => { stop(); idx = +e.target.value; renderState(); };
-function step() { if (idx >= T.events.length - 1) { stop(); return; } idx++; renderState();
-  const dt = Math.min(2000, Math.max(120, (T.events[idx + 1]?.t - T.events[idx].t || .3) * 1000 / +$("#speed").value));
-  timer = setTimeout(step, dt); }
-function stop() { playing = false; clearTimeout(timer); $("#play").textContent = "▶ 재생"; }
-$("#play").onclick = () => { if (playing) return stop(); if (idx >= T.events.length - 1) idx = 0; playing = true; $("#play").textContent = "⏸ 일시정지"; step(); };
-
-// ---------- Decision Lens ----------
-function renderLens(e) {
-  const who = e.agentName ? `<b>${e.agentName}</b> · ` : "";
-  $("#lens-summary").innerHTML = `${who}${e.summary} <span class="badge b-${e.phase}">${e.phase}</span><div class="muted">t=${e.t}s · ${e.ts}</div>`;
-  $("#lens-json").textContent = JSON.stringify({type: e.type, agent: e.agentName, task: e.taskId, tokens: e.tokens, detail: e.detail}, null, 1);
-}
-function renderDecisions() {
-  const plan = T.events.find(e => e.type === "plan-ready"), ins = T.insights;
-  const req = T.meta.request || "", m = /assigned to ([A-Za-z-]+)/.exec(req), directive = req.startsWith("[PLANNING DIRECTIVE]");
-  const solver = T.tasks[0]?.agentName || "—", used = Object.values(T.tokens.byAgent).length + 1, overhead = T.baseline ? T.tokens.total / (T.baseline.prompt + T.baseline.completion) : null;
-  const rows = [
-    ["라우팅 근거", directive ? `요청 머리의 <b>[PLANNING DIRECTIVE]</b>가 담당을 ${m ? `<b>${m[1]}</b>로 지정` : "지정"} (트랙별 one-shot prompt에 편입) → 플래너는 판단 없이 태스크 1개만 생성. 실제 실행 에이전트: <b>${solver}</b> ${m && m[1] !== solver ? "⚠️ 지시와 불일치" : "✅ 지시와 일치"}` : `directive 없음 — 플래너가 문제 유형으로 자체 라우팅 → <b>${solver}</b>`],
-    ["원칙 0", `가동 에이전트 ${used}/${T.agents.length} (플래너 + 전문가 ${used - 1}). 미가동 에이전트는 실행 비용 0이지만 플래너가 매 문항 로스터를 읽는 비용은 남는다 → 로스터는 5종으로 고정, 리뷰어·검증자·포매터 홉 금지`],
-    ["계획", plan ? `플래너가 태스크 ${plan.detail.taskCount}개를 생성 (웨이브 ${plan.detail.waves.length}개). ${ins.duplicateTasks ? `⚠️ 동일 태스크 ${ins.duplicateTasks}개 중복 — 내장 플래너의 분해 성향` : "✅ 중복 없음"}` : "—"],
-    ["승인 전 반려", `${T.meta.rejectedPlansBefore}회 — 이 워크스페이스 로그에 누적된 계획 거부(프롬프트 실험 중 사람이 반려). 평가 러너는 자동 승인이라 0`],
-    ["실행 방식", `태스크당 평균 ${ins.callsPerTask}회 모델 호출 — 에이전트 루프가 반복마다 컨텍스트를 재전송 → 입력 토큰이 출력의 ${(T.tokens.prompt / Math.max(T.tokens.completion, 1)).toFixed(1)}배`],
-    ["취합", T.events.some(e => e.type === "aggregation-started") ? "태스크 결과를 플래너가 합성해 최종 응답 생성" : "—"],
-    ["비용 판단", T.baseline ? `같은 문항을 단독 모델이 ${(T.baseline.prompt + T.baseline.completion).toLocaleString()} 토큰에 풀었음 → 스쿼드 오버헤드 ${overhead.toFixed(1)}배. ${overhead <= 3.5 ? "플래너 홉(우회 불가) + 전문가 1홉 + 취합 = AI:GO에서 가능한 최소 경로에 도달" : "중복 제거·호출 축소가 다음 최적화 대상"}${BEFORE && BEFORE.startedAt !== T.meta.startedAt ? ` · ${BEFORE.version} 대비 ÷${(BEFORE.total / T.tokens.total).toFixed(0)}` : ""}` : "베이스라인 없음"],
-  ];
-  $("#decisions").innerHTML = `<table>${rows.map(r => `<tr><th style="width:7rem">${r[0]}</th><td>${r[1]}</td></tr>`).join("")}</table>`;
-}
-
-// ---------- The Receipt ----------
-function bar(svg, rows, w, colorFn) {
-  const max = Math.max(...rows.map(r => r.v), 1), bh = 26, gap = 10, lx = 150;
-  svg.innerHTML = rows.map((r, i) => { const y = 14 + i * (bh + gap), bw = (w - lx - 90) * r.v / max;
-    return `<text x="${lx - 8}" y="${y + 17}" text-anchor="end" fill="${C.dim}" font-size="11">${r.k}</text>
-      <rect x="${lx}" y="${y}" width="${Math.max(bw, 2)}" height="${bh}" rx="6" fill="${colorFn(r, i)}"/>
-      ${bw > (w - lx - 90) * .6 ? `<text x="${lx + bw - 8}" y="${y + 17}" text-anchor="end" fill="#120f22" font-size="11" font-weight="700">${r.label ?? r.v.toLocaleString()}</text>` : `<text x="${lx + bw + 8}" y="${y + 17}" fill="#fff" font-size="11" font-weight="700">${r.label ?? r.v.toLocaleString()}</text>`}`; }).join("");
-}
-function renderReceipt() {
-  const t = T.tokens, b = T.baseline, perCorrect = t.total;
-  const k = [
-    {l: "이 문항에 쓴 총 토큰", v: t.total.toLocaleString(), hero: true},
-    {l: "입력 / 출력", v: `${t.prompt.toLocaleString()} / ${t.completion.toLocaleString()}`},
-    {l: "모델 호출", v: `${t.calls}회`},
-    {l: "소요 시간", v: `${T.meta.durationSec}s`},
-    {l: "태스크 (중복)", v: `${T.insights.taskCount} (${T.insights.duplicateTasks})`},
-    {l: "단독 모델 대비", v: b ? `${(t.total / (b.prompt + b.completion)).toFixed(1)}×` : "—"},
-    {l: "가동 에이전트 / 로스터", v: `${Object.values(t.byAgent).length + 1} / ${T.agents.length}`},
-  ];
-  const before = BEFORE && BEFORE.startedAt !== T.meta.startedAt ? BEFORE : null;
-  if (before) k.push({l: `스쿼드 ${short(before.version)} 대비`, v: `÷${(before.total / t.total).toFixed(0)}`});
-  $("#kpis").innerHTML = k.map(x => `<div class="kpi ${x.hero ? "hero" : ""}"><div class="v">${x.v}</div><div class="l">${x.l}</div></div>`).join("");
-  // race
-  const rows = b ? [{k: "단독 gpt-oss", v: b.prompt + b.completion, label: `${(b.prompt + b.completion).toLocaleString()} tok · ${b.seconds}s · ${b.correct ? "정답" : "오답"}`, c: C.done}] : [];
-  if (b && before) rows.push({k: `스쿼드 ${short(before.version)} (${before.agents} agents)`, v: before.total, label: `${before.total.toLocaleString()} tok · ${before.seconds}s · 태스크 ${before.tasks} · 호출 ${before.calls}`, c: C.fail});
-  if (b) rows.push({k: `스쿼드 ${short(T.meta.version)} (${T.agents.length} agents)`, v: t.total, label: `${t.total.toLocaleString()} tok · ${T.meta.durationSec}s · 태스크 ${T.insights.taskCount} · 호출 ${t.calls}`, c: C.accent});
-  bar($("#race"), rows, 520, r => r.c);
-  $("#race-note").innerHTML = b ? (before
-    ? `문항 ${b.item}. ${before.version}은 비용의 91%가 입력(컨텍스트 재전송)이었다 — 에이전트 호출 1회 = 컨텍스트 전체를 한 번 더. <b>원칙 0: 불필요한 에이전트 사용 금지</b> → 태스크 ${before.tasks}→${T.insights.taskCount}, 호출 ${before.calls}→${t.calls}, 토큰 ÷${(before.total / t.total).toFixed(0)}. 남은 ${(t.total / (b.prompt + b.completion)).toFixed(1)}×는 플래너 홉 + 취합 = AI:GO 최소 경로.`
-    : `문항 ${b.item}. 스쿼드 비용의 ${Math.round(100 * t.prompt / t.total)}%가 입력(컨텍스트 재전송) — 에이전트 호출 1회 = 컨텍스트 전체를 한 번 더. 호출 횟수 축소가 가장 큰 절감 레버.`) : "";
-  // agents
-  const ag = Object.values(t.byAgent).sort((a, b2) => b2.prompt + b2.completion - a.prompt - a.completion);
-  bar($("#agents"), ag.map(a => ({k: a.name, v: a.prompt + a.completion, label: `${(a.prompt + a.completion).toLocaleString()} tok · ${a.calls}회`})), 520, () => C.run);
-  // calibration
-  const cal = T.calibration || [], svg = $("#calib");
-  if (cal.length) {
-    const W = 520, H = 220, px = 50, py = 20, pw = W - px - 20, ph = H - py - 40;
-    let o = `<line x1="${px}" y1="${py + ph}" x2="${px + pw}" y2="${py + ph}" stroke="${C.line}"/><line x1="${px}" y1="${py}" x2="${px}" y2="${py + ph}" stroke="${C.line}"/>`;
-    [0, 50, 100].forEach(p => { const y = py + ph - ph * p / 100; o += `<text x="${px - 6}" y="${y + 4}" text-anchor="end" fill="${C.dim}" font-size="10">${p}%</text><line x1="${px}" y1="${y}" x2="${px + pw}" y2="${y}" stroke="${C.line}" stroke-dasharray="3 4"/>`; });
-    const pts = cal.map(c => { const x = px + pw * c.conf / 10, y = py + ph - ph * (c.correct / c.n); return {x, y, ...c}; });
-    o += `<polyline points="${pts.map(p => p.x + "," + p.y).join(" ")}" fill="none" stroke="${C.accent}" stroke-width="2.5"/>`;
-    pts.forEach(p => o += `<circle cx="${p.x}" cy="${p.y}" r="${3 + Math.min(6, p.n / 5)}" fill="${C.think}" opacity=".9"/><text x="${p.x}" y="${py + ph + 16}" text-anchor="middle" fill="${C.dim}" font-size="10">${p.conf}</text><text x="${p.x}" y="${p.y - 10}" text-anchor="middle" fill="#fff" font-size="9">${Math.round(100 * p.correct / p.n)}% (n=${p.n})</text>`);
-    o += `<text x="${px + pw / 2}" y="${H - 4}" text-anchor="middle" fill="${C.dim}" font-size="10">self-reported confidence (0–10)</text>`;
-    svg.innerHTML = o;
-  } else svg.innerHTML = `<text x="10" y="30" fill="${C.dim}" font-size="12">캘리브레이션 데이터 없음</text>`;
-  $("#tasks").innerHTML = `<tr><th>#</th><th>태스크</th><th>에이전트</th><th>상태</th><th>소요</th></tr>` +
-    T.tasks.map((x, i) => `<tr><td>${i + 1}</td><td>${x.title}</td><td>${x.agentName}</td><td>${x.status}</td><td>${x.durationSec ?? "—"}s</td></tr>`).join("");
-}
-
-const fetchRun = u => fetch(u).then(r => r.json());
-fetchRun("traces/run-001.json").then(t => { BEFORE = summarize(t); }).catch(() => {})
-  .then(() => fetchRun($("#runsel").value)).then(load).catch(() => { $("#meta").textContent = "trace.json을 드래그해서 여세요"; });
-$("#runsel").onchange = e => fetchRun(e.target.value).then(load).catch(() => { $("#meta").textContent = "런 파일을 찾을 수 없습니다 (http 서버로 열어야 함)"; });
+// ---- §2.4 normalizeRaw: AI:GO events.jsonl (+ .squad.json) → trace schema. v2 logic kept; fixes 1–3 marked. ref = current trace (borrowed baseline/calibration) ----
+function normalizeRaw(text,squad,ref){
+  const raw=text.split("\n").filter(l=>l.trim()).map(l=>JSON.parse(l));
+  const cfg=squad?(squad.config||squad):null;
+  const agents={};
+  (cfg?.agents||[]).forEach(a=>agents[a.id]={id:a.id,name:a.name,role:a.role?.value||a.role?.type,model:((a.modelPreferences||{}).preferredModelId||"").split("/").pop(),planner:a.id===cfg.plannerAgentId});
+  const plannerId=cfg?.plannerAgentId||null;
+  const ts=s=>new Date(s).getTime()/1000;
+  const execIdx=Math.max(...raw.map((e,i)=>e.eventType==="squad:execution-started"?i:-1));
+  if(execIdx<0)throw new Error("execution-started 이벤트가 없습니다 (완주된 실행 로그가 필요)");
+  const planIdx=Math.max(...raw.slice(0,execIdx).map((e,i)=>e.eventType==="squad:planning-started"?i:-1));
+  const evs=raw.slice(Math.max(planIdx,0));const t0=ts(evs[0].timestamp);
+  const rejected=raw.slice(0,Math.max(planIdx,0)).filter(e=>e.eventType==="squad:plan-ready").length;
+  const tasks={};let phase="planning",cur=null,prev=[0,0];const events=[],calls=[];
+  const name=id=>agents[id]?.name||(id?"agent-"+String(id).slice(-6):"?");
+  const ensureAgent=id=>{if(id&&!agents[id])agents[id]={id,name:name(id),role:"?",model:"?",planner:id===plannerId};};
+  const nextRunning=from=>{for(let j=from;j<evs.length;j++){const q=evs[j];if(q.eventType==="squad:agent-state-changed"&&(q.payload||{}).state==="running")return q.payload.agentId;}return null;};   // fix 1
+  evs.forEach((e,idx)=>{
+    const p=e.payload||{},et=e.eventType.split(":")[1],t=+(ts(e.timestamp)-t0).toFixed(2);
+    const ev={t,ts:e.timestamp,type:et,phase};
+    if(et==="planning-started"){ev.agentId=plannerId;ev.summary="플래너가 요청을 분석해 계획을 수립합니다";ev.detail={request:(p.request||"").slice(0,600)};}
+    else if(et==="plan-ready"){ev.agentId=plannerId;ev.summary=`계획 완성 — 태스크 ${p.taskCount}개, 웨이브 ${(p.waves||[]).length}개`;ev.detail={taskCount:p.taskCount,waves:p.waves,autoApprove:p.autoApprove};}
+    else if(et==="execution-started"){phase="execution";ev.phase=phase;ev.summary=`실행 시작 — 태스크 ${p.totalTasks}개 / 웨이브 ${p.totalWaves}개`;}
+    else if(et==="task-wave-started"){(p.taskIds||[]).forEach(id=>tasks[id]=tasks[id]||{id,title:"task",status:"pending"});ev.summary=`웨이브 ${(p.waveIndex||0)+1} 시작 (태스크 ${(p.taskIds||[]).length}개 병렬)`;ev.detail={taskIds:p.taskIds};}
+    else if(et==="task-status-changed"){ev.taskId=p.taskId;ev.agentId=cur||nextRunning(idx);ev.detail={oldStatus:p.oldStatus,newStatus:p.newStatus,taskId:p.taskId};ev.summary=`태스크 ${p.oldStatus} → ${p.newStatus}`;}   // fix 1
+    else if(et==="agent-state-changed"){ensureAgent(p.agentId);ev.agentId=p.agentId;if(p.state==="running")cur=p.agentId;ev.summary=`${name(p.agentId)} 상태 → ${p.state}`;ev.detail={state:p.state};}
+    else if(et==="execution-token-usage"){const cp=p.promptTokens||0,cc=p.completionTokens||0;const dp=cp>=prev[0]?cp-prev[0]:cp,dc=cc>=prev[1]?cc-prev[1]:cc;prev=[cp,cc];
+      ev.agentId=phase==="execution"?cur:plannerId;ensureAgent(ev.agentId);ev.tokens={prompt:dp,completion:dc,cumPrompt:cp,cumCompletion:cc};ev.summary=`모델 호출 — 입력 ${dp.toLocaleString()} / 출력 ${dc.toLocaleString()} 토큰 (누적 ${(cp+cc).toLocaleString()})`;calls.push({agentId:ev.agentId,phase,prompt:dp,completion:dc});}
+    else if(et==="token-usage-update"){ensureAgent(p.agentId);ev.agentId=p.agentId;ev.summary=`${name(p.agentId)} 누적 토큰 ${(p.total||0).toLocaleString()}`;ev.detail={cumPrompt:p.promptTokens,cumCompletion:p.completionTokens};}
+    else if(et==="task-completed"){ev.taskId=p.taskId;ev.agentId=cur;tasks[p.taskId]={...(tasks[p.taskId]||{id:p.taskId}),title:p.taskTitle||"task",status:p.success?"done":"failed",agentId:cur,agentName:name(cur)};ev.summary=`태스크 '${p.taskTitle}' 완료 (${p.success?"성공":"실패"})`;ev.detail={success:p.success,error:p.error,taskCounts:p.taskCounts};}
+    else if(et==="aggregation-started"){phase="aggregation";ev.phase=phase;ev.agentId=plannerId;ev.summary=`취합 시작 — 태스크 ${(p.taskIds||[]).length}개 결과 합성`;}
+    else if(et==="execution-completed"){ev.summary="실행 완료";ev.detail={result:p.result,tokenUsage:p.tokenUsage};}
+    else ev.summary=et;
+    if(ev.agentId){ensureAgent(ev.agentId);ev.agentName=name(ev.agentId);}
+    events.push(ev);});
+  events.forEach(ev=>{if(ev.type==="task-status-changed"&&ev.taskId&&tasks[ev.taskId]){const d=ev.detail||{};ev.summary=`태스크 '${tasks[ev.taskId].title}' ${d.oldStatus} → ${d.newStatus}`;}});   // fix 2: titles from task-completed.taskTitle
+  const byAgent={};let tp=0,tc=0;
+  calls.forEach(c=>{const b=byAgent[c.agentId]=byAgent[c.agentId]||{name:name(c.agentId),prompt:0,completion:0,calls:0};b.prompt+=c.prompt;b.completion+=c.completion;b.calls++;tp+=c.prompt;tc+=c.completion;});
+  const fin=evs.find(e=>e.eventType==="squad:execution-completed");const tu=fin?.payload?.tokenUsage;if(tu){tp=tu.promptTokens??tp;tc=tu.completionTokens??tc;}
+  const tl=Object.values(tasks);const dupMap={};tl.forEach(x=>{const k=x.title+"|"+x.agentId;dupMap[k]=(dupMap[k]||0)+1;});
+  const duplicates=Object.values(dupMap).reduce((a,v)=>a+(v>1?v-1:0),0);   // fix 3: dup rule = same title + same agent − 1
+  const execCalls=calls.filter(c=>c.phase==="execution").length;
+  return{meta:{squad:cfg?.name||"squad",version:(cfg?.name||"drop")+" (원본 로그)",request:events.find(e=>e.type==="planning-started")?.detail?.request||"",startedAt:evs[0].timestamp,completedAt:evs[evs.length-1].timestamp,durationSec:+(ts(evs[evs.length-1].timestamp)-t0).toFixed(1),rejectedPlansBefore:rejected,source:"events.jsonl (원본 로그에서 브라우저 내 정규화)",borrowedBaseline:!!(ref&&ref.baseline)},
+    agents:Object.values(agents),tasks:tl,events,tokens:{prompt:tp,completion:tc,total:tp+tc,calls:calls.length,byAgent},
+    insights:{taskCount:tl.length,duplicateTasks:duplicates,plannerShare:0,callsPerTask:+(execCalls/Math.max(tl.length,1)).toFixed(1)},
+    baseline:ref?.baseline,calibration:ref?.calibration};}
 </script>
-</body>
-</html>
+<script>
+// =================================================================================================
+// UI — state · scales · §1.1 header · A/B bench · B hero · C.0 strip · C.1 timeline/race · C.2 lanes
+// =================================================================================================
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const W=1100,L=150,R=110,PW=W-L-R,RUNS={};let ORDER=[];   // ORDER = runs visible in UI (latest, +history when toggled, +drops)
+let cur=null,T=null,D=null,tNow=0,playing=false,sel=-1,cmp=true,hist=false,dmode=0,tokMode=0,xWin=null,lastTs=0,animId=0,shownRatio=0,idleTimer=0,SQUAD=null,lastPulse=-1;
+const PH={planning:'var(--pl)',execution:'var(--ex)',aggregation:'var(--ag)'},PHK={planning:'계획',execution:'실행',aggregation:'취합'};
+const HATCH='<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="6" fill="var(--bad)"/></pattern></defs>';
+const Dof=k=>(RUNS[k].D||=derive(RUNS[k])),E=i=>T.events[i],BL=()=>baseLane(D.base);
+const vtag=k=>k.startsWith('drop:')?'드롭':((RUNS[k].meta||{}).version||k).split(' ')[0];
+function label(k){if(k.startsWith('drop:'))return`드롭 ${Object.keys(RUNS).filter(x=>x.startsWith('drop:')).indexOf(k)+1}`;const t=RUNS[k],cnt={};Object.keys(RUNS).forEach(x=>cnt[RUNS[x].agents.length]=(cnt[RUNS[x].agents.length]||0)+1);const mode=+Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];return`${vtag(k)} · ${t.agents.length!==mode?t.agents.length+' agents':modelShort((Dof(k).planner||{}).model)}`;}
+const beforeKey=()=>hist&&RUNS['run-001']?'run-001':null,pairKeys=()=>{const bk=beforeKey();return{bk,ak:bk&&bk===cur?ORDER[0]:cur};};   // Before = v1 only when the history toggle is on (else the 단독 baseline lane); After = cur, or LATEST when cur is v1
+// ---- shared scales (§3): one clock, one token axis, one per-call scale ----
+const xMax=()=>cmp?Math.max(...ORDER.map(k=>Dof(k).dur),D.base?D.base.s:0):D.dur;
+const tokMax=()=>Math.max(cmp?Math.max(...ORDER.map(k=>Dof(k).total)):D.total,D.base?D.base.tok:0,1);
+const callMax=()=>Math.max(cmp?Math.max(...ORDER.map(k=>Dof(k).callMax),D.base?D.base.tok:0):D.callMax,1);
+const sx=(t,a,b)=>L+(t-a)/(b-a)*PW,X=t=>sx(t,0,xMax());
+const axis=(y,h,x=X,a=0,b=xMax())=>{const r=b-a,st=[0.5,1,2,5,10,20].find(s=>r/s<=12)||50;let s='';for(let t=Math.ceil(a/st)*st;t<=b+1e-9;t+=st)s+=`<line x1="${x(t)}" x2="${x(t)}" y1="${y}" y2="${y+h}" stroke="#1b1e25"/><text x="${x(t)+3}" y="${y+h-3}">${+t.toFixed(1)}s</text>`;return s;};
+const stair=(d,x,y0,y1,max,endT)=>{let p=`M${x(0)},${y0}`,c=0;d.calls.forEach(q=>{p+=` L${x(q.t)},${y0-c/max*(y0-y1)}`;c=q.cum;p+=` L${x(q.t)},${y0-c/max*(y0-y1)}`;});return p+` L${x(endT??d.dur)},${y0-c/max*(y0-y1)}`;};
+function soFar(d,t){let tok=0,n=0;for(const c of d.calls){if(c.t<=t+1e-9){tok=c.cum;n++;}else break;}return{tok,n};}
+
+// ---- §1.1 header: runs · sections · scrubber (cumulative-token area IS the slider track) ----
+function renderRuns(){$('#runs').innerHTML=ORDER.map((k,i)=>`<button data-k="${k}" class="${k===cur?'on':''}" title="키 ${i+1}">${esc(label(k))}</button>`).join('');
+  $('#sections').innerHTML=[['sA','A'],['sB','B'],['sC','C'],['s03','원장'],['s04','판단'],['s05','각주']].map(([id,n])=>`<button data-s="${id}">${n}</button>`).join('');}
+function areaSVG(el,H){const max=tokMax(),y0=H-6,y1=10,yb=v=>y0-v/max*(y0-y1);let s=axis(2,y0-2);
+  if(cmp)ORDER.filter(k=>k!==cur).forEach(k=>{s+=`<path d="${stair(Dof(k),X,y0,y1,max)}" fill="none" stroke="var(--dim)" stroke-dasharray="3 2" opacity=".7"/>`;});
+  const p=stair(D,X,y0,y1,max);s+=`<path d="${p} L${X(D.dur)},${y0} Z" fill="var(--ex)" opacity=".25"/><path d="${p}" fill="none" stroke="var(--ex)" stroke-width="1.5"/>`;
+  if(D.base){s+=`<line x1="${L}" x2="${X(xMax())}" y1="${yb(D.base.tok)}" y2="${yb(D.base.tok)}" stroke="var(--ag)" stroke-dasharray="4 3"/><text x="${L-6}" y="${Math.max(12,yb(D.base.tok)+4)}" text-anchor="end" fill="var(--ag)">단독 ${fmt(D.base.tok)}</text>`;
+    if(cmp)s+=`<path d="${stair(BL(),X,y0,y1,max,D.base.s)}" fill="none" stroke="var(--ag)" stroke-width="1.5"/><text x="${X(D.base.s)+4}" y="${yb(D.base.tok)-4}" fill="var(--ag)">🏁 ${D.base.s}s</text>`;}
+  D.phases.forEach(([ph,a,b])=>{s+=`<rect x="${X(a)}" y="${H-5}" width="${Math.max(0,X(b)-X(a))}" height="5" fill="${PH[ph]}" opacity=".8"/>`;});
+  [D.plan,D.agg,D.fin].concat(D.spans.map(q=>({t:q.t1}))).forEach(m=>{if(m)s+=`<line x1="${X(m.t)}" x2="${X(m.t)}" y1="${y0-8}" y2="${y0}" stroke="var(--fg)" opacity=".5"/>`;});
+  s+=`<text x="${W-4}" y="12" text-anchor="end" class="lbl">${fmt(D.total)} tok</text><line class="ph" x1="0" x2="0" y1="0" y2="${H}"/>`;el.innerHTML=s;}
+function renderScrub(){areaSVG($('#scrub'),64);areaSVG($('#cumB'),90);$('#range').max=xMax();}
+function snapT(t){const ms=[D.plan&&D.plan.t,D.agg&&D.agg.t,D.fin&&D.fin.t,D.base&&cmp?D.base.s:null].concat(D.spans.map(q=>q.t1)).filter(v=>v!=null),tol=6/PW*xMax();for(const m of ms)if(Math.abs(m-t)<tol)return m;return t;}
+// ---- §6.5 SPLIT chips: Before = v1 (history on) or 단독 baseline lane; After = cur ----
+function renderSplits(){const box=$('#splits');box.style.display=cmp?'flex':'none';if(!cmp)return;const{bk,ak}=pairKeys(),A=Dof(ak),B=bk?Dof(bk):BL();if(!B){box.innerHTML='';return;}const sp=splitsOf(B,A),bn=bk?label(bk):'단독';
+  const rows=[['계획 완료',sp.plan,B.checkpoints.plan,A.checkpoints.plan,'s'],['첫 호출',sp.first,B.checkpoints.firstCall,A.checkpoints.firstCall,'s'],['완주',sp.finish,B.checkpoints.finish,A.checkpoints.finish,'s'],['토큰',sp.tokens,B.checkpoints.finish,A.checkpoints.finish,'tok']];
+  const acc=BENCH.tracks.filter(t=>t.base&&t.latest.acc>t.base.acc).map(t=>`${t.id} +${Math.round(t.latest.acc-t.base.acc)}%p`).join(' · ');   // vs 단독: the fixed-cost chips are balanced by the accuracy gain (A)
+  box.innerHTML=`<span class="t">SPLIT ${esc(bn)} → ${esc(label(ak))}</span>`+(bk||!acc?'':`<span class="sp on good" title="A 정확도 — 가시 연습셋, jxc-selfeval"><small>정확도</small>${esc(acc)} (A)</span>`)+rows.map(([nm,d,tb,ta,u])=>{if(d==null)return bk?`<span class="sp"><small>${nm}</small>—</span>`:'';const on=tNow>=Math.max(tb??0,ta??0)-1e-9,pc=`${sp.pct>0?'+':'−'}${Math.abs(sp.pct).toFixed(0)}%`;
+    const v=u==='s'?(d>0?'+':'−')+f1(Math.abs(d))+'s':[`${sgn(d)} (${pc})`,d<0?`÷${sp.div}`:`×${f1(A.total/B.total)}`,pc][tokMode],cls=!on?'':bk?(d<=0?' good':' bad'):' fixed';   // red/green only when History (v1) is the Before; vs 단독 = amber 고정비
+    return`<span class="sp${on?' on':''}${cls}${u==='tok'?' tok':''}" title="${u==='tok'?'클릭: 형식 전환':bk?'':'오케스트레이션 고정비 (플래너 1홉 + 취합) — 채점 지표 아님'}"><small>${bk?'':'고정비 · '}${nm}</small>${v}</span>`;}).join('');
+  const tk=box.querySelector('.sp.tok');if(tk)tk.onclick=()=>{tokMode=(tokMode+1)%3;renderSplits();};}
+
+// ---- A · B: BENCH tables (owner numbers, verbatim) ----
+function renderBench(){const v=benchVerdicts(),bar=(val,max,cls)=>`<div class="bb ${cls}"><i style="width:${Math.max(1,val/max*100)}%"></i>${cls==='l'?fmt(val):''}</div>`;
+  $('#vA').innerHTML=`${esc(v.A)}<small>출처: 가시 연습셋, jxc-selfeval · n과 CI90은 표 참조 · 정답 여부는 채점 러너 기준</small>`;
+  $('#accT').innerHTML=`<tr><th>트랙</th><th>베이스라인 정확도 (n)</th><th>최신 ${esc(BENCH.latestLabel)} (n · CI90)</th><th>Δ</th><th class="bars">0 → 100%</th></tr>`+BENCH.tracks.map(t=>{const b=t.base,l=t.latest,d=b?l.acc-b.acc:null;
+    return`<tr class="${t.ref?'ref':''}"><td>${esc(t.name)}${t.ref?` <span class="na">${esc(t.ref)}</span>`:''}</td><td>${b?`${b.acc}% (n=${b.n})`:'—'}</td><td>${l.acc}% (n=${l.n} · ${l.ci[0]}–${l.ci[1]}%)</td><td>${d==null?'—':`<span class="chip ${d<0?'worse':''}">${d>0?'+':''}${d.toFixed(1)}%p</span>`}</td><td class="bars">${b?bar(b.acc,100,''):''}${bar(l.acc,100,'l')}</td></tr>`;}).join('');
+  $('#accNote').textContent=`막대: 회색 = 베이스라인(단순 프롬프트), 초록 = 최신 스쿼드 · 모두 gpt-oss-120b 솔버 · ${BENCH.tracks.find(t=>t.ref)?'AIME 행은 난이도 참고(베이스라인 미측정)':''}`;
+  $('#vB').innerHTML=`${esc(v.B)}<small>문항당 출력 토큰 (jxc-selfeval) · 아래 큰 숫자는 같은 문항 1건의 trace 합계(입력+출력)</small>`;
+  $('#tokT').innerHTML=`<tr><th>트랙 · 문항당 출력 토큰</th><th>베이스라인</th><th>최신 ${esc(BENCH.latestLabel)}</th><th>Δ</th><th class="bars">막대 = 베이스라인 대비</th></tr>`+BENCH.tracks.map(t=>{const b=t.base,l=t.latest,mx=Math.max(b?b.tok:0,l.tok);
+    return`<tr class="${t.ref?'ref':''}"><td>${esc(t.name)}</td><td>${b?fmt(b.tok):'—'}</td><td>${fmt(l.tok)}</td><td>${b?`<span class="chip ${l.tok>b.tok?'worse':''}">${sgn(l.tok-b.tok)} (${l.tok>b.tok?'+':'−'}${Math.abs((l.tok/b.tok-1)*100).toFixed(0)}%)</span>`:'—'}</td><td class="bars">${b?bar(b.tok,mx,''):''}${bar(l.tok,mx,'l')}</td></tr>`;}).join('');
+  $('#tokNote').textContent=`플래너: ${BENCH.planner.qwen.model} ${BENCH.planner.qwen.tok} tok/문항 (${BENCH.planner.qwen.sec} s) vs ${BENCH.planner.gptoss.model} ${BENCH.planner.gptoss.tok} tok (${BENCH.planner.gptoss.dup})`;
+  $('#ingred').textContent=`재료(측정 후 제외): ${BENCH.excluded} · 플래너 비교: ${BENCH.planner.qwen.model} ${BENCH.planner.qwen.tok} tok · ${BENCH.planner.qwen.sec} s vs ${BENCH.planner.gptoss.model} ${BENCH.planner.gptoss.tok} tok, ${BENCH.planner.gptoss.dup}`;}
+
+// ---- B hero: 단독 617 → 최신 total (×) · frozen at run totals · v1 only as a secondary line / history bar ----
+function renderHero(anim){const b=D.base,v1=RUNS['run-001']?Dof('run-001'):null;
+  $('#lab-before').textContent=b?`${BENCH.baseLabel} · ${b.s}s${b.correct?' · 정답(외부 채점)':''}`:'베이스라인 없음';$('#tok-before').textContent=b?fmt(b.tok):'—';
+  $('#lab-after').textContent=`${esc(label(cur))} · ${RUNS[cur].meta.squad||''} · 플래너 ${(D.planner||{}).model||'?'} · ${f1(D.dur)}s`;$('#tok-after').textContent=fmt(D.total);
+  if(D.ratio)setRatio(D.ratio,anim);else $('#ratio-after').textContent='—';
+  $('#sent').innerHTML=`에이전트 오케스트레이션의 고정 비용 = 플래너 1홉 + 취합<small>${v1&&v1!==D?`첫 스쿼드 ${esc(vtag('run-001'))}은 ${fmt(v1.total)} tok${v1.ratio?`(${f1(v1.ratio)}×)`:''}였다 → 관측으로 ÷${f1(v1.total/D.total)} · 관측할 수 있으면 줄일 수 있다`:'관측할 수 있으면 줄일 수 있다 — If you can observe it, you can cut it.'}</small>`;
+  $('#herocap').innerHTML=b?`<b>${fmt(D.total)}</b> / ${fmt(b.tok)} = ${f2(D.total/b.tok)} · 입력 ${fmt(D.prompt)} + 출력 ${fmt(D.completion)} · 같은 문항 ${esc(b.item)} · 정답 여부: 외부 채점(baseline.correct=${b.correct}) · 스쿼드 답 텍스트는 로그 미기록${T.meta.borrowedBaseline?` · <span class="warn">⚠ 기준 ${fmt(b.tok)}은 ${esc(b.item)}의 단독 값 — 이 로그의 문항과 다를 수 있음</span>`:''}`:`<b>${fmt(D.total)}</b> tok · 기준 없음 (baseline 필드 없음)`;
+  const rows=(b?[{n:'단독 '+modelShort(b.model),v:b.tok,k:null}]:[]).concat(ORDER.map(k=>({n:label(k)+' · '+modelShort((Dof(k).planner||{}).model),v:Dof(k).total,k}))),max=Math.max(...rows.map(r=>r.v),1),h=rows.length*22+10,bx=v=>L+v/max*(W-L-90);let s='';
+  rows.forEach((r,i)=>{const y=8+i*22,on=r.k===cur||r.k===null;s+=`<text x="${L-8}" y="${y+13}" text-anchor="end" class="${on?'lbl':''}">${esc(r.n)}</text><rect x="${L}" y="${y}" width="${Math.max(1,bx(r.v)-L)}" height="16" fill="${r.k===null?'var(--ag)':r.k===cur?'var(--ex)':'var(--dim)'}" opacity="${on?1:.4}"/><text x="${bx(r.v)+6}" y="${y+13}" class="${on?'lbl':''}">${fmt(r.v)}</text>`;});
+  if(b)s+=`<line x1="${bx(b.tok)}" x2="${bx(b.tok)}" y1="2" y2="${h-2}" stroke="var(--ag)" stroke-dasharray="3 2"/>`;const hb=$('#herobar');hb.setAttribute('viewBox',`0 0 ${W} ${h}`);hb.innerHTML=s;}
+function setRatio(v,anim){cancelAnimationFrame(animId);const el=$('#ratio-after');if(!anim){shownRatio=v;el.textContent=f1(v);return;}const from=shownRatio,t0=performance.now();const step=ts=>{const p=Math.min(1,(ts-t0)/1200),k=1-Math.pow(1-p,3);shownRatio=from+(v-from)*k;el.textContent=f1(shownRatio);if(p<1)animId=requestAnimationFrame(step);};animId=requestAnimationFrame(step);}
+
+// ---- C.0 interaction strip: 요청 → 계획 → 태스크 → 풀이 → 취합 → 최종 (states + captions from events ≤ tNow; pulse travels on event crossings) ----
+const STAGES=['요청','계획','태스크','풀이','취합','최종'];
+function renderStrip(){const sv=D.solver?D.solver.name:'솔버',pl=(D.planner||{}).name||'플래너';const names=['요청',`${pl} 계획`,`태스크 ${D.spans[0]?D.spans[0].title:'—'}`,`${sv} 풀이`,'취합','최종'];
+  $('#strip').innerHTML=names.map((n,i)=>`<div class="sbox" data-b="${i}"><span class="st">대기</span><b>${esc(n)}</b><small></small></div>${i<5?`<div class="edge" data-e="${i}"><i></i></div>`:''}`).join('');}
+function stripAt(t){const b=D.base,req=(T.meta.request||'').replace(/\s+/g,' ').slice(0,80),sp=D.spans,lastSpan=sp.filter(q=>q.t0<=t).pop(),open=sp.find(q=>q.t0<=t&&t<q.t1),doneN=sp.filter(q=>q.t1<=t).length,so=soFar(D,t);
+  const st=[[t>=0?'done':'wait',t>=0?`요청 수신 — ${esc(req)}…${b?` (문항 ${esc(b.item)})`:''}`:''],
+    [!D.plan||t<D.plan.t?'run':'done',!D.plan||t<D.plan.t?`플래너(${esc((D.planner||{}).model||'?')})가 생각 중 — ${f1(t)}s 동안 이벤트 0개`:`플래너가 태스크 ${sp.length}개를 만들고 ${esc(sp[0]?sp[0].agentName:'?')}에게 넘겼다 (${f1(D.plan.t)}s)`],
+    [!lastSpan?'wait':open?'run':'done',!lastSpan?'계획을 기다리는 중':open?`${esc(open.title)} #${open.n}${open.dup?' (중복)':''} 진행 중 → ${esc(open.agentName)}`:`태스크 ${doneN}개 완료${D.dupCount?` · 중복 ${D.dupCount}`:''}`],
+    [!so.n&&!open?'wait':open?'run':'done',so.n?`${esc(D.solver?D.solver.name:'솔버')}가 입력 ${fmt(so.tok-D.calls.slice(0,so.n).reduce((a,c)=>a+c.c,0))} tok · 호출 ${so.n}회 → 출력 ${fmt(D.calls.slice(0,so.n).reduce((a,c)=>a+c.c,0))} tok`:open?'첫 호출 준비 중':'대기 중 (호출 0)'],
+    [!D.agg||t<D.agg.t?'wait':D.fin&&t>=D.fin.t?'done':'run',D.agg&&t>=D.agg.t?`플래너가 ${sp.length}개 결과를 합성`:'결과를 기다리는 중'],
+    [D.fin&&t>=D.fin.t?'done':'wait',D.fin&&t>=D.fin.t?`실행 완료 · ${fmt(D.total)} tok · ${f1(D.dur)}s · 답 텍스트는 로그 미기록`:'']];
+  st.forEach(([cls,cap],i)=>{const el=$(`.sbox[data-b="${i}"]`);if(!el)return;el.className='sbox '+(cls==='wait'?'':cls);el.querySelector('.st').textContent={wait:'대기',run:'진행',done:'완료'}[cls];el.querySelector('small').innerHTML=cap;});
+  $$('.edge').forEach(e=>e.classList.toggle('done',st[+e.dataset.e+1][0]!=='wait'));
+  // pulse: the last crossed event maps to an edge (or the solver box for a model call)
+  const EDGE={'planning-started':0,'plan-ready':1,'task-status-changed':2,'execution-token-usage':'box3','task-completed':3,'aggregation-started':3,'execution-completed':4};
+  let li=-1;T.events.forEach((e,i)=>{if(e.t<=t+1e-9&&EDGE[e.type]!=null&&!(e.type==='task-status-changed'&&!/in_progress/.test(e.summary||'')))li=i;});
+  if(li!==lastPulse){lastPulse=li;$$('.edge.pulse').forEach(x=>x.classList.remove('pulse'));$$('.sbox.flash').forEach(x=>x.classList.remove('flash'));if(li>=0){const m=EDGE[E(li).type],el=m==='box3'?$('.sbox[data-b="3"]'):$(`.edge[data-e="${m}"]`);if(el){void el.offsetWidth;el.classList.add(m==='box3'?'flash':'pulse');}}}}
+
+// ---- C.1 single-run timeline (§3.3): phase bands · staggered markers · task bands (hatch) · sawtooth · staircase · gap glyphs ----
+function renderTL(){if(cmp)return renderRace();const svg=$('#tl');svg.setAttribute('viewBox',`0 0 ${W} 230`);const[a,b]=xWin||[0,D.dur],x=t=>sx(t,a,b),y0=200,yh=120,cm=callMax(),tm=tokMax(),bw=Math.max(6,Math.min(14,PW/(b-a)*0.6));
+  let s=HATCH+`<clipPath id="ctl"><rect x="${L}" y="0" width="${PW}" height="230"/></clipPath>`+axis(62,138,x,a,b),g='';
+  D.phases.forEach(([ph,p,q])=>{const w=Math.max(0,x(q)-x(p));g+=`<rect x="${x(p)}" y="6" width="${w}" height="18" fill="${PH[ph]}" opacity=".18"/><rect x="${x(p)}" y="6" width="${w}" height="3" fill="${PH[ph]}"/>${w>70?`<text x="${x(p)+4}" y="20" class="lbl">${PHK[ph]} ${f1(q-p)}s</text>`:w>22?`<text x="${x(p)+4}" y="20" class="lbl">${PHK[ph]}</text>`:''}`;});
+  const marks=[];if(D.plan)marks.push([D.plan.t,'계획']);D.spans.forEach(q=>marks.push([q.t1,`#${q.n} 완료`]));if(D.agg)marks.push([D.agg.t,'취합']);if(D.fin)marks.push([D.fin.t,'완료']);
+  marks.sort((p,q)=>p[0]-q[0]).forEach(([t,nm],j)=>{const xx=x(t),end=xx>W-R-60;g+=`<line x1="${xx}" x2="${xx}" y1="26" y2="${y0}" stroke="var(--dim)" stroke-dasharray="2 3"/><text x="${xx+(end?-3:3)}" y="${36+(j%3)*12}" text-anchor="${end?'end':'start'}">${nm} ${f1(t)}s</text>`;});
+  D.spans.forEach(q=>{const w=Math.max(2,x(q.t1)-x(q.t0)),lb=w>170?`${esc(q.title)} #${q.n}${q.dup?' 중복':''} · ${f1(q.dur)}s · ${q.calls.length}회`:w>60?`#${q.n}${q.dup?' 중복':''} ${q.calls.length}회`:'';
+    g+=`<g data-i="${q.i0}" data-t="${q.t0}"><rect x="${x(q.t0)}" y="66" width="${w}" height="18" fill="${q.dup?'url(#hatch)':'var(--ex)'}" opacity="${q.dup?1:.25}"/>${q.dup?`<text x="${x(q.t0)+3}" y="80" fill="var(--bad)" font-weight="700">??</text>`:''}<text x="${x(q.t0)+(q.dup?24:3)}" y="80" class="lbl">${lb}</text></g>`;});
+  D.gaps.forEach(q=>{if(x(q.t1)-x(q.t0)>70)g+=`<text x="${(x(q.t0)+x(q.t1))/2}" y="${y0-8}" text-anchor="middle" fill="var(--pl)">⏳ ${f1(q.t1-q.t0)}s 침묵</text>`;});
+  D.calls.forEach(c=>{const sp=c.task?D.spans[c.task-1]:null,hp=c.p/cm*yh,hc=c.c/cm*yh,xx=x(c.t)-bw/2;
+    g+=`<g data-i="${c.i}" data-t="${c.t}"><title>태스크 #${c.task??'-'} · ${c.k??1}번째 호출 · 입력 ${fmt(c.p)} / 출력 ${fmt(c.c)} · 누적 ${fmt(c.cum)}</title><rect x="${xx}" y="${y0-hp}" width="${bw}" height="${hp}" fill="var(--prompt)"/><rect x="${xx}" y="${y0-hp-hc}" width="${bw}" height="${hc}" fill="var(--comp)"/>${sp&&sp.dup?`<rect x="${xx}" y="${y0-hp-hc}" width="${bw}" height="${hp+hc}" fill="url(#hatch)" opacity=".6"/>`:''}${c.k>=3?`<rect x="${xx}" y="${y0-hp-hc-2}" width="${bw}" height="2" fill="var(--warn)"/>`:''}</g>`;});
+  g+=`<path d="${stair(D,x,y0,70,tm,b)}" fill="none" stroke="var(--pl)" stroke-width="1.5"/>`;const yb=D.base?y0-D.base.tok/tm*(y0-70):0;
+  if(D.base)g+=`<line x1="${x(a)}" x2="${x(b)}" y1="${yb}" y2="${yb}" stroke="var(--ag)" stroke-dasharray="4 3"/>`;
+  s+=`<g clip-path="url(#ctl)">${g}</g><text x="${L-6}" y="${y0-yh+4}" text-anchor="end">호출당 ${fmt(cm)}</text><text x="${L-6}" y="${y0}" text-anchor="end">0</text><text x="${W-4}" y="74" text-anchor="end" fill="var(--pl)">누적 ${fmt(tm)}</text>${D.base&&yb<y0-14?`<text x="${W-4}" y="${yb-3}" text-anchor="end" fill="var(--ag)">${fmt(D.base.tok)}</text>`:''}<text x="${W-4}" y="${y0}" text-anchor="end" fill="var(--pl)">0</text>`;
+  s+=`<rect x="${L}" y="216" width="10" height="8" fill="var(--prompt)"/><text x="${L+14}" y="224">입력(컨텍스트 재전송)</text><rect x="${L+170}" y="216" width="10" height="8" fill="var(--comp)"/><text x="${L+184}" y="224">출력</text><rect x="${L+230}" y="216" width="10" height="8" fill="url(#hatch)"/><text x="${L+244}" y="224">빗금 = 단독 모델에 없던 비용 (중복 태스크)</text>${D.base?`<text x="${L+580}" y="224" fill="var(--ag)">┄ 단독 ${fmt(D.base.tok)} = 기준선</text>`:''}<line class="ph" id="phtl" x1="0" x2="0" y1="0" y2="${y0}"/>`;
+  svg.innerHTML=s;$('#crumb').innerHTML=xWin?`<span class="crumb">전체 › ${esc(xWin[2])} (Esc)</span>`:'';}
+// ---- C.1 RACE (cmp ON, §6): 단독 synthetic lane + one lane per ORDER run on one clock, shared token/call axes, live status chips ----
+function renderRace(){const svg=$('#tl'),lanes=(D.base?[{k:null,d:BL(),t:null}]:[]).concat(ORDER.map(k=>({k,d:Dof(k),t:RUNS[k]}))),n=lanes.length,lh=n>4?90:120,top=20,H=top+n*lh+34;svg.setAttribute('viewBox',`0 0 ${W} ${H}`);const cm=callMax(),tm=tokMax(),bw=Math.max(6,Math.min(10,PW/xMax()*0.6));
+  let s=HATCH+axis(top,n*lh);
+  lanes.forEach((ln,li)=>{const d=ln.d,y=top+li*lh,base=y+lh-22,bh=lh-52,on=ln.k===cur,{bk,ak}=pairKeys();let g='';
+    if(ln.k)g+=`<text x="${L-8}" y="${y+16}" text-anchor="end" class="lbl" font-weight="700">${esc(label(ln.k))}${ln.k===bk?' · Before':ln.k===ak?' · After':''}</text><text x="${L-8}" y="${y+30}" text-anchor="end">플래너 ${esc((d.planner||{}).model||'?')}</text><text x="${L-8}" y="${y+44}" text-anchor="end">에이전트 ${ln.t.agents.length} / 호출 ${d.active}</text>`;
+    else g+=`<text x="${L-8}" y="${y+16}" text-anchor="end" class="lbl" font-weight="700">단독${bk?'':' · Before'}</text><text x="${L-8}" y="${y+30}" text-anchor="end">${esc(modelShort(D.base.model))} · 단순 프롬프트</text><text x="${L-8}" y="${y+44}" text-anchor="end">에이전트 0 / 호출 1</text><rect x="${X(0)+4}" y="${y+25}" width="${d.label.length*7.3+8}" height="16" fill="var(--bg)" opacity=".85"/><text x="${X(0)+8}" y="${y+37}" fill="var(--ag)">${esc(d.label)}</text>`;
+    d.phases.forEach(([ph,p,q])=>{g+=`<rect x="${X(p)}" y="${y+4}" width="${Math.max(0,X(q)-X(p))}" height="8" fill="${PH[ph]}" opacity=".5"/>`;});
+    d.spans.forEach(q=>{g+=`<rect x="${X(q.t0)}" y="${y+14}" width="${Math.max(2,X(q.t1)-X(q.t0))}" height="8" fill="${q.dup?'url(#hatch)':ln.k?'var(--ex)':'var(--ag)'}" opacity="${q.dup?1:.35}" data-t="${q.t0}"/>`;});
+    d.calls.forEach(c=>{const sp=c.task?d.spans[c.task-1]:null,hp=c.p/cm*bh,hc=c.c/cm*bh,xx=X(c.t)-bw/2;g+=`<g data-t="${c.t}"${on?` data-i="${c.i}"`:''}><title>${ln.k?esc(label(ln.k)):'단독'} · 호출 ${c.k??1} · 입력 ${fmt(c.p)} / 출력 ${fmt(c.c)} · 누적 ${fmt(c.cum)}</title><rect x="${xx}" y="${base-hp}" width="${bw}" height="${hp}" fill="var(--prompt)"/><rect x="${xx}" y="${base-hp-hc}" width="${bw}" height="${hc}" fill="var(--comp)"/>${sp&&sp.dup?`<rect x="${xx}" y="${base-hp-hc}" width="${bw}" height="${hp+hc}" fill="url(#hatch)" opacity=".6"/>`:''}</g>`;});
+    g+=`<path d="${stair(d,X,base,y+24,tm,d.dur)}" fill="none" stroke="${ln.k?'var(--pl)':'var(--ag)'}" stroke-width="1.5"/>`;
+    if(d.fin)g+=`<line x1="${X(d.fin.t)}" x2="${X(d.fin.t)}" y1="${y+4}" y2="${base}" stroke="var(--ag)" stroke-dasharray="2 3"/>`;
+    g+=`<rect class="lane-chip-bg" data-k="${ln.k||'base'}" x="${W-R-4}" y="${y+5}" width="0" height="16" fill="var(--bg)" opacity=".85"/><text class="lane-chip lbl" x="${W-R-4}" y="${y+16}" text-anchor="end" data-k="${ln.k||'base'}"></text><line x1="${L}" x2="${W}" y1="${y+lh-1}" y2="${y+lh-1}" stroke="var(--line)"/>`;
+    s+=`<g opacity="${on||!ln.k?1:.6}">${g}</g>`;});
+  s+=`<text x="${W-4}" y="${H-6}" text-anchor="end">누적 축 0–${fmt(tm)} · 호출당 축 0–${fmt(cm)} · 실제 경과 시간 (정규화 없음)</text><line class="ph" id="phtl" x1="0" x2="0" y1="0" y2="${H-20}"/>`;svg.innerHTML=s;$('#crumb').innerHTML='';}
+function laneChips(){$$('.lane-chip').forEach(el=>{const k=el.dataset.k,d=k==='base'?BL():Dof(k),fin=d.fin?d.fin.t:d.dur;if(tNow>=fin-1e-9){el.textContent=`🏁 완주 ${k==='base'?fin:f1(fin)}s · ${fmt(d.total)} tok${k==='base'?(D.base.correct?' · 정답(외부 채점)':''):d.ratio?` · ${f1(d.ratio)}×`:''}`;el.setAttribute('fill','var(--ag)');}else{const so=soFar(d,tNow);el.textContent=`실행 중 · ${fmt(so.tok)} tok · 호출 ${so.n}`;el.setAttribute('fill','var(--fg)');}
+    let w=0;try{w=el.getBBox().width;}catch(e){}if(!w)w=el.textContent.length*7.4;const bg=$(`.lane-chip-bg[data-k="${k}"]`);if(bg){bg.setAttribute('x',W-R-4-w-6);bg.setAttribute('width',w+12);}});}   // dark backing so the chip never collides with the playhead/bars
+// ---- C.2 agent lanes (§3.4): every defined agent, idle rows dimmed ----
+function renderLanes(){const svg=$('#ln'),rh=34,h=rh*T.agents.length+40;svg.setAttribute('viewBox',`0 0 ${W} ${h}`);let s=HATCH+axis(14,h-30),idle=0;
+  T.agents.forEach((a,i)=>{const y=14+i*rh,iv=D.runs[a.id]||[],b=D.byAgent[a.id],busy=iv.filter(v=>v[2]==='execution').reduce((q,v)=>q+(v[1]-v[0]),0),isIdle=!iv.length&&!b;if(isIdle)idle++;
+    s+=`<g opacity="${isIdle?.35:1}"><text x="${L-8}" y="${y+13}" text-anchor="end" class="lbl" font-size="13">${esc(a.name)}</text><text x="${L-8}" y="${y+26}" text-anchor="end">${esc(a.model||'?')}${a.planner?' · 플래너':''}</text><line x1="${L}" x2="${W-R}" y1="${y+rh-2}" y2="${y+rh-2}" stroke="#15171c"/>`;
+    iv.forEach(([p,q,ph])=>s+=`<rect x="${X(p)}" y="${y+6}" width="${Math.max(2,X(q)-X(p))}" height="18" fill="${PH[ph]}" opacity=".55" data-t="${p}"/>`);
+    D.spans.filter(q=>q.dup&&q.agentId===a.id).forEach(q=>s+=`<rect x="${X(q.t0)}" y="${y+6}" width="${Math.max(2,X(q.t1)-X(q.t0))}" height="18" fill="url(#hatch)" data-t="${q.t0}"/>`);
+    D.calls.filter(c=>c.agentId===a.id).forEach(c=>s+=`<line data-i="${c.i}" data-t="${c.t}" x1="${X(c.t)}" x2="${X(c.t)}" y1="${y+4}" y2="${y+26}" stroke="var(--acc)" stroke-width="1.5"/>`);
+    s+=`</g><text x="${W-4}" y="${y+19}" text-anchor="end" class="${b?'lbl':''}">${b?`${f1(busy)}s · ${b.calls}회 · ${fmt(b.prompt+b.completion)} tok`:iv.length?`${f1(iv.reduce((q,v)=>q+(v[1]-v[0]),0))}s · 호출 0`:'호출 0 · 유휴'}</text>`;});
+  s+=`<line class="ph" x1="0" x2="0" y1="0" y2="${h}"/>`;svg.innerHTML=s;$('#lnhead').textContent=`정의 ${T.agents.length} · 계획 ${D.planner?1:0} · 호출 ${D.active} · 유휴 ${idle}`;}
+
+// ---- C.3 ledger (§3.5): one row per log event, grouped 계획 / <details> per task span / 취합, subtotals → = 합계 → 단독 → 배율 ----
+const badge=i=>D.flag[i]?`<span class="badge b-${D.flag[i]}">${SYM[D.flag[i]]}</span>`:'';
+function rowHTML(i){const e=E(i),c=e.tokens?D.calls.find(q=>q.i===i):null,prev=c&&c.k>1?D.calls.find(q=>q.task===c.task&&q.k===c.k-1):null;
+  return`<div class="row ${c?'':'ev'}" data-i="${i}" data-t="${e.t}"><span class="d">${i+1}</span><span class="d">${f1(e.t)}s</span><span>${esc(e.agentName||'—')}</span><span class="txt">${badge(i)}${c?`호출 #${c.k??'-'} / 태스크 #${c.task??'-'}`:esc(e.summary||e.type)}</span><span class="r">${c?fmt(c.p)+(prev?` <span class="dl">(${sgn(c.p-prev.p)})</span>`:''):''}</span><span class="r">${c?fmt(c.c):''}</span><span class="r d">${c?fmt(c.cum):''}</span></div>`;}
+function renderRows(){const N=T.events.length,openAll=N<=20,ex=D.exec0?D.exec0.i:N,ag=D.agg?D.agg.i:N,key=i=>i<ex?'plan':D.task[i]?'task'+D.task[i]:i>=ag?'agg':'loose';
+  let h=`<div class="row hd"><span>#</span><span>t</span><span>에이전트</span><span>항목 · ${esc(T.meta.squad||'')} · ${esc(T.meta.startedAt||'')}${D.base?' · 문항 '+esc(D.base.item):''}</span><span class="r">입력</span><span class="r">출력</span><span class="r">누적</span></div>`,i=0;
+  while(i<N){const kk=key(i);let j=i;while(j<N&&key(j)===kk)j++;const idx=[];for(let q=i;q<j;q++)idx.push(q);
+    if(kk==='loose')h+=idx.map(rowHTML).join('');
+    else{let sum='',cells=['','',''];
+      if(kk==='plan')sum=`계획 · 이벤트 ${idx.length}개 · 플래너 ${esc((D.planner||{}).model||'?')}${D.plan?` · ${f1(D.plan.t)}s`:''}`;
+      else if(kk==='agg')sum=`취합 · 이벤트 ${idx.length}개${D.agg&&D.fin?` · ${f1(D.fin.t-D.agg.t)}s`:''}`;
+      else{const q=D.spans[+kk.slice(4)-1];sum=`소계 ${esc(q.title)} #${q.n}${q.dup?' <span class="badge b-dup">중복</span>':''} · ${q.calls.length}회 · ${f1(q.dur)}s · 입력 ${fmt(q.first)}→${fmt(q.last)} · ${fmt(q.prompt+q.completion)} tok`;cells=[fmt(q.prompt),fmt(q.completion),fmt(q.prompt+q.completion)];}
+      h+=`<details${openAll?' open':''}><summary class="row sum" data-t="${E(i).t}"><span class="tri d">${i+1}–${j}</span><span class="d">${f1(E(i).t)}s</span><span></span><span>${sum} ${idx.map(badge).join('')}</span><span class="r">${cells[0]}</span><span class="r">${cells[1]}</span><span class="r">${cells[2]}</span></summary>${idx.map(rowHTML).join('')}</details>`;}
+    i=j;}
+  const b=D.base,ps=D.prompt/D.total*100,tr=(cls,txt,a='',bb='',c='')=>`<div class="row ${cls}" data-t="${D.dur}" style="cursor:default"><span></span><span></span><span></span><span>${txt}</span><span class="r">${a}</span><span class="r">${bb}</span><span class="r">${c}</span></div>`;
+  h+=tr('sum','입력 소계 (컨텍스트 재전송)',`${fmt(D.prompt)} (${f1(ps)}%)`)+tr('sum','출력 소계','',`${fmt(D.completion)} (${f1(100-ps)}%)`)+tr('tot',`= 합계 · 호출 ${D.calls.length}회 · 태스크 ${D.spans.length}개${D.dupCount?` (중복 ${D.dupCount})`:''} · ${f1(D.dur)}s · 에이전트 플래너 1 + 호출 ${D.active} / ${T.agents.length}`,'','',`${fmt(D.total)} tok`);
+  if(b)h+=tr('ev',`단독 ${esc(b.model)} · ${b.s}s · 정답 ${b.correct} (baseline 필드)`,'','',`${fmt(b.tok)} tok`)+tr('tot',`배율 (합계 ÷ 단독) · 시간 ${f1(D.dur/(b.s||1))}×`,'','',`${f1(D.total/b.tok)}×`);
+  h+=tr('ev',D.traceTotal!=null?`trace.tokens.total ${fmt(D.traceTotal)} ${D.traceTotal===D.total?'✓ 일치':'✗ 불일치 (Σ 호출 = '+fmt(D.total)+')'}`:'trace.tokens.total 없음 — Σ 호출만 사용');$('#rows').innerHTML=h;}
+// ---- §4.1 inline panel: header · 4 metrics · 해석 (6 fields + claim cards with ← 로그 #k) | 원본 (events[i] as loaded) ----
+function panelHTML(i){const e=E(i),a=T.agents.find(x=>x.id===e.agentId)||{},c=e.tokens?D.calls.find(q=>q.i===i):null,prev=c&&c.k>1?D.calls.find(q=>q.task===c.task&&q.k===c.k-1):null,s=D.task[i]?D.spans[D.task[i]-1]:null,b=D.base,na='<span class="na">로그 미제공 (AI:GO 미저장)</span>';
+  const src=(...is)=>`<span class="src">← 로그 ${is.filter(x=>x!=null&&x>=0).map(x=>`<a data-go="${x}">#${x+1}</a>`).join(', ')}</span>`,C=[],claim=(cls,txt,...is)=>C.push(`<div class="claim ${cls}">${txt}${src(...is)}</div>`);let M=[];
+  if(c){M=[['입력',fmt(c.p)],['출력',fmt(c.c)],['누적',fmt(c.cum)],['Δ입력 vs 직전',prev?sgn(c.p-prev.p):'—']];
+    if(prev)claim(c.p>prev.p?'warn':'',`입력 Δ = ${fmt(c.p)} − ${fmt(prev.p)} = ${sgn(c.p-prev.p)}${c.p>prev.p?' → 히스토리 누적 (컨텍스트 재전송)':' → 컨텍스트 축소'}`,i,prev.i);
+    const f0=D.calls[0];claim(c.cum===c.logCum?'ok':'warn',`누적 검산 Σ(prompt+completion) #${f0.i+1}..#${i+1} = ${fmt(c.cum)} · 로그 cumPrompt+cumCompletion = ${fmt(c.logCum)} ${c.cum===c.logCum?'✓ 일치':'✗ 불일치'}`,f0.i,i);
+    if(b&&b.tok)claim('',`누적 ${fmt(c.cum)} = 단독 ${fmt(b.tok)}의 ${f1(c.cum/b.tok)}×`,i);if(c.k>=3)claim('warn',`같은 태스크 ${c.k}번째 호출 — 단독 모델은 1회`,s?s.calls[0]:null,i);}
+  else if(e.type==='task-status-changed'&&s&&s.i0===i){const pv=s.dup?D.spans.find(q=>q.n<s.n&&q.title===s.title&&q.agentId===s.agentId):null;M=[['태스크','#'+s.n],['판정',s.dup?'중복':'단일'],[pv?`이전 #${pv.n} 완료`:'호출',pv?f1(pv.t1)+'s':s.calls.length],['토큰',fmt(s.prompt+s.completion)]];
+    if(pv)claim('warn',`중복 판정: title '${esc(s.title)}' + agentId 동일 → #${pv.n}(완료 ${f1(pv.t1)}s)의 반복`,pv.i0,pv.i1);else claim('ok',`첫 태스크 — 계획대로 ${esc(e.agentName||'?')}에 라우팅`,i);}
+  else if(e.type==='plan-ready'){const d=e.detail||{},n=d.taskCount??D.spans.length,ps=T.events.findIndex(q=>q.type==='planning-started');M=[['계획',f1(e.t)+'s'],['태스크',n],['지시문',1],['거절',T.meta.rejectedPlansBefore??'—']];
+    claim(n>1?'warn':'ok',`태스크 ${n}개 · 웨이브 ${(d.waves||[]).length||1} · 지시문 "task count must be exactly 1" → 중복 ${Math.max(0,n-1)} · 이 계획 전 거절 ${T.meta.rejectedPlansBefore??'?'}회`,ps);
+    if(D.flag[i]==='gap')claim('',`직전 이벤트와 ${f1(e.t-T.events[i-1].t)}s 간격 — 로그에 이벤트 0개 (플래너 ${esc((D.planner||{}).model||'?')} 생각 중)`,i-1,i);}
+  else if(e.type==='task-completed'&&s){M=[['호출',s.calls.length],['토큰',fmt(s.prompt+s.completion)],['이벤트 기준',f1(s.dur)+'s'],['durationSec',s.wallDur!=null?s.wallDur+'s':'—']];
+    claim('',`태스크 비용 = Σ 호출 #${s.calls.length?s.calls[0]+1:'-'}..#${s.calls.length?s.calls[s.calls.length-1]+1:'-'} = ${fmt(s.prompt+s.completion)} tok · ${s.calls.length}회`,s.calls[0],s.calls[s.calls.length-1]);
+    if(s.wallDur!=null&&s.wallDur-s.dur>1)claim('warn',`tasks[].durationSec ${s.wallDur}s vs 이벤트 기준 ${f1(s.dur)}s — 웨이브 시작(${D.wave?f1(D.wave.t):'?'}s)부터 측정: "병렬" 웨이브였지만 직렬 처리`,D.wave?D.wave.i:null,s.i0,i);
+    if(D.flag[i]==='serial')claim('warn',esc(D.serialClaim),D.wave?D.wave.i:null,...D.spans.map(q=>q.i0));}
+  else if(e.type==='token-usage-update'){const v=sessOf(e);M=[['세션 누적',fmt(v)],['이 실행 합계',fmt(D.total)],['차이',sgn(v-D.total)],['차트 사용','아니오']];claim(v!==D.total?'warn':'',`세션 누적 ${fmt(v)} ${v===D.total?'=':'≠'} 이 실행 합계 ${fmt(D.total)} → 차트에 쓰지 않음`,i);}
+  else if(e.type==='execution-completed'){M=[['합계',fmt(D.total)],['단독',b?fmt(b.tok):'—'],['배율',D.ratio?f1(D.ratio)+'×':'—'],['시간',f1(D.dur)+'s']];
+    claim('',`배율 = ${fmt(D.total)} / ${b?fmt(b.tok):'—'} = ${D.ratio?f2(D.ratio):'—'}× · 입력 비중 ${fmt(D.prompt)}/${fmt(D.total)} = ${f1(D.prompt/D.total*100)}%`,D.calls[0]?D.calls[0].i:null,i);
+    claim('',`가동 에이전트 플래너 1 + 호출 ${D.active} / ${T.agents.length} — 호출 0회: ${T.agents.filter(x=>!x.planner&&!D.byAgent[x.id]).map(x=>esc(x.name)).join(', ')||'없음'}`,i);
+    claim('warn',`정답 여부는 로그에 없음 — baseline.correct=${b?b.correct:'?'} (단독 모델, 외부 채점)만 기록`,i);}
+  else{const so=soFar(D,e.t);M=[['경과',f1(e.t)+'s'],['단계',PHK[e.phase]||e.phase],['누적',fmt(so.tok)],['호출',so.n]];}
+  const F=[['시각',`${f1(e.t)}s · ${esc(e.ts||'')}`],['에이전트(모델)',a.name?`${esc(a.name)} (${esc(a.model||'?')})${a.planner?' · 플래너':''}`:e.agentName?esc(e.agentName):na],['타입',`${esc(e.type)} · ${PHK[e.phase]||esc(e.phase||'')}`],['토큰',c?`입력 ${fmt(c.p)} + 출력 ${fmt(c.c)} = ${fmt(c.p+c.c)} · 로그 누적 ${fmt(c.logCum)}`:na],['상태 전이',/state|status|completed|started|ready/.test(e.type)?esc(e.summary||''):na],['출력 텍스트',na]];
+  return`<div class="panel" data-rubric="traceability explainability"><div class="hd"><span>#${i+1} ${esc(e.type)} · ${esc(e.agentName||'—')} · t=${f2(e.t)}s · ${esc(e.ts||'')}</span><span class="tabs"><span class="on" data-tab="i">해석</span><span data-tab="r">원본 (events[${i}])</span></span></div><div class="metrics">${M.map(([l,v])=>`<div class="metric">${l}<b>${v}</b></div>`).join('')}</div><div class="body"><dl>${F.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl><div class="claims">${C.join('')||'<div class="claim">상태 이벤트 — 파생 주장 없음</div>'}</div><pre style="display:none">${esc(JSON.stringify(e,null,2))}</pre></div></div>`;}
+function select(i,scroll){sel=i;$$('.panel').forEach(p=>p.remove());$$('.sel').forEach(x=>x.classList.remove('sel'));if(i<0)return;$$(`[data-i="${i}"]`).forEach(x=>x.classList.add('sel'));const row=$(`.row[data-i="${i}"]`);if(!row)return;const det=row.closest('details');if(det)det.open=true;row.insertAdjacentHTML('afterend',panelHTML(i));const p=row.nextElementSibling;
+  p.querySelector('.tabs').onclick=ev=>{const t=ev.target.dataset.tab;if(!t)return;p.querySelector('pre').style.display=t==='r'?'':'none';p.querySelector('dl').style.display=p.querySelector('.claims').style.display=t==='r'?'none':'';p.querySelectorAll('.tabs span').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));};
+  p.querySelectorAll('a[data-go]').forEach(x=>x.onclick=ev=>{ev.stopPropagation();go(+x.dataset.go,true);});if(scroll)row.scrollIntoView({block:'center'});}
+function go(i,scroll){stop();setT(E(i).t);select(i,scroll);}
+// ---- C.4 판단: flag cards · comparison table (단독 · runs) · data sentence ----
+function renderFlags(){$('#flags').innerHTML=D.flags.map(i=>{const e=E(i);return`<div class="flag" data-i="${i}" data-t="${e.t}"><span class="badge b-${D.flag[i]}">${SYM[D.flag[i]]}</span><div>${capOf(T,D,i)}<div class="t">t=${f1(e.t)}s · 이벤트 #${i+1} · ${esc(e.type)} · <a>← 로그 #${i+1}</a></div></div></div>`;}).join('')||'<div class="flag">표시할 판단 없음</div>';}
+function renderCmp(){const b=D.base,cols=ORDER.map(k=>({k,T:RUNS[k],D:Dof(k)})),chip=(v,ref)=>{if(ref==null||typeof v!=='number'||!ref)return'';const r=v/ref,d=v-ref,m=[`${f1(r)}×`,sgn(d),`${d>=0?'+':'−'}${Math.abs((r-1)*100).toFixed(0)}%`][dmode];return`<span class="chip ${v>ref?'worse':''}">${m}</span>`;};
+  const rows=[['토큰',b?b.tok:null,c=>c.D.total,fmt],['시간 (s) <span class="dimv">(공용 엔드포인트 지연 포함 · 미채점)</span>',b?b.s:null,c=>c.D.dur,f1,v=>String(v)],['모델 호출',1,c=>c.D.calls.length,v=>v],['태스크 (중복)','—',c=>`${c.D.spans.length} (${c.D.dupCount})`],['입력 비중',b?f1(b.prompt/b.tok*100)+'%':'—',c=>f1(c.D.prompt/c.D.total*100)+'%'],['에이전트 (계획+호출 / 정의)','0 / 0',c=>`${(c.D.planner?1:0)+c.D.active} / ${c.T.agents.length}`],['플래너 모델','—',c=>esc((c.D.planner||{}).model||'?')],['워크스페이스 누적 계획 거절(실험 중 사람이 반려)','—',c=>`<span class="dimv">${c.T.meta.rejectedPlansBefore??'—'}</span>`],['계획 시간 (plan.t)','—',c=>c.D.plan?f1(c.D.plan.t)+'s':'—'],['답 텍스트','채점 러너 (외부)',()=>'<span class="na">로그 미기록</span>']];
+  $('#cmpt').innerHTML=`<tr><th>기준: 단독 ${esc(b?b.model:'없음')}${b?` · 같은 문항 ${esc(b.item)}`:''} (최좌측 = 기준)</th><th>단독</th>${cols.map(c=>`<th>${esc(label(c.k))}</th>`).join('')}</tr>`+rows.map(([n,bv,f,fm=fmt,bfm=fm])=>`<tr><td>${n}</td><td>${bv==null?'—':typeof bv==='number'?bfm(bv):bv}</td>${cols.map(c=>{const v=f(c);return`<td class="${c.k===cur?'cur':''}">${typeof v==='number'?fm(v):v}${typeof v==='number'&&typeof bv==='number'?chip(v,bv):''}</td>`;}).join('')}</tr>`).join('');
+  $('#cmpt').onclick=()=>{dmode=(dmode+1)%3;renderCmp();};}
+function renderSentence(){const el=$('#sentence'),{bk,ak}=pairKeys();if(!bk){el.innerHTML='';return;}const B=Dof(bk),A=Dof(ak),TA=RUNS[ak],ps=d=>f1(d.prompt/d.total*100);
+  let s=`입력 비중은 ${esc(vtag(bk))} <b>${ps(B)}%</b> · ${esc(vtag(ak))} <b>${ps(A)}%</b> — 줄어든 것은 비중이 아니라 컨텍스트를 다시 보낸 횟수 <b>${B.calls.length} → ${A.calls.length}</b>.`;
+  if(A.plan&&B.plan&&(A.planner||{}).model!==(B.planner||{}).model){const d=A.plan.t-B.plan.t;s+=` ${esc(vtag(ak))} 플래너(${esc(A.planner.model)})는 ${esc(vtag(bk))}보다 ${f1(Math.abs(d))}s ${d>0?'느리지만':'빠르고'}(${f1(A.plan.t)}s vs ${f1(B.plan.t)}s) 태스크 수가 ${A.spans.length}로 ${A.dupCount?'줄었다':'고정됐다'}${TA.meta.rejectedPlansBefore!=null?` (거절 ${TA.meta.rejectedPlansBefore}회 뒤)`:''}.`;}el.innerHTML=s;}
+// ---- C verdict · C.5 각주: calibration (v2 renderer tweaked) · methods line ----
+function renderHonest(){$('#vC').innerHTML=`이벤트 <b>${T.events.length}</b>개 → 호출 <b>${D.calls.length}</b> · 태스크 <b>${D.spans.length}</b>${D.dupCount?` (중복 ${D.dupCount})`:''} · 에이전트 <b>${(D.planner?1:0)+D.active}/${T.agents.length}</b> 가동 — 모든 숫자는 원장 줄(← 로그 #k)로 돌아가고 합계는 화면에서 검산된다<small>플레이헤드를 끌면 상호작용 스트립·시간·에이전트·원장이 같은 시계로 움직인다 · 하단 레일의 루브릭 칩에 마우스를 올리면 해당 요소만 남는다</small>`;
+  const cal=T.calibration||[],svg=$('#cal'),Wc=520,Hc=220,px=50,py=16,pw=Wc-px-20,ph=Hc-py-44;
+  if(cal.length){let s=`<line x1="${px}" y1="${py+ph}" x2="${px+pw}" y2="${py+ph}" stroke="var(--line)"/><line x1="${px}" y1="${py}" x2="${px}" y2="${py+ph}" stroke="var(--line)"/><line x1="${px}" y1="${py+ph}" x2="${px+pw}" y2="${py}" stroke="#2a2e38" stroke-dasharray="3 3"/>`;
+    [0,50,100].forEach(p=>{const y=py+ph-ph*p/100;s+=`<text x="${px-6}" y="${y+4}" text-anchor="end">${p}%</text><line x1="${px}" x2="${px+pw}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-dasharray="3 4"/>`;});
+    const pts=cal.map(c=>({x:px+pw*c.conf/10,y:py+ph-ph*(c.correct/c.n),...c}));s+=`<polyline points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="none" stroke="var(--ag)" stroke-width="2"/>`;
+    pts.forEach(p=>{s+=`<circle cx="${p.x}" cy="${p.y}" r="${3+Math.sqrt(p.n)*1.6}" fill="var(--ag)" opacity=".5"/><text x="${p.x}" y="${py+ph+16}" text-anchor="middle">${p.conf}</text>${p.n>=5?`<text x="${p.x}" y="${p.y-12}" text-anchor="middle" class="lbl">${p.correct}/${p.n}</text>`:''}`;});
+    s+=`<text x="${px+pw/2}" y="${Hc-4}" text-anchor="middle">self-reported confidence (0–10)</text>`;svg.innerHTML=s;const top=cal[cal.length-1],n=cal.reduce((a,c)=>a+c.n,0);$('#calcap').textContent=`확신도 ${top.conf} → ${top.correct}/${top.n} 정답 (${n}문항, 채점 러너) · 확신도가 낮은 문항만 재검토하면 된다 = 원칙 0의 근거`;}
+  else{svg.innerHTML=`<text x="10" y="30">캘리브레이션 데이터 없음</text>`;$('#calcap').textContent='';}
+  const b=D.base,sess=T.events.filter(e=>e.type==='token-usage-update').map(sessOf);$('#sessNote').textContent=`token-usage-update 의 세션 누적치${sess.length?` (${sess.map(fmt).join(' / ')})`:''}는 이 실행의 합계가 아님 → 차트에 쓰지 않음`;
+  $('#methods').textContent=`methods · ${fmt(D.total)} = Σ execution-token-usage.prompt+completion (호출 ${D.calls.length}회, ${cur}, ${T.meta.source||'trace.json'}) · 입력 ${fmt(D.prompt)} / 출력 ${fmt(D.completion)}${b?` · ${fmt(b.tok)} = baseline.prompt+completion (${b.model}, ${b.s}s, correct=${b.correct}) · 배율 ${fmt(D.total)}/${fmt(b.tok)} = ${f2(D.total/b.tok)}`:' · 기준 없음'} · 중복 = 같은 제목+같은 에이전트 태스크 −1 · 호출별 Δ = cumPrompt[i]−cumPrompt[i−1] · 태스크 구간 = task-status-changed(in_progress) → task-completed${D.traceTotal!=null?` · trace 합계 = ${fmt(D.traceTotal)} ${D.traceTotal===D.total?'✓ 일치':'✗'}`:''} · 트랙 정확도·토큰 = jxc-selfeval (가시 연습셋) · ${(T.meta.startedAt||'').slice(0,10)}`;
+  $('#rngd').textContent=`${fmt(D.total)} tok ≈ RNGD 1장 기준 ~${f1(D.total/3000)}s · ~${fmt(D.total/3000*180)}J (공개 수치 3,000 tok/s · 180 W 가정 — 측정 아님)`;}
+
+// ---- §4.2 playhead / replay ----
+const endT=()=>cmp?xMax():D.dur;
+function setT(t){tNow=Math.max(0,Math.min(endT(),t));const xs=X(tNow);$$('.ph').forEach(l=>{l.setAttribute('x1',xs);l.setAttribute('x2',xs);l.style.display='';});
+  if(xWin&&!cmp){const p=$('#phtl'),xx=sx(tNow,xWin[0],xWin[1]);p.setAttribute('x1',xx);p.setAttribute('x2',xx);p.style.display=tNow<xWin[0]||tNow>xWin[1]?'none':'';}
+  $$('[data-t]').forEach(el=>el.classList.toggle('future',+el.dataset.t>tNow+1e-9));
+  const so=soFar(D,tNow),past=T.events.filter(e=>e.t<=tNow+1e-9).length,li=past-1,fl=D.flags.filter(i=>i<=li).pop();
+  $('#counter').innerHTML=`<b>${f1(tNow)}s</b> / ${f1(D.dur)}s · 호출 <b>${so.n}</b> · <b>${fmt(so.tok)}</b> tok${D.base?` · 단독의 <b>${f1(so.tok/D.base.tok)}×</b>`:''} · 이벤트 <b>${past}</b>/${T.events.length}`;
+  const ci=li<0?-1:(fl!=null&&fl>=li-1)?fl:li;$('#caption').innerHTML=ci<0?'계획 대기 — 아직 이벤트 없음':badge(ci)+capOf(T,D,ci);$('#sub').textContent=li<0?'':`#${li+1} ${E(li).summary||E(li).type}`;
+  const nxt=T.events.find(e=>e.t>tNow+1e-9),sk=$('#skip');sk.style.display=playing&&nxt&&nxt.t-tNow>3?'':'none';if(nxt)sk.textContent=`⏳ ${li<0||E(li).phase==='planning'?'플래너':E(li).agentName||'에이전트'} 생각 중 · ${f1(nxt.t-tNow)}s · 건너뛰기 →`;
+  $('#range').value=tNow;renderSplits();laneChips();stripAt(tNow);}
+function inGap(t){const g=d=>d.gaps.some(q=>q.t0<=t&&t<q.t1);if(!cmp)return g(D);const live=ORDER.filter(k=>t<Dof(k).dur);return live.length>0&&live.every(k=>g(Dof(k)));}
+function loop(ts){if(!playing)return;const dt=Math.min(.1,(ts-lastTs)/1000);lastTs=ts;const v=$('#spd').value;setT(tNow+dt*(v==='auto'?(inGap(tNow)?15:2.5):+v));if(tNow>=endT()-1e-9){stop();return;}requestAnimationFrame(loop);}
+function play(){if(tNow>=endT()-1e-9)tNow=0;playing=true;$('#play').textContent='⏸';lastTs=performance.now();requestAnimationFrame(loop);setT(tNow);}
+function stop(){playing=false;$('#play').textContent='▶';$('#skip').style.display='none';}
+function renderAll(anim){renderRuns();renderBench();renderScrub();renderHero(anim);renderStrip();renderTL();renderLanes();renderRows();renderFlags();renderCmp();renderSentence();renderHonest();lastPulse=-1;if(sel>=0)select(sel);}
+function show(k,anim=true){stop();cur=k;T=RUNS[k];D=Dof(k);sel=-1;xWin=null;renderAll(anim);setT(Math.min(tNow,endT()));}
+function setOrder(){ORDER=[LATEST].filter(k=>RUNS[k]).concat(hist?HISTORY.filter(k=>RUNS[k]):[]).concat(Object.keys(RUNS).filter(k=>k.startsWith('drop:')));if(!ORDER.includes(cur))cur=ORDER[0];}
+function addRun(k,j){if(!j||!j.events||!j.events.length)throw new Error('events 없음');RUNS[k]=j;setOrder();show(k);toast(`${k}: 이벤트 ${j.events.length} → 호출 ${D.calls.length} · 태스크 ${D.spans.length} · 사전 가공 없이 파생`);if(j.meta&&j.meta.borrowedBaseline&&D.base)setTimeout(()=>toast(`⚠ 기준 ${fmt(D.base.tok)}은 ${D.base.item} 단독 값 — 문항 불일치 가능`),3000);}
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',2800);}
+function idle(){clearTimeout(idleTimer);idleTimer=setTimeout(()=>{stop();cmp=true;hist=false;$('#cmp').checked=true;$('#hist').checked=false;setOrder();show(ORDER[0],false);setT(endT());select(-1);window.scrollTo(0,0);},45000);}
+
+// ---- §4.3 / §4.4 events: runs · toggles · scrubber · clicks · keyboard · rubric rail · drop ----
+$('#runs').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.k);};
+$('#sections').onclick=e=>{const b=e.target.closest('button');if(b)document.getElementById(b.dataset.s).scrollIntoView({block:'start'});};
+$('#cmp').onchange=e=>{cmp=e.target.checked;xWin=null;renderAll(false);setT(tNow);};
+$('#hist').onchange=e=>{hist=e.target.checked;setOrder();show(cur,true);};
+$('#play').onclick=()=>playing?stop():play();$('#rst').onclick=()=>{stop();setT(0);select(-1);};
+$('#skip').onclick=()=>{const n=T.events.find(e=>e.t>tNow+1e-9);if(n)setT(n.t-.05);};
+$('#range').oninput=e=>{stop();setT(+e.target.value);};$('#rngdTog').onchange=e=>$('#rngd').style.display=e.target.checked?'block':'none';
+(()=>{const sv=$('#scrub');let down=false;const seek=ev=>{const r=sv.getBoundingClientRect();setT(snapT(((ev.clientX-r.left)/r.width*W-L)/PW*xMax()));};sv.onpointerdown=ev=>{down=true;sv.setPointerCapture(ev.pointerId);stop();seek(ev);};sv.onpointermove=ev=>down&&seek(ev);sv.onpointerup=()=>down=false;})();
+document.addEventListener('click',e=>{const el=e.target.closest('[data-i]');if(!el||e.target.closest('.panel'))return;const i=+el.dataset.i;if(el.classList.contains('row')&&sel===i){select(-1);return;}go(i,!el.classList.contains('row'));});
+document.addEventListener('keydown',e=>{if(!T||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')return;const k=e.key,SEC=['sA','sB','sC','s03','s04','s05'];
+  if(k===' '){e.preventDefault();playing?stop():play();}
+  else if(k==='ArrowRight'||k==='ArrowLeft'){e.preventDefault();const i=Math.max(0,Math.min(T.events.length-1,(sel<0?T.events.filter(x=>x.t<=tNow+1e-9).length-1:sel)+(k==='ArrowRight'?1:-1)));go(i,true);}
+  else if(k==='n'||k==='N'){const nx=e.shiftKey?D.flags.filter(i=>i<sel).pop():D.flags.find(i=>i>sel);if(nx!=null)go(nx,true);}
+  else if(k==='Home')setT(0);else if(k==='End')setT(endT());else if(k==='r'||k==='R'){stop();setT(0);select(-1);}
+  else if(/^Digit[1-6]$/.test(e.code)&&e.shiftKey){e.preventDefault();document.getElementById(SEC[+e.code.slice(5)-1]).scrollIntoView({block:'start'});}
+  else if(/^[1-9]$/.test(k)&&ORDER[k-1])show(ORDER[k-1]);
+  else if(k==='c'||k==='C'){$('#cmp').checked=cmp=!cmp;xWin=null;renderAll(false);setT(tNow);}
+  else if(k==='h'||k==='H'){$('#hist').checked=hist=!hist;setOrder();show(cur,true);}
+  else if(k==='f'||k==='F'){const n=sel>=0?D.task[sel]:null,q=n?D.spans[n-1]:null;if(q&&!cmp){xWin=[Math.max(0,q.t0-.5),Math.min(D.dur,q.t1+.5),`${q.title} #${q.n}`];renderTL();setT(tNow);select(sel);}}
+  else if(k==='Escape'){if(sel>=0)select(-1);else if(xWin){xWin=null;renderTL();setT(tNow);}}
+  else if(k==='Tab'){e.preventDefault();const y=window.scrollY+170,els=SEC.map(id=>document.getElementById(id)),nx=e.shiftKey?[...els].reverse().find(s=>s.offsetTop<y-10):els.find(s=>s.offsetTop>y+10);if(nx)nx.scrollIntoView({block:'start'});}
+  else if(k==='?')toggleKeys();});
+const RUB={observability:['스크러버 · 톱니 막대 · 유휴 레인','로그의 외부 출력(누적 토큰 카운터·상태 전이)만으로 루프 반복 수·컨텍스트 성장·5명 중 2명 가동이라는 내부 상태를 복원한다 — 원본 events.jsonl을 드롭해도 같은 그림'],interpretability:['17px 캡션 · 상호작용 스트립 · 소계 줄','플레이헤드가 지나는 매 이벤트를 사람 문장 한 줄로 바꾸고, 태스크마다 소계로 읽게 한다'],traceability:['원장 · 원본 탭 · ← 로그 #k · methods','모든 숫자는 이벤트 인덱스에 묶여 클릭 한 번에 원본 JSON으로 가고, 합계는 화면에서 검산된다'],explainability:['판단 카드 · 주장 카드 · 빗금 중복 띠','왜 43×인가: 컨텍스트를 28번 보냈고 그중 두 태스크는 통째로 중복 — 규칙으로만 생성되어 낯선 로그에도 같은 설명'],clarity:['B 히어로 (한 숫자 + 한 문장) · 0 기준 선형 막대','3초 안에 617 → 1,611 (2.6×), 잘린 축·로그 축·그래프·버블 없음, 색은 페이즈·입출력·낭비에만'],insightfulness:['레이스 레인 · SPLIT · 비교표 · 캘리브레이션','단독이 5초에 완주할 때 스쿼드는 플래너를 기다리고, 입력 비중은 91%로 같으며 바뀐 건 재전송 횟수; Qwen3 플래너는 느리지만 태스크 수를 고정했다']};
+$('#rail').innerHTML=Object.keys(RUB).map(k=>`<span class="rb" data-k="${k}" title="${esc(RUB[k][1])}">${k[0].toUpperCase()+k.slice(1)} → ${esc(RUB[k][0])}</span>`).join('')+`<span id="railDef">루브릭 6축 — 칩에 마우스를 올리면 해당 요소만 남습니다 · <kbd title="키 안내 (?)">⌨ ?</kbd></span><label>열기: events.jsonl / .squad.json / trace.json<input id="file" type="file" accept=".json,.jsonl" multiple hidden></label>`;
+$$('#rail .rb').forEach(s=>{s.onmouseenter=s.onfocus=()=>{document.body.dataset.spot=s.dataset.k;$('#railDef').textContent=RUB[s.dataset.k][1];};s.onmouseleave=s.onblur=()=>{delete document.body.dataset.spot;$('#railDef').textContent='루브릭 6축 — 칩에 마우스를 올리면 해당 요소만 남습니다';};});
+function toggleKeys(v){const kk=$('#keys');kk.style.display=(v??kk.style.display!=='block')?'block':'none';}$('#rail kbd').onclick=$('#help').onclick=()=>toggleKeys();
+['keydown','pointerdown','wheel','touchstart'].forEach(ev=>document.addEventListener(ev,idle,{passive:true}));document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
+// ---- §2.4 ingestion: drop / file input → normalizeRaw (jsonl) or trace.json; squad detected by content ----
+async function ingest(f){try{const text=await f.text(),nm=f.name.replace(/\.(jsonl|json)$/,'');
+  if(f.name.endsWith('.jsonl')){const squad=SQUAD||(T?{config:{name:T.meta.squad,agents:T.agents.map(a=>({id:a.id,name:a.name,role:{value:a.role},modelPreferences:{preferredModelId:a.model}})),plannerAgentId:(T.agents.find(a=>a.planner)||{}).id}}:null);addRun('drop:'+nm,normalizeRaw(text,squad,T));return;}
+  const j=JSON.parse(text);if(j.events&&j.meta)addRun('drop:'+nm,j);else if(j.config||j.agents){SQUAD=j;toast('스쿼드 설정 적재됨 — 이제 events.jsonl을 드롭하세요');}else throw new Error('알 수 없는 형식: '+f.name);}
+  catch(err){toast('적재 실패: '+err.message);}}
+document.body.addEventListener('dragover',e=>{e.preventDefault();document.body.classList.add('drag');});document.body.addEventListener('dragleave',e=>{if(!e.relatedTarget)document.body.classList.remove('drag');});
+document.body.addEventListener('drop',async e=>{e.preventDefault();document.body.classList.remove('drag');for(const f of e.dataTransfer.files)await ingest(f);});
+$('#file').onchange=async e=>{for(const f of e.target.files)await ingest(f);e.target.value='';};
+// ---- boot (§2.2): inline <script type=application/json id=run-00N> first; fetch('traces/…') only as dev fallback ----
+(async()=>{for(const k of RUN_IDS){let j=null;const el=document.getElementById(k);if(el)try{j=JSON.parse(el.textContent);}catch(e){}if(!j)try{j=await fetch('traces/'+k+'.json').then(r=>r.json());}catch(e){}if(j)RUNS[k]=j;}
+  if(!Object.keys(RUNS).length){toast('내장 런 없음 — trace.json 을 드롭하세요');return;}
+  setOrder();tNow=Infinity;show(ORDER[0],false);setT(endT());idle();toggleKeys(true);setTimeout(()=>toggleKeys(false),4000);})();   // key overlay shows once for 4 s on first load
+</script>
+</body></html>
