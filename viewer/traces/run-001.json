@@ -5,7 +5,8 @@
   "startedAt": "2026-08-22T04:52:54.665414Z",
   "completedAt": "2026-08-22T04:53:54.892647Z",
   "durationSec": 60.2,
-  "rejectedPlansBefore": 6
+  "rejectedPlansBefore": 6,
+  "version": "v1 (8 agents · 프롬프트 v2)"
  },
  "agents": [
   {

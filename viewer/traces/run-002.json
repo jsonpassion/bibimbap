@@ -5,7 +5,8 @@
   "startedAt": "2026-08-22T07:54:38.317058Z",
   "completedAt": "2026-08-22T07:54:46.228Z",
   "durationSec": 7.9,
-  "rejectedPlansBefore": 10
+  "rejectedPlansBefore": 10,
+  "version": "v3.2 (5 agents · 원칙 0 이전)"
  },
  "agents": [
   {

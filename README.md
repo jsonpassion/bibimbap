@@ -38,3 +38,7 @@ cd viewer && python3 -m http.server 8642
 ## 테스트 절차
 
 `docs/TESTING.md` 참조.
+
+## v2 (8/22 저녁)
+- 기본 런 = run-002(최신 5-agent 스쿼드), 헤더에서 run-001(v1)로 전환 가능 — Before/After.
+- Decision Lens에 라우팅 근거·원칙 0(불필요한 에이전트 사용 금지) 행, Receipt에 3단 Before/After 막대.

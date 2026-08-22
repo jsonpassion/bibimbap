@@ -35,3 +35,12 @@
 
 ## 합격 기준
 T1~T4 전 항목 통과 + T5 첫 항목(오프라인) 통과. 데모 엑스포는 T5 조건에서 진행.
+
+## T6. 뷰어 v2 (8/22 저녁) — 최신 스쿼드(5 agents) 기준 Before/After
+
+- 기본 적재 = `traces/run-002.json` (v3.2 · 5 agents · 1,564 tok). 헤더 우측 **런 선택**으로 `run-001.json` (v1 · 8 agents · 26,808 tok)로 전환 → Before/After 리플레이.
+- The Bowl: 에이전트 5개 방사형 + 각 노드 아래 모델명(gpt-oss-120b) + 중앙 **홉 카운터**.
+- Decision Lens: **라우팅 근거**([PLANNING DIRECTIVE] → 담당 일치 ✅/⚠️), **원칙 0**(가동 에이전트 n/5), 비용 판단(최소 경로 도달 여부 + v1 대비 ÷N).
+- The Receipt: KPI 8개(가동 에이전트/로스터, v1 대비 ÷17 추가) + **3단 막대**(단독 617 / v1 26,808 / v3.2 1,564) + 원칙 0 해설.
+- 확인법: `python3 -m http.server 8765 --directory viewer` → http://localhost:8765/viewer.html → ③ The Receipt에서 막대 3개·라벨 잘림 없음, ② Decision Lens 첫 행이 "라우팅 근거".
+- v3.4 스쿼드로 새 완주 로그가 생기면: `python3 viewer/normalize.py <workspace> -o viewer/traces/run-003.json --baseline <results.jsonl> --item math-visible-0001` 후 `meta.version`에 "v3.4 (5 agents · 원칙 0)" 기입, `#runsel`에 옵션 추가.

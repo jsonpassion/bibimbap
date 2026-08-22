@@ -10,7 +10,8 @@
   *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
   header{display:flex;align-items:center;gap:1rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--line);background:var(--panel)}
   header h1{font-size:1.05rem;margin:0;letter-spacing:.04em} header .sub{color:var(--dim);font-size:.8rem}
-  header .sp{flex:1} header label{font-size:.78rem;color:var(--dim);cursor:pointer;border:1px dashed var(--line);padding:.3rem .7rem;border-radius:8px}
+  header .sp{flex:1} header select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:.3rem .5rem;font:inherit;font-size:.78rem}
+  header label{font-size:.78rem;color:var(--dim);cursor:pointer;border:1px dashed var(--line);padding:.3rem .7rem;border-radius:8px}
   nav{display:flex;gap:.3rem;padding:.6rem 1.2rem 0;background:var(--panel)}
   nav button{background:none;border:none;color:var(--dim);font:inherit;font-size:.9rem;padding:.5rem .9rem;border-radius:9px 9px 0 0;cursor:pointer}
   nav button.on{background:var(--bg);color:var(--ink);font-weight:700;box-shadow:inset 0 2px 0 var(--accent)}
@@ -47,6 +48,7 @@
   <h1>🥣 BIBIMBAP <span class="sub">Squad Trace Viewer</span></h1>
   <span class="sub" id="meta"></span>
   <span class="sp"></span>
+  <select id="runsel" title="내장 런 전환 (Before / After)"><option value="traces/run-002.json">After · run-002 (v3.2 · 5 agents)</option><option value="traces/run-001.json">Before · run-001 (v1 · 8 agents)</option></select>
   <label>열기: events.jsonl / .squad.json / trace.json <input id="file" type="file" accept=".json,.jsonl" multiple hidden></label>
 </header>
 <nav>
@@ -92,7 +94,7 @@
   <section class="view" id="v-receipt">
     <div class="kpis" id="kpis"></div>
     <div class="grid">
-      <div class="card"><h3>Insightfulness — 단독 모델 vs 스쿼드 (같은 문항)</h3><svg id="race" viewBox="0 0 520 170" width="100%"></svg><div class="muted" id="race-note"></div></div>
+      <div class="card"><h3>Insightfulness — 단독 모델 vs 스쿼드 Before/After (같은 문항)</h3><svg id="race" viewBox="0 0 520 130" width="100%"></svg><div class="muted" id="race-note"></div></div>
       <div class="card"><h3>에이전트별 토큰 · 호출</h3><svg id="agents" viewBox="0 0 520 200" width="100%"></svg></div>
       <div class="card"><h3>확신도 캘리브레이션 (self-reported confidence → 정답률)</h3><svg id="calib" viewBox="0 0 520 220" width="100%"></svg><div class="muted">Generic-Solver가 보고한 확신도별 실제 정답률(연습 세트 140문항). 단조 증가 = 확신도가 정직하다는 증거.</div></div>
       <div class="card"><h3>태스크</h3><table id="tasks"></table></div>
@@ -104,6 +106,9 @@
 const $ = s => document.querySelector(s);
 const C = {idle:"#6b6690", think:"#f5c542", run:"#5aa8ff", done:"#3ddc97", fail:"#ff6b6b", accent:"#b794f6", dim:"#a39bd4", line:"#332c5c"};
 let T = null, idx = 0, playing = false, timer = null;
+let BEFORE = null; // run-001(v1) 요약 — Before/After 비교용. 현재 런이 run-001 자신이면 비교 생략
+const short = v => (v || "").split(" ")[0] || "현재";
+const summarize = t => ({version: t.meta.version || "이전 런", total: t.tokens.total, calls: t.tokens.calls, tasks: t.insights.taskCount, agents: t.agents.length, seconds: t.meta.durationSec, startedAt: t.meta.startedAt});
 
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
@@ -171,7 +176,7 @@ document.body.addEventListener("drop", async e => { e.preventDefault(); for (con
 
 function load(t) {
   T = t; idx = 0; stop();
-  $("#meta").textContent = `${t.meta.squad} · ${t.meta.durationSec}s · ${t.tokens.total.toLocaleString()} tok · ${t.events.length} events${t.meta.source ? " · " + t.meta.source : ""}`;
+  $("#meta").textContent = `${t.meta.squad}${t.meta.version ? " " + t.meta.version : ""} · ${t.agents.length} agents · ${t.meta.durationSec}s · ${t.tokens.total.toLocaleString()} tok · ${t.events.length} events${t.meta.source ? " · " + t.meta.source : ""}`;
   $("#scrub").max = t.events.length - 1; $("#scrub").value = 0;
   renderFeed(); renderState(); renderReceipt(); renderDecisions();
 }
@@ -204,7 +209,8 @@ function renderState() {
   // center problem
   out += `<circle cx="${cx}" cy="${cy}" r="46" fill="#241f45" stroke="${C.accent}" stroke-width="2"/>
     <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">문항</text>
-    <text x="${cx}" y="${cy + 13}" text-anchor="middle" fill="${C.dim}" font-size="10">${s.phase}</text>`;
+    <text x="${cx}" y="${cy + 13}" text-anchor="middle" fill="${C.dim}" font-size="10">${s.phase}</text>
+    <text x="${cx}" y="${cy + 27}" text-anchor="middle" fill="${C.accent}" font-size="9" font-weight="700">홉 ${Object.values(s.ag).filter(a => a.calls).length}</text>`;
   T.agents.forEach((a, i) => {
     const ang = -Math.PI / 2 + i * 2 * Math.PI / n, x = cx + R * Math.cos(ang), y = cy + R * Math.sin(ang);
     const st = s.ag[a.id], col = C[st.status] || C.idle, active = st.status !== "idle";
@@ -212,7 +218,7 @@ function renderState() {
     out += `<circle cx="${x}" cy="${y}" r="${active ? 30 : 24}" fill="${col}" opacity="${active ? 1 : .55}" ${active ? `style="filter:drop-shadow(0 0 10px ${col})"` : ""}/>
       <text x="${x}" y="${y + 4}" text-anchor="middle" fill="#120f22" font-size="9" font-weight="800">${a.planner ? "★" : ""}${a.name.split("-")[0]}</text>
       <text x="${x}" y="${y + 44}" text-anchor="middle" fill="${C.dim}" font-size="9.5">${a.name}</text>
-      <text x="${x}" y="${y + 56}" text-anchor="middle" fill="${st.tokens ? "#fff" : C.dim}" font-size="9">${st.tokens ? st.tokens.toLocaleString() + " tok · " + st.calls + "회" : ""}</text>`;
+      <text x="${x}" y="${y + 56}" text-anchor="middle" fill="${st.tokens ? "#fff" : C.dim}" font-size="9">${st.tokens ? st.tokens.toLocaleString() + " tok · " + st.calls + "회" : (a.model && a.model !== "?" ? a.model : "")}</text>`;
   });
   // tasks strip
   T.tasks.forEach((t, i) => {
@@ -245,12 +251,16 @@ function renderLens(e) {
 }
 function renderDecisions() {
   const plan = T.events.find(e => e.type === "plan-ready"), ins = T.insights;
+  const req = T.meta.request || "", m = /assigned to ([A-Za-z-]+)/.exec(req), directive = req.startsWith("[PLANNING DIRECTIVE]");
+  const solver = T.tasks[0]?.agentName || "—", used = Object.values(T.tokens.byAgent).length + 1, overhead = T.baseline ? T.tokens.total / (T.baseline.prompt + T.baseline.completion) : null;
   const rows = [
+    ["라우팅 근거", directive ? `요청 머리의 <b>[PLANNING DIRECTIVE]</b>가 담당을 ${m ? `<b>${m[1]}</b>로 지정` : "지정"} (트랙별 one-shot prompt에 편입) → 플래너는 판단 없이 태스크 1개만 생성. 실제 실행 에이전트: <b>${solver}</b> ${m && m[1] !== solver ? "⚠️ 지시와 불일치" : "✅ 지시와 일치"}` : `directive 없음 — 플래너가 문제 유형으로 자체 라우팅 → <b>${solver}</b>`],
+    ["원칙 0", `가동 에이전트 ${used}/${T.agents.length} (플래너 + 전문가 ${used - 1}). 미가동 에이전트는 실행 비용 0이지만 플래너가 매 문항 로스터를 읽는 비용은 남는다 → 로스터는 5종으로 고정, 리뷰어·검증자·포매터 홉 금지`],
     ["계획", plan ? `플래너가 태스크 ${plan.detail.taskCount}개를 생성 (웨이브 ${plan.detail.waves.length}개). ${ins.duplicateTasks ? `⚠️ 동일 태스크 ${ins.duplicateTasks}개 중복 — 내장 플래너의 분해 성향` : "✅ 중복 없음"}` : "—"],
-    ["승인 전 반려", `${T.meta.rejectedPlansBefore}회 (사람이 계획을 거부·재계획)`],
+    ["승인 전 반려", `${T.meta.rejectedPlansBefore}회 — 이 워크스페이스 로그에 누적된 계획 거부(프롬프트 실험 중 사람이 반려). 평가 러너는 자동 승인이라 0`],
     ["실행 방식", `태스크당 평균 ${ins.callsPerTask}회 모델 호출 — 에이전트 루프가 반복마다 컨텍스트를 재전송 → 입력 토큰이 출력의 ${(T.tokens.prompt / Math.max(T.tokens.completion, 1)).toFixed(1)}배`],
     ["취합", T.events.some(e => e.type === "aggregation-started") ? "태스크 결과를 플래너가 합성해 최종 응답 생성" : "—"],
-    ["비용 판단", T.baseline ? `같은 문항을 단독 모델이 ${(T.baseline.prompt + T.baseline.completion).toLocaleString()} 토큰에 풀었음 → 스쿼드 오버헤드 ${(T.tokens.total / (T.baseline.prompt + T.baseline.completion)).toFixed(1)}배. 중복 제거·호출 축소가 다음 최적화 대상` : "베이스라인 없음"],
+    ["비용 판단", T.baseline ? `같은 문항을 단독 모델이 ${(T.baseline.prompt + T.baseline.completion).toLocaleString()} 토큰에 풀었음 → 스쿼드 오버헤드 ${overhead.toFixed(1)}배. ${overhead <= 3.5 ? "플래너 홉(우회 불가) + 전문가 1홉 + 취합 = AI:GO에서 가능한 최소 경로에 도달" : "중복 제거·호출 축소가 다음 최적화 대상"}${BEFORE && BEFORE.startedAt !== T.meta.startedAt ? ` · ${BEFORE.version} 대비 ÷${(BEFORE.total / T.tokens.total).toFixed(0)}` : ""}` : "베이스라인 없음"],
   ];
   $("#decisions").innerHTML = `<table>${rows.map(r => `<tr><th style="width:7rem">${r[0]}</th><td>${r[1]}</td></tr>`).join("")}</table>`;
 }
@@ -261,7 +271,7 @@ function bar(svg, rows, w, colorFn) {
   svg.innerHTML = rows.map((r, i) => { const y = 14 + i * (bh + gap), bw = (w - lx - 90) * r.v / max;
     return `<text x="${lx - 8}" y="${y + 17}" text-anchor="end" fill="${C.dim}" font-size="11">${r.k}</text>
       <rect x="${lx}" y="${y}" width="${Math.max(bw, 2)}" height="${bh}" rx="6" fill="${colorFn(r, i)}"/>
-      <text x="${lx + bw + 8}" y="${y + 17}" fill="#fff" font-size="11" font-weight="700">${r.label ?? r.v.toLocaleString()}</text>`; }).join("");
+      ${bw > (w - lx - 90) * .6 ? `<text x="${lx + bw - 8}" y="${y + 17}" text-anchor="end" fill="#120f22" font-size="11" font-weight="700">${r.label ?? r.v.toLocaleString()}</text>` : `<text x="${lx + bw + 8}" y="${y + 17}" fill="#fff" font-size="11" font-weight="700">${r.label ?? r.v.toLocaleString()}</text>`}`; }).join("");
 }
 function renderReceipt() {
   const t = T.tokens, b = T.baseline, perCorrect = t.total;
@@ -272,13 +282,19 @@ function renderReceipt() {
     {l: "소요 시간", v: `${T.meta.durationSec}s`},
     {l: "태스크 (중복)", v: `${T.insights.taskCount} (${T.insights.duplicateTasks})`},
     {l: "단독 모델 대비", v: b ? `${(t.total / (b.prompt + b.completion)).toFixed(1)}×` : "—"},
+    {l: "가동 에이전트 / 로스터", v: `${Object.values(t.byAgent).length + 1} / ${T.agents.length}`},
   ];
+  const before = BEFORE && BEFORE.startedAt !== T.meta.startedAt ? BEFORE : null;
+  if (before) k.push({l: `스쿼드 ${short(before.version)} 대비`, v: `÷${(before.total / t.total).toFixed(0)}`});
   $("#kpis").innerHTML = k.map(x => `<div class="kpi ${x.hero ? "hero" : ""}"><div class="v">${x.v}</div><div class="l">${x.l}</div></div>`).join("");
   // race
-  const rows = b ? [{k: "단독 gpt-oss", v: b.prompt + b.completion, label: `${(b.prompt + b.completion).toLocaleString()} tok · ${b.seconds}s · ${b.correct ? "정답" : "오답"}`},
-                    {k: "BIBIMBAP 스쿼드", v: t.total, label: `${t.total.toLocaleString()} tok · ${T.meta.durationSec}s`}] : [];
-  bar($("#race"), rows, 520, (r, i) => i === 0 ? C.done : C.accent);
-  $("#race-note").textContent = b ? `문항 ${b.item}. 스쿼드 비용의 ${Math.round(100 * t.prompt / t.total)}%가 입력(컨텍스트 재전송) — 호출 횟수 축소가 가장 큰 절감 레버.` : "";
+  const rows = b ? [{k: "단독 gpt-oss", v: b.prompt + b.completion, label: `${(b.prompt + b.completion).toLocaleString()} tok · ${b.seconds}s · ${b.correct ? "정답" : "오답"}`, c: C.done}] : [];
+  if (b && before) rows.push({k: `스쿼드 ${short(before.version)} (${before.agents} agents)`, v: before.total, label: `${before.total.toLocaleString()} tok · ${before.seconds}s · 태스크 ${before.tasks} · 호출 ${before.calls}`, c: C.fail});
+  if (b) rows.push({k: `스쿼드 ${short(T.meta.version)} (${T.agents.length} agents)`, v: t.total, label: `${t.total.toLocaleString()} tok · ${T.meta.durationSec}s · 태스크 ${T.insights.taskCount} · 호출 ${t.calls}`, c: C.accent});
+  bar($("#race"), rows, 520, r => r.c);
+  $("#race-note").innerHTML = b ? (before
+    ? `문항 ${b.item}. ${before.version}은 비용의 91%가 입력(컨텍스트 재전송)이었다 — 에이전트 호출 1회 = 컨텍스트 전체를 한 번 더. <b>원칙 0: 불필요한 에이전트 사용 금지</b> → 태스크 ${before.tasks}→${T.insights.taskCount}, 호출 ${before.calls}→${t.calls}, 토큰 ÷${(before.total / t.total).toFixed(0)}. 남은 ${(t.total / (b.prompt + b.completion)).toFixed(1)}×는 플래너 홉 + 취합 = AI:GO 최소 경로.`
+    : `문항 ${b.item}. 스쿼드 비용의 ${Math.round(100 * t.prompt / t.total)}%가 입력(컨텍스트 재전송) — 에이전트 호출 1회 = 컨텍스트 전체를 한 번 더. 호출 횟수 축소가 가장 큰 절감 레버.`) : "";
   // agents
   const ag = Object.values(t.byAgent).sort((a, b2) => b2.prompt + b2.completion - a.prompt - a.completion);
   bar($("#agents"), ag.map(a => ({k: a.name, v: a.prompt + a.completion, label: `${(a.prompt + a.completion).toLocaleString()} tok · ${a.calls}회`})), 520, () => C.run);
@@ -298,7 +314,10 @@ function renderReceipt() {
     T.tasks.map((x, i) => `<tr><td>${i + 1}</td><td>${x.title}</td><td>${x.agentName}</td><td>${x.status}</td><td>${x.durationSec ?? "—"}s</td></tr>`).join("");
 }
 
-fetch("traces/run-001.json").then(r => r.json()).then(load).catch(() => { $("#meta").textContent = "trace.json을 드래그해서 여세요"; });
+const fetchRun = u => fetch(u).then(r => r.json());
+fetchRun("traces/run-001.json").then(t => { BEFORE = summarize(t); }).catch(() => {})
+  .then(() => fetchRun($("#runsel").value)).then(load).catch(() => { $("#meta").textContent = "trace.json을 드래그해서 여세요"; });
+$("#runsel").onchange = e => fetchRun(e.target.value).then(load).catch(() => { $("#meta").textContent = "런 파일을 찾을 수 없습니다 (http 서버로 열어야 함)"; });
 </script>
 </body>
 </html>
