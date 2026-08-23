@@ -6,6 +6,6 @@
 
 솔버 프롬프트는 공개 연습 세트 전수로 검증했습니다: generic 140문항 79.1→80.9%(출력 토큰 −16%), math 164문항 79.8→82.6%(−21%), LCB 20문항 75.0→88.9%(−15%), AIME-2024는 Reasoning: high로 72.4→78.6%. Qwen3와 EXAONE은 측정 후 제외했고, 20문항 베이스라인 60%가 표본 불운이었음도 전수로 정정했습니다.
 
-가장 큰 교훈은 리더보드였습니다. 로컬에선 정답을 내던 3 솔버+Judge 앙상블(v7.1)이 0.045 — Judge의 답이 채점기에 닿지 않았습니다. 공개 보드의 요청 수가 Trace였습니다: 상위 3팀 모두 gpt-oss ≈ 1회/문항(DemoDayCare는 정확히 147회 = 1/문항), 즉 채점기는 계획 단계 플래너의 최종 메시지를 읽습니다. 최종 v6.0 DIRECT는 2 에이전트(전원 gpt-oss, Reasoning: high): Conductor가 0 태스크·0 도구로 직접 답을 쓰고, 같은 페르소나의 Solver가 fan-out 보험을 섭니다(러너 충실 조건 generic 76.0%, 재측정 중).
+가장 큰 교훈은 리더보드였습니다. 로컬에선 정답을 내던 3 솔버+Judge 앙상블이 0.045 — 채점기는 계획 단계 플래너의 최종 메시지만 읽습니다(상위 3팀 모두 gpt-oss ≈ 1회/문항). 최종 스쿼드는 2 에이전트(전원 gpt-oss): Conductor가 0 태스크·0 도구로 직접 답을 쓰고, 같은 페르소나의 Solver가 fan-out 보험을 섭니다 → 0.373(math 53.8% 1위 동률). 마지막 발견은 코딩 21.1% = 8/38 = LCB만 정답, SWE 전멸의 원인이 풀이가 아니라 패치 형식(빈 @@ 헤더)이라는 것 — 채점기 허용 범위를 실측해 패치 계약(3+3 컨텍스트, 세어 쓴 hunk 헤더)을 프롬프트에 넣었습니다(숫자 헤더 0/8→8/8, LCB 회귀 20/20).
 
-산출물: .squad.json + one-shot, Trace Viewer(간단/원장 모드, 루브릭 6축 1:1, 원본 events.jsonl 재생, 로그에 없는 답 텍스트는 '미기록'으로 표시), 그림책 kids.html. 리포 github.com/jsonpassion/bibimbap · 데모 jsonpassion.github.io/bibimbap/
+산출물: squad.json + one-shot 3종, 5분 키노트(18장), Trace Viewer(간단/원장 모드, 루브릭 6축 1:1, 원본 events.jsonl 재생), 그림책 kids.html(실전 재생·무한 루프). 리포 github.com/jsonpassion/junction2026-54-1-CouchPotato · 데모 jsonpassion.github.io/junction2026-54-1-CouchPotato/viewer/kids.html
