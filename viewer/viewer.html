@@ -609,7 +609,7 @@ function show(k,anim=true){stop();cur=k;T=RUNS[k];D=Dof(k);sel=-1;xWin=null;rend
 function setOrder(){ORDER=RUN_IDS.filter(k=>RUNS[k]).concat(Object.keys(RUNS).filter(k=>k.startsWith('drop:')));if(!ORDER.includes(cur))cur=ORDER[0];}   // all three story points stay visible; H only switches the SPLIT Before (단독 ↔ v1)
 function addRun(k,j){if(!j||!j.events||!j.events.length)throw new Error('events 없음');RUNS[k]=j;setOrder();show(k);toast(`${k}: 이벤트 ${j.events.length} → 호출 ${D.calls.length} · 태스크 ${D.spans.length} · 사전 가공 없이 파생`);if(j.meta&&j.meta.borrowedBaseline&&D.base)setTimeout(()=>toast(`⚠ 기준 ${fmt(D.base.tok)}은 ${D.base.item} 단독 값 — 문항 불일치 가능`),3000);}
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',2800);}
-function idle(){clearTimeout(idleTimer);idleTimer=setTimeout(()=>{if(demo||playing||FL.playing){idle();return;}stop();cmp=true;hist=false;$('#cmp').checked=true;$('#hist').checked=false;setOrder();show(ORDER[0],false);setT(endT());select(-1);window.scrollTo(0,0);setMode(true);},45000);}
+function idle(){clearTimeout(idleTimer);idleTimer=setTimeout(()=>{if(demo||playing||FL.playing){idle();return;}stop();cmp=true;hist=false;$('#cmp').checked=true;$('#hist').checked=false;setOrder();show(ORDER[0],false);setT(endT());select(-1);window.scrollTo(0,0);setMode(false);},45000);}
 
 // ---- §4.3 / §4.4 events: runs · toggles · scrubber · clicks · keyboard · rubric rail · drop ----
 $('#runs').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.k);};
@@ -769,7 +769,7 @@ window.addEventListener('resize',()=>{if(tourI>=0)showStep();if(simple&&FG){clea
   if(HP.run&&RUNS[HP.run]&&cur!==HP.run)show(HP.run,false);
   if(HP.cmp==='0'){cmp=false;$('#cmp').checked=false;xWin=null;renderAll(false);}
   if(HP.hist==='1'){hist=true;$('#hist').checked=true;renderAll(false);}
-  setMode(HP.mode!=='ledger');
+  setMode(HP.mode==='simple');   // default = 원장(ledger) 모드, #mode=simple 로 간단 모드
   setT(HP.t!=null?+HP.t:endT());
   if(!simple&&HP.sel!=null&&T.events[+HP.sel])go(+HP.sel,true);
   if(!simple&&HP.sec&&document.getElementById(HP.sec))document.getElementById(HP.sec).scrollIntoView({block:'start'});
