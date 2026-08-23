@@ -384,7 +384,7 @@ function normalizeRaw(text,squad,ref){
 // =================================================================================================
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const W=1100,L=150,R=110,PW=W-L-R,RUNS={};let ORDER=[];   // ORDER = runs visible in UI (latest, +history when toggled, +drops)
-let cur=null,T=null,D=null,tNow=0,playing=false,sel=-1,cmp=true,hist=false,dmode=0,tokMode=0,xWin=null,lastTs=0,animId=0,shownRatio=0,idleTimer=0,SQUAD=null,lastPulse=-1;
+let cur=null,T=null,D=null,tNow=0,playing=false,sel=-1,cmp=true,hist=false,dmode=0,tokMode=0,xWin=null,lastTs=0,animId=0,shownRatio=0,idleTimer=0,SQUAD=null,lastPulse=-1,loopTimer=0;
 const PH={planning:'var(--pl)',execution:'var(--ex)',aggregation:'var(--ag)'},PHK={planning:'계획',execution:'실행',aggregation:'취합'};
 const HATCH='<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="2" height="6" fill="var(--bad)"/></pattern></defs>';
 const Dof=k=>(RUNS[k].D||=derive(RUNS[k])),E=i=>T.events[i],BL=()=>baseLane(D.base);
@@ -600,15 +600,16 @@ function setT(t){tNow=Math.max(0,Math.min(endT(),t));const xs=X(tNow);$$('.ph').
   const nxt=T.events.find(e=>e.t>tNow+1e-9),sk=$('#skip');sk.style.display=playing&&nxt&&nxt.t-tNow>3?'':'none';if(nxt)sk.textContent=`⏳ ${li<0||E(li).phase==='planning'?'플래너':E(li).agentName||'에이전트'} 생각 중 · ${f1(nxt.t-tNow)}s · 건너뛰기 →`;
   $('#range').value=tNow;renderSplits();laneChips();stripAt(tNow);}
 function inGap(t){const g=d=>d.gaps.some(q=>q.t0<=t&&t<q.t1);if(!cmp)return g(D);const live=ORDER.filter(k=>t<Dof(k).dur);return live.length>0&&live.every(k=>g(Dof(k)));}
-function loop(ts){if(!playing)return;const dt=Math.min(.1,(ts-lastTs)/1000);lastTs=ts;const v=$('#spd').value;setT(tNow+dt*(v==='auto'?(inGap(tNow)?15:2.5):+v));if(tNow>=endT()-1e-9){stop();return;}requestAnimationFrame(loop);}
+function loop(ts){if(!playing)return;const dt=Math.min(.1,(ts-lastTs)/1000);lastTs=ts;const v=$('#spd').value;setT(tNow+dt*(v==='auto'?(inGap(tNow)?7.5:1.25):+v));if(tNow>=endT()-1e-9){holdLoop();return;}requestAnimationFrame(loop);}   // 자동 = 1.25× (idle gaps 7.5×): half the previous 2.5× / 15× for the stage
+function holdLoop(){clearTimeout(loopTimer);$('#skip').style.display='none';loopTimer=setTimeout(()=>{if(!playing)return;tNow=0;select(-1);lastTs=performance.now();setT(0);requestAnimationFrame(loop);},3000);}   // end reached while playing: hold 3 s, restart from 0 — stop() (pause / scrub / run switch / idle) cancels; the hash is never rewritten
 function play(){if(tNow>=endT()-1e-9)tNow=0;playing=true;$('#play').textContent='⏸';lastTs=performance.now();requestAnimationFrame(loop);setT(tNow);}
-function stop(){playing=false;$('#play').textContent='▶';$('#skip').style.display='none';}
+function stop(){playing=false;clearTimeout(loopTimer);$('#play').textContent='▶';$('#skip').style.display='none';}
 function renderAll(anim){renderRuns();renderBench();renderScrub();renderHero(anim);renderStrip();renderTL();renderLanes();renderRows();renderFlags();renderCmp();renderSentence();renderHonest();lastPulse=-1;if(sel>=0)select(sel);}
 function show(k,anim=true){stop();cur=k;T=RUNS[k];D=Dof(k);sel=-1;xWin=null;renderAll(anim);setT(Math.min(tNow,endT()));}
 function setOrder(){ORDER=RUN_IDS.filter(k=>RUNS[k]).concat(Object.keys(RUNS).filter(k=>k.startsWith('drop:')));if(!ORDER.includes(cur))cur=ORDER[0];}   // all three story points stay visible; H only switches the SPLIT Before (단독 ↔ v1)
 function addRun(k,j){if(!j||!j.events||!j.events.length)throw new Error('events 없음');RUNS[k]=j;setOrder();show(k);toast(`${k}: 이벤트 ${j.events.length} → 호출 ${D.calls.length} · 태스크 ${D.spans.length} · 사전 가공 없이 파생`);if(j.meta&&j.meta.borrowedBaseline&&D.base)setTimeout(()=>toast(`⚠ 기준 ${fmt(D.base.tok)}은 ${D.base.item} 단독 값 — 문항 불일치 가능`),3000);}
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',2800);}
-function idle(){clearTimeout(idleTimer);idleTimer=setTimeout(()=>{if(demo)return;stop();cmp=true;hist=false;$('#cmp').checked=true;$('#hist').checked=false;setOrder();show(ORDER[0],false);setT(endT());select(-1);window.scrollTo(0,0);setMode(true);},45000);}
+function idle(){clearTimeout(idleTimer);idleTimer=setTimeout(()=>{if(demo||playing||FL.playing){idle();return;}stop();cmp=true;hist=false;$('#cmp').checked=true;$('#hist').checked=false;setOrder();show(ORDER[0],false);setT(endT());select(-1);window.scrollTo(0,0);setMode(true);},45000);}
 
 // ---- §4.3 / §4.4 events: runs · toggles · scrubber · clicks · keyboard · rubric rail · drop ----
 $('#runs').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.k);};
@@ -655,7 +656,7 @@ $('#file').onchange=async e=>{for(const f of e.target.files)await ingest(f);e.ta
 // =================================================================================================
 // 간단 모드 (scoreboard, default) · 데이터 기반 플로우 (요청 → 플래너 → 웨이브 1 태스크 → 웨이브 2 … → 답) · 안내 투어 · 자동 데모 — numbers only from BENCH / derive(); 원장 모드 untouched
 // =================================================================================================
-let simple=false,demo=false,tourI=-1;const FL={ft:0,playing:false,end:true,stage:0,hops:[],hop:null,raf:0,last:0,keysShown:false,demoT:0,stepT:0,rsz:0};let FG=null;   // FG = current flow graph (nodes/edges in px)
+let simple=false,demo=false,tourI=-1;const FL={ft:0,playing:false,end:true,stage:0,hops:[],hop:null,raf:0,last:0,keysShown:false,demoT:0,stepT:0,rsz:0,loopT:0};let FG=null;   // FG = current flow graph (nodes/edges in px)
 const LD=()=>D||(RUNS[LATEST]?Dof(LATEST):null),V1=()=>RUNS['run-001']?Dof('run-001'):null,V4=()=>RUNS['run-004']?Dof('run-004'):null,V8=()=>RUNS['run-008']?Dof('run-008'):null,round=n=>Math.round(n);
 const FINAL=()=>{const k=STORY.find(x=>RUNS[x]&&stageOf(x,RUNS[x])==='최종');return k?{k,d:Dof(k)}:null;};   // the 최종 제출 run (v6.0 DIRECT) once its trace is inlined; null until then
 const HP=(()=>{const o={};location.hash.replace(/^#/,'').split('&').forEach(kv=>{if(!kv)return;const[k,v='1']=kv.split('=');o[decodeURIComponent(k)]=decodeURIComponent(v);});return o;})();   // deep links: #mode=ledger&run=run-004&t=20&cmp=0&hist=1&sel=35&sec=s04 · #tour=3 · #ft=30 (간단 플로우 시각)
@@ -724,13 +725,13 @@ function flowSet(ft){const d=LD(),G=FG;if(!G)return;FL.ft=Math.max(0,Math.min(d.
   const fc=$('#fcap'),ct=flowCapAt(d,FL.ft);if(fc&&fc.innerHTML!==ct)fc.innerHTML=ct;
   if((FL.hops.length||FL.hop)&&!FL.raf){FL.last=performance.now();FL.raf=requestAnimationFrame(flowTick);}}
 function flowTick(ts){const dt=Math.min(.05,(ts-FL.last)/1000);FL.last=ts;const d=LD(),G=FG;if(!G){FL.raf=0;return;}
-  if(FL.playing){flowSet(FL.ft+dt*d.dur/6);if(FL.ft>=d.dur-1e-9){FL.playing=false;FL.end=true;$('#bplay').textContent='▶ 재생';}}   // whole log → ~6 s
+  if(FL.playing){flowSet(FL.ft+dt*d.dur/12);if(FL.ft>=d.dur-1e-9){FL.playing=false;FL.end=true;$('#bplay').textContent='▶ 재생';if(!demo){clearTimeout(FL.loopT);FL.loopT=setTimeout(()=>{if(demo||!simple||FL.playing||!FL.end)return;FL.stage=0;FL.hops=[];FL.hop=null;flowSet(0);flowPlay();},3000);}}}   // whole log → ~12 s (was 6) · end reached while playing: hold 3 s, replay from 0 (▶/⏸ or leaving 간단 모드 cancels; 자동 데모 keeps its own tour → flow cycle)
   if(!FL.hop&&FL.hops.length){const bi=FL.hops.shift(),bn=G.nodes[bi],preds=G.edges.filter(e=>e.b===bi).map(e=>G.nodes[e.a]),cand=preds.filter(p=>p.t1<=bn.t0+1e-9),pred=(cand.length?cand:preds).reduce((m,p)=>!m||p.t1>m.t1?p:m,null);   // hop arrives from the predecessor that finished last (the one whose result this task waited for)
     const dot=$('#fdot'),pos=[+dot.getAttribute('cx'),+dot.getAttribute('cy')],path=[pos];if(pred){const ex=exitOf(pred);if(Math.hypot(ex[0]-pos[0],ex[1]-pos[1])>1)path.push(ex);}path.push(entryOf(bn),exitOf(bn));
     FL.hop={b:bi,edge:pred?`${pred.idx}-${bi}`:null,p:0,path,dur:0.3+0.12*(path.length-2)};if(FL.hop.edge){const el=$('#fe'+FL.hop.edge);if(el)el.setAttribute('class','edge run');}}
   if(FL.hop){FL.hop.p+=dt/FL.hop.dur;const p=Math.min(1,FL.hop.p),k=1-Math.pow(1-p,2);dotAt(alongPath(FL.hop.path,k));if(p>=1){if(FL.hop.edge){const el=$('#fe'+FL.hop.edge);if(el)el.setAttribute('class','edge done');}FL.hop=null;}}
   if(FL.playing||FL.hop||FL.hops.length)FL.raf=requestAnimationFrame(flowTick);else{FL.raf=0;if(demo&&FL.end&&tourI<0)demoNext('flow');}}
-function flowPlay(){if(FL.playing){FL.playing=false;$('#bplay').textContent='▶ 재생';return;}if(FL.ft>=LD().dur-1e-9){FL.stage=0;FL.hops=[];FL.hop=null;flowSet(0);}FL.playing=true;FL.end=false;$('#bplay').textContent='⏸';if(!FL.raf){FL.last=performance.now();FL.raf=requestAnimationFrame(flowTick);}}
+function flowPlay(){clearTimeout(FL.loopT);if(FL.playing){FL.playing=false;$('#bplay').textContent='▶ 재생';return;}if(FL.ft>=LD().dur-1e-9){FL.stage=0;FL.hops=[];FL.hop=null;flowSet(0);}FL.playing=true;FL.end=false;$('#bplay').textContent='⏸';if(!FL.raf){FL.last=performance.now();FL.raf=requestAnimationFrame(flowTick);}}
 // ---- mode ----
 function setMode(on){simple=!!on;document.body.classList.toggle('simple',simple);$$('#mode button').forEach(b=>b.classList.toggle('on',(b.dataset.m==='1')===simple));
   if(simple){renderBoard();toggleKeys(false);}else{FL.playing=false;if(tourI>=0)endTour(false);if(!FL.keysShown){FL.keysShown=true;toggleKeys(true);setTimeout(()=>toggleKeys(false),4000);}}}   // key overlay: once, 4 s, on first 원장 entry

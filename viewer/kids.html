@@ -127,6 +127,7 @@ main{max-width:1240px;margin:0 auto;padding:20px 20px 40px}
 .seg{display:inline-flex;border:var(--bw) solid var(--ink);border-radius:14px;overflow:hidden;box-shadow:var(--sh-sm);background:var(--card)}
 .seg button{min-height:48px;min-width:58px;border:0;border-right:var(--bw) solid var(--ink);background:var(--card);font-weight:900;font-size:19px;cursor:pointer}
 .seg button:last-child{border-right:0}.seg button[aria-pressed="true"]{background:var(--ink);color:var(--yellow)}
+.btn.loop{font-size:18px;min-height:48px;padding:6px 14px}
 .lclock{display:flex;align-items:center;gap:8px;font-weight:900;font-size:24px;font-variant-numeric:tabular-nums}
 .lclock .clock{width:46px}
 #lhand{transform-origin:50px 50px;transition:transform .2s linear}
@@ -345,13 +346,14 @@ const icoSVG={
 /* ── scene engine ── */
 let timers=[],rafs=[],fq=[],cur=0,auto=false;
 const FAST=/fast/.test(location.hash);if(FAST)document.documentElement.classList.add('fast'); /* #s3fast = jump to the scene's end state (screenshots / no-motion) */
-const at=(ms,f)=>{if(FAST)fq.push([ms,f]);else timers.push(setTimeout(f,ms));};
+const SLOW=1.6,HOLD=3000,LIVE_HOLD=5000; /* stage pacing: every step timer / count-up runs SLOW× longer (CSS hover transitions untouched) · a finished scene holds HOLD ms then replays · 실전 재생 holds LIVE_HOLD ms then restarts */
+const at=(ms,f)=>{if(FAST)fq.push([ms,f]);else timers.push(setTimeout(f,ms*SLOW));};
 function flush(){while(fq.length){fq.sort((a,b)=>a[0]-b[0]);fq.shift()[1]();}}
-function clearAll(){timers.forEach(clearTimeout);rafs.forEach(cancelAnimationFrame);timers=[];rafs=[];fq=[];LIVE.playing=false;cancelAnimationFrame(LIVE.raf);}
+function clearAll(){timers.forEach(clearTimeout);rafs.forEach(cancelAnimationFrame);timers=[];rafs=[];fq=[];LIVE.playing=false;LIVE.loop=false;cancelAnimationFrame(LIVE.raf);}
 const el=(root,k)=>root.querySelector(`.ch[data-id="${k}"]`);
 function setState(e,s){if(!e)return;e.classList.remove('idle','working','done');e.classList.add(s);}
 function say(e,t){if(!e)return;const s=e.querySelector('.say');s.textContent=t||'';s.classList.toggle('on',!!t);}
-function countTo(node,n,ms,dec){if(!node)return;if(FAST){node.textContent=dec?n.toFixed(dec):fmt(n);return;}const t0=performance.now();const step=now=>{const p=Math.min(1,(now-t0)/ms),v=n*(1-Math.pow(1-p,3));node.textContent=dec?v.toFixed(dec):fmt(Math.round(v));if(p<1)rafs.push(requestAnimationFrame(step));else node.textContent=dec?n.toFixed(dec):fmt(n);};rafs.push(requestAnimationFrame(step));}
+function countTo(node,n,ms,dec){if(!node)return;if(FAST){node.textContent=dec?n.toFixed(dec):fmt(n);return;}const t0=performance.now();const step=now=>{const p=Math.min(1,(now-t0)/(ms*SLOW)),v=n*(1-Math.pow(1-p,3));node.textContent=dec?v.toFixed(dec):fmt(Math.round(v));if(p<1)rafs.push(requestAnimationFrame(step));else node.textContent=dec?n.toFixed(dec):fmt(n);};rafs.push(requestAnimationFrame(step));}
 function center(stage,e){const a=stage.getBoundingClientRect(),b=e.getBoundingClientRect();return{x:b.left-a.left+b.width/2,y:b.top-a.top+b.height*.42};}
 function flyNote(stage,from,to,text,delay,hold){const n=document.createElement('div');n.className='note';n.innerHTML=text;const p=center(stage,from),q=center(stage,to);n.style.left=p.x+'px';n.style.top=p.y+'px';stage.appendChild(n);
  at(delay,()=>{n.classList.add('on');at(60,()=>{n.style.left=q.x+'px';n.style.top=(q.y-30)+'px';});});at(delay+1300+(hold||1200),()=>n.classList.remove('on'));return n;}
@@ -372,7 +374,7 @@ const SCENES=[
  build(root){root.innerHTML=`<div class="row"><div class="stage"></div><div class="panel"><div class="elbl">컨덕터의 시계 (기록에서)</div><ul class="tl">${kv(f1(S9.startT)+'초','문제 카드를 읽기 시작해요 (planning-started)')}${kv(f1(S9.planT)+'초','지휘자의 답장 도착! 심부름 쪽지 <b>0장</b> — 답을 직접 썼어요 (plan-ready)')}${kv(f1(S9.execT)+'초','런타임: "쪽지가 없네? 쌍둥이에게도 문제를 복사!" (execution-started · 팬아웃 '+S9.fanout+')')}${kv('→','채점 선생님이 읽는 건 <b>지휘자의 마지막 말</b>이에요')}</ul><p class="kid small">${f1(S9.planT-S9.startT)}초 동안 지휘자가 혼자 생각했어요. 그 생각은 기록에 토큰이 안 찍혀요.</p></div></div><div class="cap">심부름 쪽지 대신, 지휘자가 답을 써요. 채점 선생님은 지휘자의 마지막 말을 읽거든요.</div>`;
   cast(root.querySelector('.stage'),{conductor:'big',solver:'small'});},
  play(root){const s=root.querySelector('.stage'),c=el(root,'conductor'),li=root.querySelectorAll('.tl li');
-  s.querySelectorAll('.stamp').forEach(n=>n.remove());c.classList.remove('answer');say(el(root,'solver'),'');
+  s.querySelectorAll('.stamp').forEach(n=>n.remove());c.classList.remove('answer');say(el(root,'solver'),'');li.forEach(x=>x.classList.remove('on'));
   setState(c,'working');say(c,'음… 직접 풀자');li[0].classList.add('on');
   stamp(s,null,'심부름 쪽지 0장 ✕',s.clientWidth-150,58,2200);
   at(3200,()=>{setState(c,'done');c.classList.add('answer');say(c,'답 썼어요! 마지막 말 = 답');li[1].classList.add('on');});
@@ -382,7 +384,7 @@ const SCENES=[
  build(root){root.innerHTML=`<div class="row"><div class="stage"><div class="rt r">런타임: 쌍둥이에게도 복사!</div></div><div class="panel energy"><div class="elbl">쌍둥이의 에너지(토큰) — 기록에 찍힌 호출</div><div class="track"><div class="fill in"></div><div class="fill out"></div></div><div class="legend"><span class="sw in"></span>읽기(입력) <b id="nIn">0</b> <span class="sw out"></span>쓰기(출력) <b id="nOut">0</b> → 합계 <b id="nTot">0</b> 토큰</div><div class="clockrow">${clockSVG()}<div><b id="nSec" style="font-size:30px">0.0</b>초 (문제 전체)<br><small>혼자 푼 기본 기록은 ${f1(S9.base.sec)}초 · ${fmt(S9.base.tok)} 토큰</small></div></div><div class="calls" id="calls">${S9.calls.map((e,i)=>`<div>쌍둥이 호출 ${i+1}번 — 읽기 ${fmt(e.tokens.prompt)} / 쓰기 ${fmt(e.tokens.completion)}</div>`).join('')}<div>지휘자의 생각은 기록에 토큰이 안 찍혀요 (리더보드 기준 한 문항 평균 ${LB.calls}번 호출)</div></div></div></div><div class="cap mint">혹시 몰라 쌍둥이도 한 번 더 풀어요 — 보험이에요. 점수는 지휘자의 마지막 말로만 매겨요.</div>`;
   cast(root.querySelector('.stage'),{solver:'big'});},
  play(root){const s=root.querySelector('.stage'),c=el(root,'conductor'),m=el(root,'solver'),rt=root.querySelector('.rt');
-  s.querySelectorAll('.note').forEach(n=>n.remove());rt.classList.remove('on');setState(c,'done');c.classList.add('answer');say(c,'난 벌써 답 썼어요');setState(m,'idle');say(m,'');
+  s.querySelectorAll('.note').forEach(n=>n.remove());rt.classList.remove('on');root.querySelectorAll('.calls div').forEach(d=>d.classList.remove('on'));root.querySelector('#hand').style.transform='';setState(c,'done');c.classList.add('answer');say(c,'난 벌써 답 썼어요');setState(m,'idle');say(m,'');
   at(600,()=>rt.classList.add('on'));flyNote(s,rt,m,'문제 복사본<br><b>→ Solver</b>',900,1500);
   at(2300,()=>{setState(m,'working');say(m,'나도 두 번 풀어 볼게…');say(c,'');});
   const fi=root.querySelector('.fill.in'),fo=root.querySelector('.fill.out');fi.style.width='0';fo.style.width='0';
@@ -418,26 +420,26 @@ const SCENES=[
  build(root){root.innerHTML=`<div class="three"><div class="card3 on" style="background:var(--pink);color:#fff">${icoSVG.target}<h3>정확하게</h3><p>리더보드 점수예요</p><p class="n">수학 ${LB.math}</p><p>${LB.mathNote} · 객관식 ${LB.generic}<br>종합 ${LB.score} (${LB.rank})</p></div><div class="card3 on" style="background:var(--mint)">${icoSVG.battery}<h3>아껴서</h3><p>한 문항에 평균 ${LB.calls}번만 불러요</p><p class="n">${fmt(S1.total)} → ${fmt(S9.total)}</p><p>문제 하나에 쓴 토큰 · ${Math.round(RATIO)}배 줄었어요<br>첫 팀 run-001 → 최종 run-009</p></div><div class="card3 on" style="background:var(--blue);color:#fff">${icoSVG.eye}<h3>잘 보이게</h3><p>기록을 그림으로 보면 고칠 수 있어요</p><p class="n">${MAIN.events.length}줄의 기록</p><p>이 그림책도 기록으로 만들었어요</p></div></div><div class="cap" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><span style="flex:1">${MORAL}.</span><button class="btn" onclick="openIntro()">친구들 소개 보기</button><button class="btn play" onclick="go(SCENES.length-1)">실전 재생 ▶</button></div>`;},
  play(root){root.querySelectorAll('.card3').forEach((c,i)=>{c.classList.remove('pulse');at(200+i*450,()=>c.classList.add('pulse'));});}},
 {title:'실전 재생 — 진짜 기록 세 개',dur:0,live:true,
- build(root){root.innerHTML=`<div class="lbar"><button class="btn play" id="lplay">▶ 재생</button><div class="seg" role="group" aria-label="재생 속도">${[1,2,4].map(v=>`<button data-v="${v}" aria-pressed="${v===LIVE.speed}">${v}×</button>`).join('')}</div><button class="btn" id="lnext">다음 문제 ▶</button><div class="lclock">${clockSVG('lhand')}<span><b>0.0</b>초</span></div><div class="pdots" aria-label="문제 진행">${LIVE.list.map(()=>'<span></span>').join('')}</div></div><div class="row live"><div class="stage"><div class="gap"></div><div class="rt"></div></div><div class="panel"><div class="pcwrap"><div class="pc"></div></div><div class="energy"><div class="elbl">에너지(토큰) — 읽기 <b class="lin">0</b> · 쓰기 <b class="lout">0</b> · 합계 <b class="ltot">0</b></div><div class="track"><div class="fill in"></div><div class="fill out"></div></div></div>${bowlSVG()}</div></div><div class="cap live-cap">…</div>`;
+ build(root){root.innerHTML=`<div class="lbar"><button class="btn play" id="lplay">▶ 재생</button><button class="btn loop" id="lloop" aria-pressed="true" title="끝나면 5초 쉬고 처음부터 다시 재생해요">↻ 반복 재생 중</button><div class="seg" role="group" aria-label="재생 속도">${[1,2,4].map(v=>`<button data-v="${v}" aria-pressed="${v===LIVE.speed}">${v}×</button>`).join('')}</div><button class="btn" id="lnext">다음 문제 ▶</button><div class="lclock">${clockSVG('lhand')}<span><b>0.0</b>초</span></div><div class="pdots" aria-label="문제 진행">${LIVE.list.map(()=>'<span></span>').join('')}</div></div><div class="row live"><div class="stage"><div class="gap"></div><div class="rt"></div></div><div class="panel"><div class="pcwrap"><div class="pc"></div></div><div class="energy"><div class="elbl">에너지(토큰) — 읽기 <b class="lin">0</b> · 쓰기 <b class="lout">0</b> · 합계 <b class="ltot">0</b></div><div class="track"><div class="fill in"></div><div class="fill out"></div></div></div>${bowlSVG()}</div></div><div class="cap live-cap">…</div>`;
   const extra=[...new Set(LIVE.list.map(P=>P.solver).filter(k=>!ACTIVE.includes(k)))];
   cast(root.querySelector('.stage'),{retired:extra,rcls:'small',lbl:'지난 친구 · 이전 방식'});LIVE.root=root;
-  root.querySelector('#lplay').onclick=()=>LIVE.ended?liveStart():livePlay(!LIVE.playing);root.querySelector('#lnext').onclick=()=>{if(!LIVE.ended)liveNext();};
+  root.querySelector('#lplay').onclick=liveToggle;root.querySelector('#lloop').onclick=()=>liveLoop(!LIVE.loop);root.querySelector('#lnext').onclick=()=>{if(!LIVE.ended)liveNext();};
   root.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{LIVE.speed=+b.dataset.v;root.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
   LIVE.ended=false;liveSetup(0);},
- play(){if(FAST)liveJumpEnd();else liveStart();}}];
+ play(){liveLoop(true);if(FAST)liveJumpEnd();else liveStart();}}];
 /* ── 실전 재생: real traces replayed from their event timelines ──
    Problem list is data-driven: add <script type="application/json" id="runNNN"> and one entry here.
    Missing ids are skipped; `or` is the fallback used until the preferred record exists (run-013 = coding DIRECT, when it lands). */
 const LIVE_RUNS=[{kind:'generic',id:'run011',tag:'최종 세트'},{kind:'math',id:'run012',tag:'최종 세트'},{kind:'coder',id:'run013',tag:'최종 세트',or:{id:'run006',tag:'이전 방식(위임) 기록'}}];
 const itemOf=r=>{const m=(r.meta.version||'').match(/\(([^)]+)\)/);return m?m[1]:(r.baseline&&r.baseline.item)||'?';};
-/* virtual timeline: every silent gap > 2 s is compressed to 1.2 s; anchors map virtual ms → real seconds. Events after execution-completed (a following problem's planning) are dropped. */
+/* virtual timeline: every silent gap > 2 s is compressed to 2.0 s; anchors map virtual ms → real seconds. Events after execution-completed (a following problem's planning) are dropped. */
 function compile(r){const steps=[],anchors=[[0,0]];let vt=0,prev=0;const endI=r.events.findIndex(e=>e.type==='execution-completed'),ev=endI>=0?r.events.slice(0,endI+1):r.events;
- ev.forEach(e=>{const gap=e.t-prev;vt+=gap>2?1200:gap*1000;anchors.push([vt,e.t]);steps.push({vt,e});prev=e.t;});return{steps,anchors,end:vt};}
+ ev.forEach(e=>{const gap=e.t-prev;vt+=gap>2?2000:gap*1000;anchors.push([vt,e.t]);steps.push({vt,e});prev=e.t;});return{steps,anchors,end:vt};}
 const segAt=(A,vt)=>{let i=0;while(i<A.length-2&&vt>=A[i+1][0])i++;return i;};
 function realAt(A,vt){const i=segAt(A,vt),[v0,t0]=A[i],[v1,t1]=A[i+1];return vt>=v1||v1===v0?t1:t0+(t1-t0)*(vt-v0)/(v1-v0);}
 function vtAt(A,t){let i=0;while(i<A.length-2&&t>=A[i+1][1])i++;const [v0,t0]=A[i],[v1,t1]=A[i+1];return t>=t1||t1===t0?v1:v0+(v1-v0)*(t-t0)/(t1-t0);}
 function gapAt(A,vt){const i=segAt(A,vt);return(A[i+1][1]-A[i][1]>2&&vt<A[i+1][0])?A[i][1]:null;}
-const LIVE={list:LIVE_RUNS.map(d=>{let r=RUN(d.id),tag=d.tag;if(!r&&d.or){r=RUN(d.or.id);tag=d.or.tag;}if(!r)return null;const st=stat(r);return{kind:d.kind,run:r,st,tl:compile(r),solver:st.direct?'solver':(keyOf(st.solver)||d.kind),direct:st.direct,tag,item:itemOf(r)};}).filter(Boolean),p:0,vt:0,applied:0,playing:false,speed:2,raf:0,last:0,root:null,thinker:null,ended:false,calls:0,tin:0,tout:0};
+const LIVE={list:LIVE_RUNS.map(d=>{let r=RUN(d.id),tag=d.tag;if(!r&&d.or){r=RUN(d.or.id);tag=d.or.tag;}if(!r)return null;const st=stat(r);return{kind:d.kind,run:r,st,tl:compile(r),solver:st.direct?'solver':(keyOf(st.solver)||d.kind),direct:st.direct,tag,item:itemOf(r)};}).filter(Boolean),p:0,vt:0,applied:0,playing:false,speed:2,loop:true,raf:0,last:0,root:null,thinker:null,ended:false,calls:0,tin:0,tout:0};
 const lcap=h=>{const c=LIVE.root.querySelector('.live-cap');c.innerHTML=h;c.classList.remove('pulse');void c.offsetWidth;c.classList.add('pulse');};
 const later=f=>requestAnimationFrame(()=>requestAnimationFrame(f));
 function liveSetup(p){const L=LIVE,root=L.root,P=L.list[p];L.p=p;L.vt=0;L.applied=0;L.calls=0;L.tin=0;L.tout=0;L.thinker=null;
@@ -471,15 +473,17 @@ function liveApply(s){const L=LIVE,P=L.list[L.p],root=L.root,stage=root.querySel
  case 'execution-completed':root.querySelector('.bowlcheck').classList.add('on');lcap(`문제 끝! ${f1(e.t)}초 · ${fmt(P.st.total)} 토큰 — 이건 위임 방식 기록이에요. 정답 여부는 채점 선생님(외부)이 확인해요`);break;}}
 function liveClock(){const L=LIVE,P=L.list[L.p],root=L.root,A=P.tl.anchors,real=realAt(A,L.vt);root.querySelector('.lclock b').textContent=f1(real);root.querySelector('#lhand').style.transform=`rotate(${real/60*360}deg)`;
  const g=gapAt(A,L.vt),chip=root.querySelector('.gap');if(g!==null){chip.textContent=`⏳ ${L.thinker?L.thinker+' 생각 중':'기다리는 중'} · 진짜로는 ${f1(real-g)}초`;chip.classList.add('on');}else chip.classList.remove('on');}
-function liveTick(ts){const L=LIVE;if(!L.playing)return;const dt=Math.min(80,ts-L.last);L.last=ts;const P=L.list[L.p],S=P.tl.steps;L.vt+=dt*(gapAt(P.tl.anchors,L.vt)!==null?1:L.speed);
+function liveTick(ts){const L=LIVE;if(!L.playing)return;const dt=Math.min(80,ts-L.last);L.last=ts;const P=L.list[L.p],S=P.tl.steps;L.vt+=dt*(gapAt(P.tl.anchors,L.vt)!==null?1:L.speed/SLOW);
  while(L.applied<S.length&&S[L.applied].vt<=L.vt){liveApply(S[L.applied]);L.applied++;}liveClock();if(L.vt>=P.tl.end+1800)liveNext();else L.raf=requestAnimationFrame(liveTick);}
 function livePlay(on){const L=LIVE;L.playing=on;cancelAnimationFrame(L.raf);const b=L.root&&L.root.querySelector('#lplay');if(b)b.textContent=on?'⏸ 멈춤':'▶ 재생';if(on){L.last=performance.now();L.raf=requestAnimationFrame(liveTick);}}
+function liveToggle(){const L=LIVE;if(L.ended)liveStart();else{if(L.playing)liveLoop(false);livePlay(!L.playing);}}   /* user ▶/⏸ — pausing also switches the loop off */
+function liveLoop(on){const L=LIVE;L.loop=!!on;const b=L.root&&L.root.querySelector('#lloop');if(b){b.setAttribute('aria-pressed',L.loop);b.textContent=L.loop?'↻ 반복 재생 중':'↻ 반복 꺼짐';}}
 function liveNext(){const L=LIVE;livePlay(false);L.root.querySelector('.pc').classList.add('out');at(650,()=>{if(L.p+1<L.list.length){liveSetup(L.p+1);livePlay(true);}else liveEnd();});}
 function liveEnd(){const L=LIVE,root=L.root;L.ended=true;livePlay(false);root.querySelectorAll('.pdots span').forEach(d=>d.className='ok');const sum=L.list.reduce((a,P)=>a+P.st.total,0);
  root.querySelector('.live-cap').className='cap live-cap lime';lcap(`${L.list.length}문제 끝! ${L.list.map(P=>`<span class="pill">${KIND[P.kind]} → ${P.direct?'지휘자 직접':'위임 → '+CH[P.solver].short}</span>`).join(' ')} · 기록된 토큰 합계 <b>${fmt(sum)}</b> — 지휘자의 생각은 기록에 안 찍혀요`);
- const b=root.querySelector('#lplay');if(b)b.textContent='↻ 처음부터';if(auto)at(4000,()=>go(0));}
+ const b=root.querySelector('#lplay');if(b)b.textContent='↻ 처음부터';if(auto)at(4000,()=>go(0));else if(L.loop&&!FAST)at(LIVE_HOLD/SLOW,()=>{if(L.loop&&L.ended&&!L.playing&&root.isConnected)liveStart();});}
 function liveStart(){const L=LIVE;L.ended=false;L.root.querySelector('.live-cap').className='cap live-cap';liveSetup(0);livePlay(true);}
-function liveSeek(p,t){const L=LIVE;document.documentElement.classList.add('fast');livePlay(false);L.ended=false;L.root.querySelector('.live-cap').className='cap live-cap';liveSetup(p);L.vt=vtAt(L.list[p].tl.anchors,t);
+function liveSeek(p,t){const L=LIVE;liveLoop(false);document.documentElement.classList.add('fast');livePlay(false);L.ended=false;L.root.querySelector('.live-cap').className='cap live-cap';liveSetup(p);L.vt=vtAt(L.list[p].tl.anchors,t);
  const S=L.list[p].tl.steps;while(L.applied<S.length&&S[L.applied].vt<=L.vt){liveApply(S[L.applied]);L.applied++;}liveClock();L.root.querySelector('.pc').classList.add('in');if(!FAST)setTimeout(()=>document.documentElement.classList.remove('fast'),120);}
 function liveJumpEnd(){const L=LIVE;L.list.forEach((P,p)=>{liveSetup(p);P.tl.steps.forEach(liveApply);L.vt=P.tl.end;});liveClock();liveEnd();}
 function flyCurve(stage,from,to,text){const n=document.createElement('div');n.className='note curve';n.innerHTML=text;const p=center(stage,from),q=center(stage,to);n.style.offsetPath=`path('M${p.x} ${p.y} Q${(p.x+q.x)/2} ${Math.min(p.y,q.y)-120} ${q.x} ${q.y-34}')`;n.style.transitionDuration=(1.2/LIVE.speed)+'s,.3s';stage.appendChild(n);later(()=>{if(n.dataset.dead)return;n.classList.add('on');n.style.offsetDistance='100%';});at(4000,()=>n.remove());}
@@ -490,11 +494,11 @@ function go(i,replay){clearAll();cur=(i+SCENES.length)%SCENES.length;const root=
  document.querySelectorAll('.dots button').forEach((b,j)=>b.setAttribute('aria-current',j===cur?'true':'false'));
  if(!replay)history.replaceState(null,'','#s'+(cur+1)+(FAST?'fast':''));
  if(FAST)play();else at(250,()=>play());}
-function play(){clearAll();const sc=SCENES[cur];sc.play($('#scene')._body);if(FAST)flush();else if(auto&&!sc.live)at(sc.dur+1200,()=>go(cur+1));}
+function play(){clearAll();const sc=SCENES[cur];sc.play($('#scene')._body);if(FAST)flush();else if(!sc.live)at(sc.dur+(auto?1200:HOLD/SLOW),()=>auto?go(cur+1):play());}   /* auto: next scene (go() wraps after the last) · else hold HOLD ms and replay this scene — clearAll() at the top drops the pending timer, so loops never stack */
 $('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);$('#play').onclick=()=>play();$('#liveBtn').onclick=()=>go(SCENES.length-1);
 $('#auto').onclick=e=>{auto=!auto;e.currentTarget.setAttribute('aria-pressed',auto);e.currentTarget.textContent='자동 재생: '+(auto?'켜짐':'꺼짐');if(auto)play();};
 SCENES.forEach((s,i)=>{const b=document.createElement('button');b.textContent=i+1;b.setAttribute('aria-label','장면 '+(i+1)+' '+s.title);b.onclick=()=>go(i);$('#dots').appendChild(b);});
-document.addEventListener('keydown',e=>{if($('#intro').open)return;if(e.key==='ArrowRight')go(cur+1);else if(e.key==='ArrowLeft')go(cur-1);else if(e.key===' '){e.preventDefault();if(SCENES[cur].live)livePlay(!LIVE.playing);else play();}});
+document.addEventListener('keydown',e=>{if($('#intro').open)return;if(e.key==='ArrowRight')go(cur+1);else if(e.key==='ArrowLeft')go(cur-1);else if(e.key===' '){e.preventDefault();if(SCENES[cur].live)liveToggle();else play();}});
 /* ── intro dialog ── */
 const TABS=['conductor','solver','models',...RETIRED,'ensemble'];
 const tabLabel=k=>k==='models'?'모델 친구 셋':CH[k].name+(CH[k].retired?` (${CH[k].retired})`:'');
